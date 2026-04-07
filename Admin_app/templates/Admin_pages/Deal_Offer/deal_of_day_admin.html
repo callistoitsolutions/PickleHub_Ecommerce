@@ -1,0 +1,443 @@
+{% extends "Admin_pages/admin_base.html" %}
+
+{% block title %}Deal of the Day | PickleHub Admin{% endblock %}
+{% block page_title %}⚡ Deal of the Day{% endblock %}
+{% block nav_deal_dotd %}active{% endblock %}
+{% block nav_deals_main %}active{% endblock %}
+{% block nav_deals_show %}show{% endblock %}
+
+{% block extra_css %}
+<style>
+.dotd-layout{display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:start;}
+@media(max-width:1100px){.dotd-layout{grid-template-columns:1fr;}}
+.form-card{background:#fff;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);overflow:hidden;}
+.form-card-head{padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;}
+.form-card-head h3{font-size:15px;font-weight:800;color:#1a1a2e;margin:0;}
+.form-card-body{padding:24px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg-full{grid-column:1/-1;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;}
+.form-group input,
+.form-group select,
+.form-group textarea{border:1.5px solid #e8e8e8;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border-color .2s;background:#fafafa;color:#1a1a2e;}
+.form-group input:focus,
+.form-group select:focus{border-color:#e85d04;background:#fff;}
+.form-group input[readonly]{background:#f0f0f0;color:#999;cursor:not-allowed;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-hint{font-size:10px;color:#aaa;margin-top:2px;}
+.section-divider{font-size:10px;font-weight:700;color:#e85d04;letter-spacing:1.5px;text-transform:uppercase;grid-column:1/-1;border-bottom:1px solid #fde8d8;padding-bottom:4px;margin-top:6px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9fa;border-radius:8px;padding:10px 14px;grid-column:1/-1;}
+.toggle-row label.tl{font-size:12px;font-weight:600;color:#444;}
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:50px;cursor:pointer;transition:.2s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle-switch input:checked+.toggle-slider{background:#e85d04;}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px);}
+.btn-save-dotd{width:100%;background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;}
+.btn-save-dotd:hover{box-shadow:0 4px 14px rgba(232,93,4,.4);transform:translateY(-1px);}
+.btn-save-dotd:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.preview-card{background:linear-gradient(135deg,#1c0a02 0%,#3d1208 45%,#6a1f08 100%);border-radius:16px;padding:28px;position:relative;overflow:hidden;}
+.preview-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(232,93,4,.2),transparent 60%);pointer-events:none;}
+.preview-inner{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;}
+.pv-badge{background:#ff3d1f;color:#fff;font-size:11px;font-weight:900;padding:3px 12px;border-radius:50px;display:inline-flex;margin-bottom:12px;}
+.pv-title{font-family:'Playfair Display',serif;font-size:22px;color:#fff;font-weight:800;line-height:1.2;margin-bottom:8px;}
+.pv-desc{font-size:12px;color:rgba(255,255,255,.6);margin-bottom:14px;line-height:1.6;}
+.pv-cd-row{display:flex;gap:8px;margin-bottom:14px;}
+.pv-cd{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 10px;text-align:center;min-width:52px;}
+.pv-cd-num{font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:800;display:block;}
+.pv-cd-lbl{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;}
+.pv-prices{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+.pv-new{font-family:'Playfair Display',serif;font-size:24px;color:#fff;font-weight:800;}
+.pv-old{font-size:14px;color:rgba(255,255,255,.4);text-decoration:line-through;}
+.pv-disc{background:#e8a020;color:#1c0a02;font-size:11px;font-weight:900;padding:2px 8px;border-radius:50px;}
+.pv-cta{background:#c8470a;color:#fff;padding:9px 20px;border-radius:50px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px;}
+.pv-float{background:rgba(255,255,255,.9);border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;color:#1c0a02;margin-top:6px;display:inline-block;}
+.preview-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.dotd-status{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#2d6a4f;}
+.status-dot.off{background:#aaa;}
+.existing-info{background:#fffaf5;border:1.5px solid #fde8d8;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;color:#7a5c3a;}
+.existing-info strong{color:#e85d04;}
+.ph-toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:2000;transform:translateY(60px);opacity:0;transition:.3s;}
+.ph-toast.show{transform:translateY(0);opacity:1;}
+.ph-toast.success{border-left:4px solid #52b788;}
+.ph-toast.error{border-left:4px solid #e85d04;}
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+<!-- ── NOTICE BAR ── -->
+{% if dotd and dotd.product %}
+<div class="existing-info">
+    <strong>⚡ Active deal:</strong> {{ dotd.product.emoji }} {{ dotd.title }} — ₹{{ dotd.price }}
+    &nbsp;|&nbsp;
+    {% if dotd.is_visible %}<span style="color:#2d6a4f;">● Visible on site</span>
+    {% else %}<span style="color:#aaa;">○ Hidden</span>{% endif %}
+    &nbsp;|&nbsp; Saving will update the live deal instantly.
+</div>
+{% else %}
+<div class="existing-info" style="border-color:#d0e8ff;background:#f0f7ff;color:#1a5fa8;">
+    <strong>ℹ️ No deal set yet.</strong> Select a product below to create your first Deal of the Day.
+</div>
+{% endif %}
+
+<div class="dotd-layout">
+
+  <!-- ═══════════ LEFT: FORM ═══════════ -->
+  <div class="form-card">
+    <div class="form-card-head">
+      <h3>⚡ Deal of the Day Settings</h3>
+      <div class="dotd-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Loading...</span>
+      </div>
+    </div>
+    <div class="form-card-body">
+      <div class="form-grid">
+
+        <!-- 1. PRODUCT DROPDOWN -->
+        <div class="section-divider">Select Product</div>
+
+        <div class="form-group fg-full">
+          <label>Product *</label>
+          <select id="f_product" onchange="onProductChange()">
+            <option value="">— Choose a product —</option>
+            {% for p in products %}
+            <option value="{{ p.id }}"
+                    data-name="{{ p.name|escapejs }}"
+                    data-emoji="{{ p.emoji }}"
+                    data-price="{{ p.price }}"
+                    data-old="{{ p.old_price }}"
+                    data-subtitle="{{ p.region|default:p.weight|escapejs }}"
+                    data-url="{{ p.get_absolute_url }}"
+                    data-rating="{{ p.rating }}"
+                    data-reviews="{{ p.review_count }}"
+                    {% if dotd and dotd.product_id == p.id %}selected{% endif %}>
+              {{ p.emoji }} {{ p.name }} — ₹{{ p.price }}
+            </option>
+            {% endfor %}
+          </select>
+          <span class="form-hint">Title, price, emoji, URL auto-fill from the selected product</span>
+        </div>
+
+        <!-- 2. AUTO-FILLED (readonly) -->
+        <div class="section-divider">Auto-filled from Product</div>
+
+        <div class="form-group fg-full">
+          <label>Title</label>
+          <input type="text" id="f_title" readonly placeholder="Auto-filled after selecting product">
+        </div>
+
+        <div class="form-group">
+          <label>Sale Price (₹)</label>
+          <input type="text" id="f_price" readonly placeholder="Auto-filled">
+        </div>
+
+        <div class="form-group">
+          <label>Original Price (₹)</label>
+          <input type="text" id="f_old_price" readonly placeholder="Auto-filled">
+        </div>
+
+        <div class="form-group">
+          <label>Emoji</label>
+          <input type="text" id="f_emoji" readonly placeholder="Auto-filled">
+        </div>
+
+        <div class="form-group">
+          <label>Discount</label>
+          <input type="text" id="f_disc" readonly placeholder="Auto-calculated">
+        </div>
+
+        <!-- 3. EDITABLE DEAL FIELDS -->
+        <div class="section-divider">Deal Settings</div>
+
+        <div class="form-group fg-full">
+          <label>Badge Text</label>
+          <input type="text" id="f_badge_text" value="🔥 Deal of the Day" oninput="syncPreview()">
+        </div>
+
+        <!-- 4. TIMER -->
+        <div class="section-divider">Deal Timer</div>
+
+        <div class="form-group fg-full">
+          <label>Deal Ends At *</label>
+          <input type="datetime-local" id="f_end_time" onchange="syncPreview()">
+          <span class="form-hint">Countdown auto-calculates from this</span>
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" onclick="setEndTime(4)"  class="quick-btn">+4 hrs</button>
+          <button type="button" onclick="setEndTime(8)"  class="quick-btn">+8 hrs</button>
+          <button type="button" onclick="setEndTime(12)" class="quick-btn">+12 hrs</button>
+          <button type="button" onclick="setEndTime(24)" class="quick-btn">+24 hrs</button>
+          <button type="button" onclick="setEndTime(48)" class="quick-btn">+48 hrs</button>
+        </div>
+
+        <!-- 5. FLOAT BADGES -->
+        <div class="section-divider">Float Badges</div>
+
+        <div class="form-group">
+          <label>Float Badge 1</label>
+          <input type="text" id="f_float1" oninput="syncPreview()">
+          <span class="form-hint">Top-right • auto-fills from product rating</span>
+        </div>
+
+        <div class="form-group">
+          <label>Float Badge 2</label>
+          <input type="text" id="f_float2" value="✅ 100% Natural" oninput="syncPreview()">
+          <span class="form-hint">Bottom-left</span>
+        </div>
+
+        <!-- 6. VISIBILITY -->
+        <div class="section-divider">Visibility</div>
+
+        <div class="toggle-row">
+          <label class="tl">Show on deals page</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="f_is_visible" checked onchange="updateStatus()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <button class="btn-save-dotd" id="saveDotdBtn" onclick="saveDotd()">
+        <i class="fa fa-save"></i> Save Deal of the Day
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ RIGHT: PREVIEW ═══════════ -->
+  <div>
+    <div class="preview-label">Live Preview</div>
+    <div class="preview-card">
+      <div class="preview-inner">
+        <div>
+          <div class="pv-badge" id="pv_badge">🔥 Deal of the Day</div>
+          <div class="pv-title" id="pv_title">Product Title</div>
+          <div class="pv-desc"  id="pv_desc">Description here...</div>
+          <div class="pv-cd-row">
+            <div class="pv-cd"><span class="pv-cd-num" id="pv-h">00</span><span class="pv-cd-lbl">Hrs</span></div>
+            <div class="pv-cd"><span class="pv-cd-num" id="pv-m">00</span><span class="pv-cd-lbl">Min</span></div>
+            <div class="pv-cd"><span class="pv-cd-num" id="pv-s">00</span><span class="pv-cd-lbl">Sec</span></div>
+          </div>
+          <div class="pv-prices">
+            <span class="pv-new" id="pv_price">₹---</span>
+            <span class="pv-old" id="pv_old">₹---</span>
+            <span class="pv-disc" id="pv_disc">--%</span>
+          </div>
+          <div class="pv-cta">🛒 Grab This Deal</div>
+        </div>
+        <div style="text-align:center;">
+          <div id="pv_emoji" style="font-size:72px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4));">🥒</div>
+          <div class="pv-float" id="pv_float1">⭐ ---</div>
+          <div class="pv-float" style="margin-top:4px;" id="pv_float2">✅ 100% Natural</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;background:#fff;border-radius:10px;padding:14px;font-size:12px;color:#888;">
+      <strong style="color:#1a1a2e;display:block;margin-bottom:6px;">ℹ️ How it works</strong>
+      Select a product → set end time → click Save. Only one deal is active at a time.
+    </div>
+  </div>
+
+</div>
+<div class="ph-toast" id="phToast"></div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+/* ════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════ */
+const CSRF     = document.querySelector('[name=csrfmiddlewaretoken]').value;
+const SAVE_URL = "{% url 'dotd_save_ajax' %}";
+
+/* ════════════════════════════════════════
+   ON PAGE LOAD — pre-fill if record exists
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', function(){
+
+    {% if dotd and dotd.product %}
+    // Pre-select product in dropdown — this triggers onProductChange()
+    document.getElementById('f_product').value = "{{ dotd.product.id }}";
+    onProductChange();
+
+    // Overwrite editable fields with saved values
+    document.getElementById('f_badge_text').value = "{{ dotd.badge_text|escapejs }}";
+    document.getElementById('f_float1').value     = "{{ dotd.float_badge1|escapejs }}";
+    document.getElementById('f_float2').value     = "{{ dotd.float_badge2|escapejs }}";
+    document.getElementById('f_is_visible').checked = {{ dotd.is_visible|yesno:"true,false" }};
+
+    {% if dotd.end_time %}
+    var dt    = new Date("{{ dotd.end_time|date:'c' }}");
+    var local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+    document.getElementById('f_end_time').value = local;
+    {% endif %}
+
+    {% endif %}
+
+    syncPreview();
+    updateStatus();
+    startPreviewCountdown();
+});
+
+/* ════════════════════════════════════════
+   STEP 1 — When admin picks a product
+   Reads data-* attrs from <option> tag
+   Auto-fills readonly fields + preview
+════════════════════════════════════════ */
+function onProductChange(){
+    var sel = document.getElementById('f_product');
+    var opt = sel.options[sel.selectedIndex];
+    if(!opt || !opt.value) return;
+
+    // Fill readonly display fields
+    document.getElementById('f_title').value    = opt.dataset.name;
+    document.getElementById('f_price').value    = '₹' + opt.dataset.price;
+    document.getElementById('f_old_price').value= '₹' + opt.dataset.old;
+    document.getElementById('f_emoji').value    = opt.dataset.emoji;
+
+    // Auto disc %
+    var p = parseFloat(opt.dataset.price), o = parseFloat(opt.dataset.old);
+    var disc = (o > p) ? Math.round((o - p) / o * 100) + '% off' : '—';
+    document.getElementById('f_disc').value = disc;
+
+    // Auto-fill float badge 1 from rating & reviews
+    if(opt.dataset.rating){
+        document.getElementById('f_float1').value =
+            '⭐ ' + opt.dataset.rating + ' • ' + opt.dataset.reviews + ' reviews';
+    }
+
+    syncPreview();
+}
+
+/* ════════════════════════════════════════
+   STEP 2 — Sync the live preview panel
+   Called on any field change
+════════════════════════════════════════ */
+function syncPreview(){
+    var sel  = document.getElementById('f_product');
+    var opt  = sel.options[sel.selectedIndex];
+
+    document.getElementById('pv_badge').textContent  = document.getElementById('f_badge_text').value || '🔥 Deal of the Day';
+    document.getElementById('pv_title').textContent  = opt && opt.value ? opt.dataset.name : 'Product Title';
+    document.getElementById('pv_desc').textContent   = opt && opt.value ? (opt.dataset.subtitle || '') : 'Description here...';
+    document.getElementById('pv_emoji').textContent  = opt && opt.value ? opt.dataset.emoji : '🥒';
+    document.getElementById('pv_float1').textContent = document.getElementById('f_float1').value;
+    document.getElementById('pv_float2').textContent = document.getElementById('f_float2').value;
+
+    if(opt && opt.value){
+        var p = parseFloat(opt.dataset.price), o = parseFloat(opt.dataset.old);
+        document.getElementById('pv_price').textContent = '₹' + p;
+        document.getElementById('pv_old').textContent   = '₹' + o;
+        var disc = (o > p) ? Math.round((o-p)/o*100)+'%' : '—';
+        document.getElementById('pv_disc').textContent  = disc;
+    }
+}
+
+/* ════════════════════════════════════════
+   STEP 3 — Preview countdown ticks live
+════════════════════════════════════════ */
+var _cdInterval = null;
+function startPreviewCountdown(){
+    if(_cdInterval) clearInterval(_cdInterval);
+    _cdInterval = setInterval(function(){
+        var val = document.getElementById('f_end_time').value;
+        if(!val){ return; }
+        var end = new Date(val).getTime();
+        var rem = Math.max(0, Math.floor((end - Date.now()) / 1000));
+        document.getElementById('pv-h').textContent = String(Math.floor(rem/3600)).padStart(2,'0');
+        document.getElementById('pv-m').textContent = String(Math.floor((rem%3600)/60)).padStart(2,'0');
+        document.getElementById('pv-s').textContent = String(rem%60).padStart(2,'0');
+    }, 1000);
+}
+document.getElementById('f_end_time').addEventListener('change', startPreviewCountdown);
+
+/* ════════════════════════════════════════
+   Quick end-time shortcut buttons
+════════════════════════════════════════ */
+function setEndTime(hours){
+    var d     = new Date(Date.now() + hours * 3600 * 1000);
+    var local = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    document.getElementById('f_end_time').value = local;
+    startPreviewCountdown();
+}
+
+/* ════════════════════════════════════════
+   Status dot (Visible / Hidden)
+════════════════════════════════════════ */
+function updateStatus(){
+    var vis = document.getElementById('f_is_visible').checked;
+    document.getElementById('statusDot').className  = vis ? 'status-dot' : 'status-dot off';
+    document.getElementById('statusText').textContent = vis ? 'Visible on site' : 'Hidden';
+}
+document.getElementById('f_is_visible').addEventListener('change', updateStatus);
+
+/* ════════════════════════════════════════
+   STEP 4 — Save via AJAX POST
+════════════════════════════════════════ */
+async function saveDotd(){
+    var btn       = document.getElementById('saveDotdBtn');
+    var productId = document.getElementById('f_product').value;
+    var endTime   = document.getElementById('f_end_time').value;
+
+    // Validate
+    if(!productId){ showToast('Please select a product first', 'error'); return; }
+    if(!endTime)  { showToast('Please set a deal end time',    'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving…';
+
+    var payload = {
+        product_id:   productId,
+        badge_text:   document.getElementById('f_badge_text').value,
+        end_time:     endTime,
+        float_badge1: document.getElementById('f_float1').value,
+        float_badge2: document.getElementById('f_float2').value,
+        is_visible:   document.getElementById('f_is_visible').checked,
+    };
+
+    try {
+        var res  = await fetch(SAVE_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body:    JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if(data.success){
+            showToast('✅ Deal of the Day saved!', 'success');
+        } else {
+            showToast('Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+    } catch(e){
+        showToast('Network error — try again', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Save Deal of the Day';
+    }
+}
+
+/* ════════════════════════════════════════
+   Toast helper
+════════════════════════════════════════ */
+function showToast(msg, type){
+    var t = document.getElementById('phToast');
+    t.textContent = msg;
+    t.className   = 'ph-toast ' + (type||'success') + ' show';
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+</script>
+
+{# Quick button style #}
+<style>
+.quick-btn{font-size:11px;padding:5px 12px;border:1.5px solid #e85d04;background:none;color:#e85d04;border-radius:6px;cursor:pointer;font-weight:700;transition:.2s;}
+.quick-btn:hover{background:#e85d04;color:#fff;}
+</style>
+{% endblock %}

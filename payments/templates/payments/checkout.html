@@ -1,0 +1,647 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Checkout | PickleHub Nagpur{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── STEPS BAR ── */
+.steps-bar { background:#fff; padding:14px 24px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.steps-inner { max-width:700px; margin:0 auto; display:flex; align-items:center; }
+.step { display:flex; align-items:center; gap:8px; flex:1; }
+.step-num { width:28px; height:28px; border-radius:50%; background:#f0f0f0; color:#aaa; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:.3s; }
+.step.on .step-num { background:#e85d04; color:#fff; }
+.step.done .step-num { background:#2d6a4f; color:#fff; }
+.step-lbl { font-size:12px; font-weight:700; color:#aaa; }
+.step.on .step-lbl { color:#e85d04; }
+.step.done .step-lbl { color:#2d6a4f; }
+.step-line { flex:1; height:2px; background:#f0f0f0; margin:0 6px; }
+.step-line.done { background:#2d6a4f; }
+
+/* ── LAYOUT ── */
+.page-wrap { max-width:1100px; margin:0 auto; padding:24px 16px; display:grid; grid-template-columns:1fr 360px; gap:20px; }
+@media(max-width:900px) { .page-wrap { grid-template-columns:1fr; } }
+
+/* ── SECTION CARD ── */
+.sc { background:#fff; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.07); margin-bottom:16px; overflow:hidden; }
+.sc-head { padding:14px 20px; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px; }
+.sc-ico { width:32px; height:32px; border-radius:8px; background:#fff8f5; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.sc-title { font-size:14px; font-weight:800; color:#1a1a2e; }
+.sc-sub { font-size:11px; color:#aaa; margin-left:auto; }
+.sc-body { padding:18px 20px; }
+
+/* ── FORM ── */
+.lbl { font-size:11px; font-weight:700; color:#444; margin-bottom:4px; display:block; }
+.req { color:#e85d04; }
+.inp { width:100%; border-radius:10px; border:1.5px solid #e0e0e0; padding:10px 14px; font-size:13px; font-family:'Poppins',sans-serif; outline:none; transition:.2s; color:#1a1a2e; background:#fff; }
+.inp:focus { border-color:#e85d04; box-shadow:0 0 0 3px rgba(232,93,4,.08); }
+.inp.ok { border-color:#2d6a4f; }
+.inp-icon { position:relative; }
+.inp-icon .inp { padding-right:38px; }
+.inp-icon .ico { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#aaa; font-size:14px; }
+
+/* ── ADDRESS CARDS ── */
+.addr-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+@media(max-width:600px) { .addr-grid { grid-template-columns:1fr; } }
+.addr-card { border:2px solid #e0e0e0; border-radius:12px; padding:14px; cursor:pointer; transition:.2s; position:relative; }
+.addr-card:hover { border-color:#f48c06; }
+.addr-card.on { border-color:#e85d04; background:#fff8f5; }
+.addr-card .addr-tag { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; background:#f0f0f0; color:#888; padding:2px 8px; border-radius:50px; display:inline-block; margin-bottom:6px; }
+.addr-card.on .addr-tag { background:#fde8d8; color:#e85d04; }
+.addr-card .addr-name { font-size:13px; font-weight:700; color:#1a1a2e; }
+.addr-card .addr-text { font-size:11px; color:#777; line-height:1.7; margin-top:3px; }
+.addr-card .addr-phone { font-size:11px; color:#555; font-weight:600; margin-top:4px; }
+.addr-card .addr-check { position:absolute; top:10px; right:10px; width:20px; height:20px; border-radius:50%; border:2px solid #ddd; display:flex; align-items:center; justify-content:center; font-size:10px; transition:.2s; }
+.addr-card.on .addr-check { background:#e85d04; border-color:#e85d04; color:#fff; }
+.add-addr-btn { border:2px dashed #ddd; border-radius:12px; padding:14px; text-align:center; cursor:pointer; transition:.2s; background:#fafafa; color:#888; font-size:12px; font-weight:600; }
+.add-addr-btn:hover { border-color:#e85d04; color:#e85d04; background:#fff8f5; }
+
+/* ── PINCODE CHECK ── */
+.pin-row { display:flex; gap:8px; align-items:flex-end; }
+.pin-btn { background:#1a1a2e; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:'Poppins',sans-serif; }
+.pin-result { font-size:11px; margin-top:6px; padding:6px 12px; border-radius:8px; font-weight:600; }
+.pin-ok { background:#d4edda; color:#155724; }
+.pin-err { background:#fdecea; color:#c62828; }
+
+/* ── PAYMENT METHOD ── */
+.pay-methods { display:flex; flex-direction:column; gap:10px; }
+.pm { border:2px solid #e0e0e0; border-radius:12px; cursor:pointer; transition:.2s; overflow:hidden; }
+.pm:hover { border-color:#f48c06; }
+.pm.on { border-color:#e85d04; }
+.pm-head { padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.pm-radio { width:18px; height:18px; border-radius:50%; border:2px solid #ddd; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:.2s; }
+.pm.on .pm-radio { border-color:#e85d04; background:#e85d04; }
+.pm.on .pm-radio::after { content:''; width:6px; height:6px; background:#fff; border-radius:50%; }
+.pm-ico { font-size:22px; }
+.pm-info { flex:1; }
+.pm-name { font-size:13px; font-weight:700; color:#1a1a2e; }
+.pm-sub { font-size:11px; color:#aaa; }
+.pm-badges { display:flex; gap:4px; margin-left:auto; }
+.pm-badge { background:#f0f0f0; color:#666; border-radius:4px; padding:2px 7px; font-size:9px; font-weight:700; }
+.pm-body { padding:0 16px 14px; display:none; }
+.pm.on .pm-body { display:block; }
+
+/* ── UPI OPTIONS ── */
+.upi-apps { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.upi-app { border:2px solid #e0e0e0; border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center; font-size:11px; font-weight:600; transition:.2s; min-width:70px; }
+.upi-app:hover, .upi-app.on { border-color:#e85d04; background:#fff8f5; color:#e85d04; }
+.upi-app .upi-ico { font-size:22px; display:block; margin-bottom:4px; }
+
+/* ── CARD ── */
+.card-preview { background:linear-gradient(135deg,#1a1a2e,#0f3460); border-radius:14px; padding:18px 20px; color:#fff; margin-bottom:14px; position:relative; overflow:hidden; }
+.card-preview::before { content:''; position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.05); }
+.card-preview::after { content:''; position:absolute; bottom:-30px; right:30px; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,.04); }
+.card-chip { width:32px; height:24px; background:linear-gradient(135deg,#ffd60a,#f48c06); border-radius:4px; margin-bottom:14px; }
+.card-num { font-size:16px; letter-spacing:3px; font-family:monospace; margin-bottom:10px; }
+.card-bottom { display:flex; justify-content:space-between; align-items:flex-end; }
+.card-name { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); }
+.card-expiry { font-size:11px; color:rgba(255,255,255,.6); }
+.card-brand { font-size:22px; }
+
+/* ── COD ── */
+.cod-box { background:#f8f9fa; border-radius:10px; padding:14px; text-align:center; }
+.cod-icon { font-size:40px; margin-bottom:8px; }
+.cod-note { font-size:12px; color:#555; line-height:1.7; }
+
+/* ── COUPON ── */
+.coupon-row { display:flex; gap:8px; }
+.coupon-btn { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:10px; padding:10px 18px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; white-space:nowrap; }
+.coupon-applied { background:#d4edda; border:1.5px solid #c3e6cb; border-radius:10px; padding:8px 14px; display:flex; align-items:center; gap:8px; display:none; }
+.coupon-applied.show { display:flex; }
+.coupon-codes { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.cc { border:1.5px dashed #f48c06; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:700; color:#e85d04; cursor:pointer; background:#fff8f5; transition:.2s; }
+.cc:hover { background:#fde8d8; }
+
+/* ── ORDER SUMMARY SIDEBAR ── */
+.os { background:#fff; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.07); position:sticky; top:80px; }
+.os-head { background:linear-gradient(135deg,#1a1a2e,#0f3460); padding:16px 20px; border-radius:16px 16px 0 0; }
+.os-title { font-size:15px; font-weight:800; color:#ffd60a; font-family:'Playfair Display',serif; }
+.os-sub { font-size:11px; color:rgba(255,255,255,.6); margin-top:2px; }
+.os-body { padding:16px 20px; }
+
+/* ── ORDER ITEMS ── */
+.oi { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+.oi:last-of-type { border-bottom:none; }
+.oi-img { width:52px; height:52px; border-radius:10px; object-fit:cover; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.oi-name { font-size:12px; font-weight:700; color:#1a1a2e; flex:1; }
+.oi-size { font-size:10px; color:#aaa; margin-top:2px; }
+.oi-qty { font-size:10px; background:#f0f0f0; color:#555; border-radius:4px; padding:2px 6px; font-weight:700; margin-top:3px; display:inline-block; }
+.oi-price { font-size:13px; font-weight:800; color:#1a1a2e; }
+
+/* ── PRICE BREAKDOWN ── */
+.pb { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
+.pb-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.pb-label { font-size:12px; color:#666; }
+.pb-val { font-size:12px; font-weight:700; color:#1a1a2e; }
+.pb-green { color:#2d6a4f; }
+.pb-total { margin-top:10px; padding-top:10px; border-top:2px solid #f0f0f0; }
+.pb-total .pb-label { font-size:14px; font-weight:800; color:#1a1a2e; }
+.pb-total .pb-val { font-size:16px; font-weight:800; color:#e85d04; }
+.savings-box { background:linear-gradient(135deg,#d4edda,#c3e6cb); border-radius:10px; padding:8px 14px; text-align:center; margin-top:10px; }
+.savings-box span { font-size:12px; font-weight:700; color:#155724; }
+
+/* ── PLACE ORDER BTN ── */
+.place-btn { width:100%; background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:14px; padding:15px; font-size:15px; font-weight:800; cursor:pointer; font-family:'Poppins',sans-serif; transition:.3s; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px; }
+.place-btn:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(232,93,4,.35); }
+.security-note { display:flex; align-items:center; gap:6px; justify-content:center; margin-top:10px; font-size:10px; color:#aaa; font-weight:600; }
+
+/* ── ADD ADDRESS MODAL ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal-box { background:#fff; border-radius:18px; padding:24px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; }
+.modal-title { font-size:16px; font-weight:800; color:#1a1a2e; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.modal-close { margin-left:auto; background:none; border:none; font-size:20px; cursor:pointer; color:#aaa; }
+
+/* ── SUCCESS PAGE ── */
+.success-overlay { display:none; position:fixed; inset:0; background:#f0f2f5; z-index:600; align-items:center; justify-content:center; }
+.success-overlay.show { display:flex; }
+.success-box { background:#fff; border-radius:20px; padding:36px; max-width:480px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.1); }
+.success-anim { width:80px; height:80px; background:linear-gradient(135deg,#2d6a4f,#52b788); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 20px; animation:pop .5s ease; }
+@keyframes pop{0%{transform:scale(0);}80%{transform:scale(1.15);}100%{transform:scale(1);}}
+.success-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:800; color:#1a1a2e; margin-bottom:6px; }
+.success-order { font-size:20px; font-weight:800; color:#e85d04; font-family:monospace; letter-spacing:2px; background:#fff8f5; border-radius:10px; padding:10px 20px; display:inline-block; margin:14px 0; }
+.success-steps { display:flex; gap:10px; justify-content:center; margin:16px 0; }
+.ss { background:#f8f9fa; border-radius:12px; padding:12px 16px; text-align:center; flex:1; }
+.ss-ico { font-size:24px; margin-bottom:4px; }
+.ss-lbl { font-size:10px; font-weight:700; color:#555; }
+.wa-btn { background:#25D366; color:#fff; border:none; border-radius:12px; padding:12px 20px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px; width:100%; justify-content:center; margin-top:10px; transition:.2s; }
+.wa-btn:hover { background:#1da851; }
+.track-btn { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:12px; padding:12px 20px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px; width:100%; justify-content:center; margin-top:8px; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:22px; right:22px; background:#1a1a2e; color:#fff; border-radius:12px; padding:14px 20px; font-size:12px; font-weight:600; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,.2); transition:.35s; transform:translateY(80px); opacity:0; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.ok { border-left:4px solid #52b788; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="steps-bar">
+  <div class="steps-inner">
+    <div class="step done" id="step1">
+      <div class="step-num"><i class="fa fa-check" style="font-size:10px;"></i></div>
+      <div class="step-lbl">Cart</div>
+    </div>
+    <div class="step-line done"></div>
+    <div class="step on" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-lbl">Delivery Address</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-lbl">Payment</div>
+    </div>
+    <div class="step-line" id="line3"></div>
+    <div class="step" id="step4">
+      <div class="step-num">4</div>
+      <div class="step-lbl">Confirm</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+<div class="left-col">
+
+<div class="sc" id="sec-address">
+  <div class="sc-head">
+    <div class="sc-ico">📍</div>
+    <div class="sc-title">Delivery Address</div>
+    <div class="sc-sub">Step 1 of 3</div>
+  </div>
+  <div class="sc-body">
+    <div style="font-size:11px;font-weight:700;color:#aaa;margin-bottom:10px;">SAVED ADDRESSES</div>
+    <div class="addr-grid">
+      <div class="addr-card on" onclick="selAddr(this)">
+        <div class="addr-tag">🏠 Home</div>
+        <div class="addr-check">✓</div>
+        <div class="addr-name">Rahul Ramteke</div>
+        <div class="addr-text">Flat 204, Shree Nagar Colony,<br>Dharampeth, Nagpur - 440010,<br>Maharashtra</div>
+        <div class="addr-phone">📱 +91-9876543210</div>
+      </div>
+      <div class="addr-card" onclick="selAddr(this)">
+        <div class="addr-tag">🏢 Office</div>
+        <div class="addr-check"></div>
+        <div class="addr-name">Rahul Ramteke</div>
+        <div class="addr-text">Callisto IT Solutions, 3rd Floor,<br>Sitabuldi, Nagpur - 440012,<br>Maharashtra</div>
+        <div class="addr-phone">📱 +91-9876543210</div>
+      </div>
+      <div class="add-addr-btn" onclick="openAddrModal()">
+        <div style="font-size:28px;margin-bottom:4px;">➕</div>
+        <div>Add New Address</div>
+      </div>
+    </div>
+    <div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-top:4px;">
+      <div class="lbl">📦 Check Delivery Availability</div>
+      <div class="pin-row">
+        <input class="inp" id="pincode" type="text" placeholder="Enter pincode (e.g. 440010)" maxlength="6" style="max-width:240px;">
+        <button class="pin-btn" onclick="checkPin()">Check</button>
+      </div>
+      <div id="pin-result"></div>
+    </div>
+    <div style="margin-top:14px;background:linear-gradient(135deg,#d4edda,#c3e6cb);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:28px;">🚚</span>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#155724;">Expected Delivery: Tomorrow, 20 Mar 2026</div>
+        <div style="font-size:11px;color:#2d6a4f;margin-top:2px;">Free delivery · Order before 6 PM today · Nagpur only</div>
+      </div>
+    </div>
+    <button class="place-btn" style="margin-top:14px;" onclick="goToPayment()">
+      <i class="fa fa-arrow-right"></i> Continue to Payment
+    </button>
+  </div>
+</div>
+
+<div class="sc" id="sec-payment" style="display:none;">
+  <div class="sc-head">
+    <div class="sc-ico">💳</div>
+    <div class="sc-title">Choose Payment Method</div>
+    <div class="sc-sub">Step 2 of 3</div>
+  </div>
+  <div class="sc-body">
+
+    <div class="pay-methods">
+
+      <div class="pm on" onclick="selPay(this,'upi')">
+        <div class="pm-head">
+          <div class="pm-radio"></div>
+          <div class="pm-ico">📱</div>
+          <div class="pm-info">
+            <div class="pm-name">UPI Payment</div>
+            <div class="pm-sub">GPay · PhonePe · Paytm · BHIM</div>
+          </div>
+          <div class="pm-badges">
+            <span class="pm-badge" style="background:#d4edda;color:#155724;">Instant</span>
+            <span class="pm-badge" style="background:#fff3e0;color:#e85d04;">Recommended</span>
+          </div>
+        </div>
+        <div class="pm-body">
+          <div class="upi-apps">
+            <div class="upi-app on" onclick="selUpi(this,event)"><span class="upi-ico">🟢</span>GPay</div>
+            <div class="upi-app" onclick="selUpi(this,event)"><span class="upi-ico">🟣</span>PhonePe</div>
+            <div class="upi-app" onclick="selUpi(this,event)"><span class="upi-ico">🔵</span>Paytm</div>
+            <div class="upi-app" onclick="selUpi(this,event)"><span class="upi-ico">🟠</span>BHIM</div>
+          </div>
+          <div class="lbl">Or enter UPI ID</div>
+          <div class="inp-icon">
+            <input class="inp" id="upiId" type="text" placeholder="yourname@okaxis" oninput="validateUpi(this)">
+            <i class="fa fa-check-circle ico" id="upi-ico" style="display:none;color:#2d6a4f;"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="pm" onclick="selPay(this,'card')">
+        <div class="pm-head">
+          <div class="pm-radio"></div>
+          <div class="pm-ico">💳</div>
+          <div class="pm-info">
+            <div class="pm-name">Debit / Credit Card</div>
+            <div class="pm-sub">Visa · Mastercard · RuPay</div>
+          </div>
+          <div class="pm-badges">
+            <span class="pm-badge">No extra charge</span>
+          </div>
+        </div>
+        <div class="pm-body">
+          <div class="card-preview" id="card-vis">
+            <div class="card-chip"></div>
+            <div class="card-num" id="cv-num">**** **** **** ****</div>
+            <div class="card-bottom">
+              <div>
+                <div class="card-name" id="cv-name">CARDHOLDER NAME</div>
+                <div class="card-expiry" id="cv-exp">MM / YY</div>
+              </div>
+              <div class="card-brand">💳</div>
+            </div>
+          </div>
+          <div class="row g-2 mt-1">
+            <div class="col-12">
+              <label class="lbl">Card Number <span class="req">*</span></label>
+              <input class="inp" id="cardNum" type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+            </div>
+            <div class="col-md-6">
+              <label class="lbl">Cardholder Name <span class="req">*</span></label>
+              <input class="inp" id="cardName" type="text" placeholder="As on card" oninput="document.getElementById('cv-name').textContent=this.value.toUpperCase()||'CARDHOLDER NAME'">
+            </div>
+            <div class="col-md-3">
+              <label class="lbl">Expiry <span class="req">*</span></label>
+              <input class="inp" id="cardExp" type="text" placeholder="MM/YY" maxlength="5" oninput="fmtExp(this)">
+            </div>
+            <div class="col-md-3">
+              <label class="lbl">CVV <span class="req">*</span></label>
+              <input class="inp" type="password" placeholder="•••" maxlength="3">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:#aaa;">
+            <i class="fa fa-lock"></i> Secured by Razorpay · 3D Secure
+          </div>
+        </div>
+      </div>
+
+      <div class="pm" onclick="selPay(this,'nb')">
+        <div class="pm-head">
+          <div class="pm-radio"></div>
+          <div class="pm-ico">🏦</div>
+          <div class="pm-info">
+            <div class="pm-name">Net Banking</div>
+            <div class="pm-sub">All major Indian banks supported</div>
+          </div>
+        </div>
+        <div class="pm-body">
+          <select class="inp">
+            <option value="">Select your bank</option>
+            <option>State Bank of India</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+            <option>Bank of Baroda</option>
+            <option>Canara Bank</option>
+          </select>
+          <div style="font-size:11px;color:#aaa;margin-top:8px;"><i class="fa fa-info-circle"></i> You'll be redirected to your bank's secure page</div>
+        </div>
+      </div>
+
+      <div class="pm" onclick="selPay(this,'cod')">
+        <div class="pm-head">
+          <div class="pm-radio"></div>
+          <div class="pm-ico">💵</div>
+          <div class="pm-info">
+            <div class="pm-name">Cash on Delivery</div>
+            <div class="pm-sub">Pay when your order arrives</div>
+          </div>
+          <div class="pm-badges">
+            <span class="pm-badge" style="background:#fdecea;color:#c62828;">+₹25 COD charge</span>
+          </div>
+        </div>
+        <div class="pm-body">
+          <div class="cod-box">
+            <div class="cod-icon">💵</div>
+            <div class="cod-note">Keep <strong>exact change ready</strong> at delivery.<br>Our delivery partner cannot return change above ₹500.<br><span style="color:#e85d04;font-weight:700;">COD surcharge: ₹25 added to order total.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><div style="margin-top:18px;border-top:1px solid #f0f0f0;padding-top:16px;">
+      <div class="lbl">🎟️ Apply Coupon / Promo Code</div>
+      <div class="coupon-row">
+        <input class="inp" id="couponInp" type="text" placeholder="Enter coupon code" style="text-transform:uppercase;">
+        <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+      </div>
+      <div class="coupon-applied" id="coupon-applied">
+        <span style="font-size:16px;">✅</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#155724;">Coupon Applied!</div>
+          <div style="font-size:11px;color:#2d6a4f;" id="coupon-msg">You save ₹50</div>
+        </div>
+        <button onclick="removeCoupon()" style="margin-left:auto;background:none;border:none;color:#c62828;font-size:12px;font-weight:700;cursor:pointer;">✕ Remove</button>
+      </div>
+      <div class="coupon-codes">
+        <div class="cc" onclick="fillCoupon('PICKLEFIRST')">🏷️ PICKLEFIRST — ₹50 off</div>
+        <div class="cc" onclick="fillCoupon('PICKLE10')">🏷️ PICKLE10 — 10% off</div>
+        <div class="cc" onclick="fillCoupon('FREEDEL')">🚚 FREEDEL — Free delivery</div>
+      </div>
+    </div>
+
+    <button class="place-btn" onclick="goToConfirm()">
+      <i class="fa fa-lock"></i> Review & Place Order
+    </button>
+    <button style="width:100%;background:none;border:none;color:#888;font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;padding:6px;font-family:'Poppins',sans-serif;" onclick="backToAddress()">
+      ← Back to Address
+    </button>
+  </div>
+</div>
+
+<div class="sc" id="sec-confirm" style="display:none;">
+  <div class="sc-head">
+    <div class="sc-ico">✅</div>
+    <div class="sc-title">Review Your Order</div>
+    <div class="sc-sub">Step 3 of 3</div>
+  </div>
+  <div class="sc-body">
+    <div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:#aaa;margin-bottom:8px;">📍 DELIVERING TO</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e;">Rahul Ramteke — 📱 +91-9876543210</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">Flat 204, Shree Nagar Colony, Dharampeth, Nagpur - 440010</div>
+      <button onclick="backToAddress()" style="background:none;border:none;color:#e85d04;font-size:11px;font-weight:700;cursor:pointer;margin-top:8px;padding:0;font-family:'Poppins',sans-serif;">✏️ Change</button>
+    </div>
+    <div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:#aaa;margin-bottom:8px;">💳 PAYMENT METHOD</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e;" id="conf-pay">📱 UPI — Google Pay</div>
+      <button onclick="backToPayment()" style="background:none;border:none;color:#e85d04;font-size:11px;font-weight:700;cursor:pointer;margin-top:8px;padding:0;font-family:'Poppins',sans-serif;">✏️ Change</button>
+    </div>
+    <div style="background:#fff3e0;border-radius:12px;padding:14px;">
+      <div style="font-size:11px;font-weight:800;color:#aaa;margin-bottom:8px;">📦 ORDER ITEMS</div>
+      <div class="oi"><div class="oi-img">🥭</div><div style="flex:1;"><div class="oi-name">Homemade Mango Pickle</div><div class="oi-size">500g · Mild Spicy</div><div class="oi-qty">Qty: 2</div></div><div class="oi-price">₹598</div></div>
+      <div class="oi"><div class="oi-img">🍋</div><div style="flex:1;"><div class="oi-name">Andhra Lemon Pickle</div><div class="oi-size">250g · Extra Spicy</div><div class="oi-qty">Qty: 1</div></div><div class="oi-price">₹189</div></div>
+    </div>
+    <button class="place-btn" style="font-size:16px;padding:16px;" onclick="placeOrder()">
+      <i class="fa fa-check-circle"></i> Place Order · ₹<span id="final-amt">812</span>
+    </button>
+    <div class="security-note"><i class="fa fa-lock" style="color:#2d6a4f;"></i> 100% safe & secure payment</div>
+  </div>
+</div>
+
+</div><div class="right-col">
+  <div class="os">
+    <div class="os-head">
+      <div class="os-title">Order Summary</div>
+      <div class="os-sub">3 items in your bag</div>
+    </div>
+    <div class="os-body">
+      <div class="oi"><div class="oi-img">🥭</div><div style="flex:1;"><div class="oi-name">Homemade Mango Pickle</div><div class="oi-size">500g · Mild Spicy</div><div class="oi-qty">Qty: 2</div></div><div class="oi-price">₹598</div></div>
+      <div class="oi"><div class="oi-img">🍋</div><div style="flex:1;"><div class="oi-name">Andhra Lemon Pickle</div><div class="oi-size">250g · Extra Spicy</div><div class="oi-qty">Qty: 1</div></div><div class="oi-price">₹189</div></div>
+      <div class="oi"><div class="oi-img">🧄</div><div style="flex:1;"><div class="oi-name">Garlic Pickle Premium</div><div class="oi-size">300g · Medium</div><div class="oi-qty">Qty: 1</div></div><div class="oi-price">₹245</div></div>
+      <div class="pb">
+        <div class="pb-row"><span class="pb-label">Subtotal (4 items)</span><span class="pb-val">₹1,032</span></div>
+        <div class="pb-row"><span class="pb-label">MRP Total</span><span class="pb-val" style="text-decoration:line-through;color:#aaa;">₹1,250</span></div>
+        <div class="pb-row"><span class="pb-label">Product Discount</span><span class="pb-val pb-green">-₹218</span></div>
+        <div class="pb-row"><span class="pb-label">Delivery Charge</span><span class="pb-val pb-green">FREE 🎉</span></div>
+        <div class="pb-row" id="coupon-row" style="display:none;"><span class="pb-label">Coupon Discount</span><span class="pb-val pb-green" id="coupon-discount">-₹50</span></div>
+        <div class="pb-row"><span class="pb-label">GST (18% incl.)</span><span class="pb-val">₹156</span></div>
+        <div class="pb-total pb-row"><span class="pb-label">Total Payable</span><span class="pb-val">₹<span id="sidebar-total">812</span></span></div>
+      </div>
+      <div class="savings-box">
+        <span>🎉 You are saving ₹<span id="savings-amt">218</span> on this order!</span>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+        <div style="text-align:center;"><div style="font-size:20px;">🔒</div><div style="font-size:9px;color:#aaa;font-weight:700;">SSL Secure</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;">↩️</div><div style="font-size:9px;color:#aaa;font-weight:700;">7-Day Return</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;">✅</div><div style="font-size:9px;color:#aaa;font-weight:700;">FSSAI Certified</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;">🚚</div><div style="font-size:9px;color:#aaa;font-weight:700;">Fast Delivery</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><div class="modal-overlay" id="addrModal">
+  <div class="modal-box">
+    <div class="modal-title">📍 Add New Address <button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="lbl">Full Name <span class="req">*</span></label><input class="inp" type="text" placeholder="Full name"></div>
+      <div class="col-md-6"><label class="lbl">Mobile <span class="req">*</span></label><input class="inp" type="tel" placeholder="+91-XXXXXXXXXX"></div>
+      <div class="col-12"><label class="lbl">Address Line <span class="req">*</span></label><textarea class="inp" rows="2" placeholder="Flat/House no, Street, Area"></textarea></div>
+      <div class="col-md-6"><label class="lbl">City <span class="req">*</span></label><input class="inp" type="text" value="Nagpur"></div>
+      <div class="col-md-6"><label class="lbl">Pincode <span class="req">*</span></label><input class="inp" type="text" placeholder="440XXX" maxlength="6"></div>
+      <div class="col-12"><label class="lbl">Address Type</label>
+        <div style="display:flex;gap:8px;"><span class="cc" onclick="selTag(this)">🏠 Home</span><span class="cc" onclick="selTag(this)" style="background:#fff;">🏢 Office</span><span class="cc" onclick="selTag(this)" style="background:#fff;">📍 Other</span></div>
+      </div>
+      <div class="col-12"><button class="place-btn" onclick="saveAddress()"><i class="fa fa-check"></i> Save Address</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="success-overlay" id="successPage">
+  <div class="success-box">
+    <div class="success-anim">✓</div>
+    <div class="success-title">Order Placed Successfully!</div>
+    <div style="font-size:13px;color:#666;">Thank you, Rahul! Your pickles are on their way 🥒</div>
+    <div class="success-order" id="success-ordid">PH-2026-3847</div>
+    <div class="success-steps">
+      <div class="ss"><div class="ss-ico">✅</div><div class="ss-lbl">Order Confirmed</div></div>
+      <div class="ss"><div class="ss-ico">📦</div><div class="ss-lbl">Packing</div></div>
+      <div class="ss"><div class="ss-ico">🚚</div><div class="ss-lbl">Out Tomorrow</div></div>
+      <div class="ss"><div class="ss-ico">🏠</div><div class="ss-lbl">Delivery</div></div>
+    </div>
+    <div style="background:#f8f9fa;border-radius:12px;padding:12px;font-size:12px;color:#555;margin:10px 0;text-align:left;">
+      <div>📍 <strong>Delivering to:</strong> Dharampeth, Nagpur</div>
+      <div style="margin-top:4px;">📅 <strong>Expected:</strong> Tomorrow, 20 Mar 2026</div>
+      <div style="margin-top:4px;">💳 <strong>Payment:</strong> <span id="succ-pay">UPI — GPay</span></div>
+      <div style="margin-top:4px;">💰 <strong>Amount Paid:</strong> ₹<span id="succ-amt">812</span></div>
+    </div>
+    <button class="wa-btn"><i class="fab fa-whatsapp"></i> Get Updates on WhatsApp</button>
+    <button class="track-btn"><i class="fa fa-map-marker-alt"></i> Track My Order</button>
+    <button style="width:100%;background:none;border:none;color:#aaa;font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;padding:6px;font-family:'Poppins',sans-serif;" onclick="window.location='/'">🛍️ Continue Shopping</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// STEP NAV
+function goToPayment(){
+  document.getElementById('sec-address').style.display='none';
+  document.getElementById('sec-payment').style.display='block';
+  markStep(3);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goToConfirm(){
+  document.getElementById('sec-payment').style.display='none';
+  document.getElementById('sec-confirm').style.display='block';
+  markStep(4);
+  // update conf-pay
+  var sel = document.querySelector('.pm.on .pm-name');
+  if(sel) document.getElementById('conf-pay').textContent = sel.textContent;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function backToAddress(){
+  document.getElementById('sec-payment').style.display='none';
+  document.getElementById('sec-confirm').style.display='none';
+  document.getElementById('sec-address').style.display='block';
+  markStep(2);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function backToPayment(){
+  document.getElementById('sec-confirm').style.display='none';
+  document.getElementById('sec-payment').style.display='block';
+  markStep(3);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function markStep(n){
+  for(var i=2;i<=4;i++){
+    var s=document.getElementById('step'+i);
+    s.classList.remove('on','done');
+    if(i<n){s.classList.add('done');s.querySelector('.step-num').innerHTML='<i class="fa fa-check" style="font-size:10px;"></i>';}
+    else if(i===n){s.classList.add('on');s.querySelector('.step-num').textContent=i;}
+    else s.querySelector('.step-num').textContent=i;
+  }
+  if(document.getElementById('line2')) document.getElementById('line2').className='step-line'+(n>2?' done':'');
+  if(document.getElementById('line3')) document.getElementById('line3').className='step-line'+(n>3?' done':'');
+}
+// ADDRESS
+function selAddr(el){
+  document.querySelectorAll('.addr-card').forEach(function(c){c.classList.remove('on');c.querySelector('.addr-check').textContent='';});
+  el.classList.add('on');el.querySelector('.addr-check').textContent='✓';
+}
+function openAddrModal(){document.getElementById('addrModal').classList.add('show');}
+function closeModal(){document.getElementById('addrModal').classList.remove('show');}
+function saveAddress(){closeModal();toast('✅ Address saved successfully!','ok');}
+function selTag(el){document.querySelectorAll('.cc').forEach(function(c){c.style.background='#fff';});el.style.background='#fde8d8';}
+// PINCODE
+function checkPin(){
+  var p=document.getElementById('pincode').value.trim();
+  var r=document.getElementById('pin-result');
+  if(!p||p.length!==6){r.innerHTML='<div class="pin-result pin-err">⚠️ Enter valid 6-digit pincode</div>';return;}
+  var nagpur=['440001','440002','440003','440004','440005','440006','440007','440008','440009','440010','440011','440012','440013','440014','440015','440016','440017','440018','440019','440020','440022','440023','440024','440025'];
+  if(nagpur.includes(p)){r.innerHTML='<div class="pin-result pin-ok">✅ Delivery available to <strong>'+p+'</strong> — Tomorrow by 8 PM · FREE</div>';}
+  else{r.innerHTML='<div class="pin-result pin-err">❌ Sorry, delivery not available for <strong>'+p+'</strong> yet. We serve Nagpur only.</div>';}
+}
+// PAYMENT
+function selPay(el,type){
+  document.querySelectorAll('.pm').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  var cod = document.getElementById('sidebar-total');
+  var finalAmt = document.getElementById('final-amt');
+  if(type==='cod'){cod.textContent='837';finalAmt.textContent='837';document.getElementById('savings-amt').textContent='193';}
+  else{cod.textContent='812';finalAmt.textContent='812';document.getElementById('savings-amt').textContent='218';}
+}
+function selUpi(el,e){e.stopPropagation();document.querySelectorAll('.upi-app').forEach(function(u){u.classList.remove('on');});el.classList.add('on');}
+function validateUpi(inp){
+  var ok=inp.value.includes('@');
+  document.getElementById('upi-ico').style.display=ok?'block':'none';
+  if(ok)inp.classList.add('ok'); else inp.classList.remove('ok');
+}
+function formatCard(inp){
+  var v=inp.value.replace(/\D/g,'').substring(0,16);
+  var f=v.match(/.{1,4}/g);
+  inp.value=f?f.join(' '):'';
+  var d=v.padEnd(16,'*');
+  var disp=d.match(/.{1,4}/g).join(' ');
+  document.getElementById('cv-num').textContent=disp;
+}
+function fmtExp(inp){
+  var v=inp.value.replace(/\D/g,'');
+  if(v.length>=2)v=v.substring(0,2)+'/'+v.substring(2,4);
+  inp.value=v;
+  document.getElementById('cv-exp').textContent=inp.value||'MM / YY';
+}
+// COUPON
+function fillCoupon(code){document.getElementById('couponInp').value=code;}
+function applyCoupon(){
+  var c=document.getElementById('couponInp').value.trim().toUpperCase();
+  var msgs={PICKLEFIRST:'🎉 ₹50 off applied!',PICKLE10:'🎉 10% discount applied! Saved ₹82',FREEDEL:'🚚 Free delivery applied!'};
+  if(msgs[c]){
+    document.getElementById('coupon-applied').classList.add('show');
+    document.getElementById('coupon-msg').textContent=msgs[c];
+    document.getElementById('coupon-row').style.display='flex';
+    if(c==='PICKLE10'){document.getElementById('coupon-discount').textContent='-₹82';document.getElementById('sidebar-total').textContent='730';document.getElementById('final-amt').textContent='730';document.getElementById('savings-amt').textContent='300';}
+    else if(c==='PICKLEFIRST'){document.getElementById('sidebar-total').textContent='762';document.getElementById('final-amt').textContent='762';document.getElementById('savings-amt').textContent='268';}
+    toast('✅ Coupon '+c+' applied!','ok');
+  } else {toast('❌ Invalid coupon code','ok');}
+}
+function removeCoupon(){
+  document.getElementById('coupon-applied').classList.remove('show');
+  document.getElementById('coupon-row').style.display='none';
+  document.getElementById('sidebar-total').textContent='812';
+  document.getElementById('final-amt').textContent='812';
+  document.getElementById('savings-amt').textContent='218';
+  document.getElementById('couponInp').value='';
+  toast('Coupon removed','ok');
+}
+// ORDER
+function placeOrder(){
+  var payEl=document.querySelector('.pm.on .pm-name');
+  var pay=payEl?payEl.textContent:'UPI';
+  var amt=document.getElementById('sidebar-total').textContent;
+  var ordId='PH-2026-'+Math.floor(Math.random()*9000+1000);
+  document.getElementById('success-ordid').textContent=ordId;
+  document.getElementById('succ-pay').textContent=pay;
+  document.getElementById('succ-amt').textContent=amt;
+  document.getElementById('successPage').classList.add('show');
+}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},3500);}
+</script>
+{% endblock %}

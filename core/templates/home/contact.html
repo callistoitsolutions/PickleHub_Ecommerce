@@ -1,0 +1,237 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Contact Us | PickleHub Nagpur{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== HERO BANNER ===== */
+.hero-banner { background:linear-gradient(135deg,#1a1a2e,#0f3460); padding:40px 24px; text-align:center; color:#fff; }
+.hero-title { font-family:'Playfair Display',serif; font-size:32px; font-weight:800; color:#ffd60a; margin-bottom:8px; }
+.hero-sub { font-size:14px; color:rgba(255,255,255,.7); }
+
+/* ===== PAGE LAYOUT ===== */
+.page-content { max-width:1100px; margin:0 auto; padding:40px 24px; }
+
+/* ===== CONTACT CARDS ===== */
+.contact-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:28px; }
+.cc { background:#fff; border-radius:14px; padding:20px; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.07); transition:.3s; cursor:pointer; border:1.5px solid transparent; }
+.cc:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.12); border-color:#e85d04; }
+.cc-ico { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 12px; }
+.cc-title { font-size:14px; font-weight:700; color:#1a1a2e; margin-bottom:4px; }
+.cc-val { font-size:13px; color:#e85d04; font-weight:600; }
+.cc-sub { font-size:11px; color:#aaa; margin-top:2px; }
+
+/* ===== FORM CARD ===== */
+.form-card { background:#fff; border-radius:16px; padding:28px; box-shadow:0 4px 14px rgba(0,0,0,.06); margin-bottom:20px; }
+.form-title { font-size:18px; font-weight:700; color:#1a1a2e; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+.form-sub { font-size:12px; color:#aaa; margin-bottom:20px; }
+.lbl { font-size:12px; font-weight:700; color:#444; margin-bottom:4px; display:block; }
+.req { color:#e85d04; }
+.inp { width:100%; border-radius:10px; border:1.5px solid #e0e0e0; padding:10px 14px; font-size:13px; font-family:'Poppins',sans-serif; outline:none; transition:.2s; color:#1a1a2e; }
+.inp:focus { border-color:#e85d04; box-shadow:0 0 0 3px rgba(232,93,4,.08); }
+.btn-orange { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:12px; padding:13px 28px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; transition:.3s; display:inline-flex; align-items:center; gap:8px; }
+.btn-orange:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(232,93,4,.3); color:#fff; }
+
+/* ===== ENQUIRY TYPE PILLS ===== */
+.enq-pills { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.enq-pill { border:1.5px solid #ddd; border-radius:50px; padding:6px 14px; font-size:11px; font-weight:600; cursor:pointer; background:#fff; color:#555; transition:.2s; }
+.enq-pill:hover, .enq-pill.on { border-color:#e85d04; color:#e85d04; background:#fff8f5; }
+
+/* ===== HOURS GRID ===== */
+.hours-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.hour-row { display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f5f5f5; color:#555; }
+.hour-row b { color:#1a1a2e; }
+.hour-open { color:#2d6a4f; font-weight:700; }
+.hour-closed { color:#c62828; font-weight:700; }
+
+/* ===== MAP WRAP ===== */
+.map-wrap { border-radius:14px; overflow:hidden; height:200px; background:linear-gradient(135deg,#e3f2fd,#bbdefb); display:flex; align-items:center; justify-content:center; margin-bottom:16px; font-size:40px; cursor:pointer; flex-direction:column; }
+.success-box { background:#d4edda; border:1.5px solid #c3e6cb; border-radius:12px; padding:16px 20px; display:none; text-align:center; margin-bottom:15px; }
+.success-box.show { display:block; }
+
+/* ===== TOAST ===== */
+.toast-msg { position:fixed; bottom:22px; right:22px; background:#1a1a2e; color:#fff; border-radius:12px; padding:14px 20px; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,.2); transition:.35s; transform:translateY(80px); opacity:0; }
+.toast-msg.show { transform:translateY(0); opacity:1; }
+.toast-msg.ok { border-left:4px solid #52b788; }
+.toast-msg.err { border-left:4px solid #e85d04; }
+
+@media(max-width:600px){
+    .contact-cards{grid-template-columns:repeat(2,1fr);}
+    .hours-grid{grid-template-columns:1fr;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-banner">
+  <div class="hero-title">📬 Contact Us</div>
+  <div class="hero-sub">We're here to help! Reach out via any channel below.</div>
+</div>
+
+<div class="page-content">
+  <div class="contact-cards">
+    <div class="cc" onclick="showToast('Opening WhatsApp...','ok')">
+      <div class="cc-ico" style="background:#d4edda;">💬</div>
+      <div class="cc-title">WhatsApp</div>
+      <div class="cc-val">+91-9876543210</div>
+      <div class="cc-sub">Fastest response · 24×7</div>
+    </div>
+    <div class="cc" onclick="showToast('Opening phone dialer...','ok')">
+      <div class="cc-ico" style="background:#e3f2fd;">📞</div>
+      <div class="cc-title">Call Us</div>
+      <div class="cc-val">+91-9876543210</div>
+      <div class="cc-sub">Mon–Sat · 10am–7pm</div>
+    </div>
+    <div class="cc" onclick="showToast('Opening email...','ok')">
+      <div class="cc-ico" style="background:#fff3e0;">📧</div>
+      <div class="cc-title">Email</div>
+      <div class="cc-val">support@picklehub.in</div>
+      <div class="cc-sub">Reply within 24 hours</div>
+    </div>
+    <div class="cc" onclick="showToast('Opening Instagram...','ok')">
+      <div class="cc-ico" style="background:#fce4ec;">📸</div>
+      <div class="cc-title">Instagram DM</div>
+      <div class="cc-val">@picklehub_nagpur</div>
+      <div class="cc-sub">Mon–Sat · 10am–6pm</div>
+    </div>
+    <div class="cc" onclick="showToast('Opening Google Maps...','ok')">
+      <div class="cc-ico" style="background:#e8f5e9;">📍</div>
+      <div class="cc-title">Visit Us</div>
+      <div class="cc-val">Nagpur, Maharashtra</div>
+      <div class="cc-sub">By appointment only</div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="form-card h-100">
+        <div class="form-title">✉️ Send Us a Message</div>
+        <div class="form-sub">Fill the form — we'll reply within 24 hours</div>
+
+        <div class="mb-3">
+          <label class="lbl">Type of Enquiry <span class="req">*</span></label>
+          <div class="enq-pills" id="enqPills">
+            <button class="enq-pill on" type="button" onclick="selEnq(this)">General Query</button>
+            <button class="enq-pill" type="button" onclick="selEnq(this)">Order Issue</button>
+            <button class="enq-pill" type="button" onclick="selEnq(this)">Wholesale/Bulk</button>
+            <button class="enq-pill" type="button" onclick="selEnq(this)">Partnership</button>
+            <button class="enq-pill" type="button" onclick="selEnq(this)">Feedback</button>
+            <button class="enq-pill" type="button" onclick="selEnq(this)">Complaint</button>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="lbl" for="cName">Full Name <span class="req">*</span></label>
+            <input class="inp" id="cName" type="text" placeholder="Your full name">
+          </div>
+          <div class="col-md-6">
+            <label class="lbl" for="cPhone">Mobile Number <span class="req">*</span></label>
+            <input class="inp" id="cPhone" type="tel" placeholder="+91-XXXXXXXXXX">
+          </div>
+          <div class="col-12">
+            <label class="lbl" for="cEmail">Email Address</label>
+            <input class="inp" id="cEmail" type="email" placeholder="your@email.com">
+          </div>
+          <div class="col-12">
+            <label class="lbl" for="cOrder">Order ID <span style="font-weight:400;color:#aaa;">(if related to an order)</span></label>
+            <input class="inp" id="cOrder" type="text" placeholder="e.g. PH-20260318-001">
+          </div>
+          <div class="col-12">
+            <label class="lbl" for="cMsg">Your Message <span class="req">*</span></label>
+            <textarea class="inp" id="cMsg" rows="4" placeholder="Describe your query in detail..."></textarea>
+          </div>
+          <div class="col-12">
+            <div class="success-box" id="successBox">
+              ✅ <b>Message sent successfully!</b><br>
+              <span style="font-size:12px;color:#155724;">Our team will contact you within 24 hours on your mobile/email.</span>
+            </div>
+            <button class="btn-orange" onclick="submitContact()"><i class="fa fa-paper-plane"></i> Send Message</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="form-card mb-3">
+        <div class="form-title" style="font-size:15px;">📍 Our Location</div>
+        <div class="map-wrap" onclick="showToast('Opening Google Maps...','ok')">
+            🗺️<br><span style="font-size:14px;font-weight:700;color:#1565c0;">View on Google Maps</span>
+        </div>
+        <div style="font-size:13px;color:#555;line-height:1.8;">
+          <b>PickleHub Nagpur</b><br>
+          Shop No. 12, Orange City Market,<br>
+          Sitabuldi, Nagpur – 440012<br>
+          Maharashtra, India
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-title" style="font-size:15px;">🕐 Working Hours</div>
+        <div class="hours-grid mt-3">
+          <div>
+            <div class="hour-row"><b>Monday</b><span class="hour-open">10am – 7pm</span></div>
+            <div class="hour-row"><b>Tuesday</b><span class="hour-open">10am – 7pm</span></div>
+            <div class="hour-row"><b>Wednesday</b><span class="hour-open">10am – 7pm</span></div>
+            <div class="hour-row"><b>Thursday</b><span class="hour-open">10am – 7pm</span></div>
+          </div>
+          <div>
+            <div class="hour-row"><b>Friday</b><span class="hour-open">10am – 7pm</span></div>
+            <div class="hour-row"><b>Saturday</b><span class="hour-open">10am – 5pm</span></div>
+            <div class="hour-row"><b>Sunday</b><span class="hour-closed">Closed</span></div>
+            <div class="hour-row"><b>Holidays</b><span class="hour-closed">Closed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enquiry Pill Selection
+function selEnq(el) {
+    document.querySelectorAll(".enq-pill").forEach(function(p){
+        p.classList.remove("on");
+    });
+    el.classList.add("on");
+}
+
+// Handle Contact Form Submit
+function submitContact() {
+    var n = document.getElementById("cName").value.trim(),
+        p = document.getElementById("cPhone").value.trim(),
+        m = document.getElementById("cMsg").value.trim();
+    
+    if(!n || !p || !m) {
+        showToast("⚠️ Please fill all required fields", "err");
+        return;
+    }
+    
+    document.getElementById("successBox").classList.add("show");
+    showToast("✅ Message sent! We'll reply within 24 hours.", "ok");
+    
+    // Optional: Clear form after submit
+    setTimeout(function() {
+        document.getElementById("cName").value = '';
+        document.getElementById("cPhone").value = '';
+        document.getElementById("cEmail").value = '';
+        document.getElementById("cOrder").value = '';
+        document.getElementById("cMsg").value = '';
+    }, 1500);
+}
+
+// Toast Notification
+function showToast(msg, type) {
+    var t = document.getElementById("toastMsg");
+    t.textContent = msg;
+    t.className = "toast-msg " + (type || "ok") + " show";
+    clearTimeout(t._t);
+    t._t = setTimeout(function(){
+        t.classList.remove("show");
+    }, 3000);
+}
+</script>
+{% endblock %}

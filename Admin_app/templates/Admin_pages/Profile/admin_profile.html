@@ -1,0 +1,251 @@
+{% extends "Admin_pages/admin_base.html" %}
+
+{% block extra_css %}
+<style>
+/* =========================================
+   PAGE SPECIFIC CSS 
+========================================= */
+
+/* BUTTONS */
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+
+/* CARDS & PANELS */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}
+.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}
+.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+
+/* FORM INPUTS */
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.lbl-hint{font-size:10px;color:#aaa;font-weight:400;margin-left:5px;}
+.req{color:#e85d04;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+textarea.inp{resize:vertical;min-height:65px;}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+
+/* TOGGLES & PILLS */
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+
+/* SECTION TABS */
+.sec-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:0 26px;margin-bottom:0;background:#fff;border-bottom:1px solid #f0f0f0;}
+.sec-tab{padding:10px 16px;font-size:12px;font-weight:700;color:#888;cursor:pointer;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap;}
+.sec-tab.on{color:#e85d04;border-bottom-color:#e85d04;}
+.sec-panel{display:none;}
+.sec-panel.on{display:block;}
+
+/* ERROR TEXT */
+.err-msg {color: #c62828; font-size: 10px; font-weight: 600; margin-top: 4px; display: none;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 24px; overflow: hidden;">
+    <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5; flex-wrap: wrap; gap: 14px;">
+        
+        <div style="display: flex; align-items: center; gap: 16px;">
+            
+            <button onclick="window.history.back()" title="Go Back" style="background: #f0f2f5; border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1a1a2e; transition: 0.2s;" onmouseover="this.style.background='#e2e5e9'" onmouseout="this.style.background='#f0f2f5'">
+                <i class="fa fa-arrow-left"></i>
+            </button>
+
+            <div>
+              <h2 style="font-size: 18px; font-weight: 800; color: #1a1a2e; margin: 0; display: flex; align-items: center; gap: 8px;">
+                🏠 Settings & Profile
+              </h2>
+              <div style="font-size: 12px; color: #888; margin-top: 4px;">
+                  Manage your admin account and settings &rarr;
+              </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+        </div>
+    </div>
+
+    <div class="sec-tabs" style="margin: 0; padding: 0 16px; background: transparent; border-bottom: none;">
+        <div class="sec-tab on" onclick="switchTab(0)">👤 Profile Settings</div>
+    </div>
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-7">
+
+    <div class="sec-panel on" id="panel-0">
+      <div class="card">
+        <div class="card-head">
+            <span class="ch-ico">👤</span>
+            <span class="ch-title">Update Profile</span>
+            <span class="ch-sub">— Manage your personal admin details</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            
+            <div class="col-12">
+                <label class="lbl">Full Name <span class="req">*</span></label>
+                <input type="text" class="inp" id="admin_name" name="admin_name" placeholder="Enter your full name" oninput="markUnsaved()" value="{{admin_obj.admin_name}}">
+                <div class="err-msg" id="errName">Please enter a valid name.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="lbl">Email Address <span class="req">*</span></label>
+                <input type="email" class="inp" id="admin_email" name="admin_email" placeholder="admin@picklehub.com" oninput="markUnsaved()" value="{{admin_obj.admin_email}}">
+                <div class="err-msg" id="errEmail">Please enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="lbl">Phone Number <span class="req">*</span></label>
+                <input type="email" class="inp" id="admin_phone" name="admin_phone" placeholder="admin@picklehub.com" oninput="markUnsaved()" value="{{admin_obj.admin_phone}}">
+                <div class="err-msg" id="errEmail">Please enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="lbl">Password <span class="req">*</span></label>
+                <input type="text" class="inp" id="admin_password" name="admin_password" placeholder="Enter Password" oninput="markUnsaved()" value="{{admin_obj.admin_password}}">
+            </div>
+
+            <div class="col-12 mt-4">
+                <button class="btn-p" id="btn-update-profile" onclick="Update_Profile(this)" style="padding: 12px 24px; font-size: 14px;">
+                    <i class="fa fa-user-edit"></i> Update Profile
+                </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+</div><div class="col-lg-5">
+  <div class="preview-wrap">
+    
+    <div style="background:#fff;border-radius:12px;padding:20px;border:1.5px solid #f0f0f0;">
+      <div style="font-size:14px;font-weight:800;color:#1a1a2e;margin-bottom:10px;">📋 Profile Instructions</div>
+      <div style="font-size:12px;color:#666;line-height:2;">
+        • <strong>Name:</strong> Must not be blank.<br>
+        • <strong>Email:</strong> Must contain an @ symbol and a valid domain.<br>
+        • <strong>Phone:</strong> Must be exactly 10 digits (no spaces or letters).<br>
+        <br>
+        <em>Note: Your profile changes will take effect the next time you log in.</em>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>{% endblock %}
+
+{% block extra_js %}
+<script>
+    let unsaved = false;
+
+    // Helper to switch the UI state to "Unsaved"
+    function markUnsaved() {
+        unsaved = true;
+        const saveStatusEl = document.getElementById('saveStatus');
+        if (saveStatusEl) {
+            saveStatusEl.textContent = '⚠️ Unsaved Changes';
+            saveStatusEl.className = 's-pill sp-yellow';
+        }
+    }
+
+    // Helper to switch the UI state to "Saved"
+    function markSaved() {
+        unsaved = false;
+        const saveStatusEl = document.getElementById('saveStatus');
+        if (saveStatusEl) {
+            saveStatusEl.textContent = '✅ All Changes Saved';
+            saveStatusEl.className = 's-pill sp-green';
+        }
+    }
+
+   
+
+    
+
+    function Update_Profile(_this){
+      var admin_name = $("#admin_name").val();
+      var admin_email = $("#admin_email").val();
+      var admin_phone = $("#admin_phone").val();
+      var admin_password = $("#admin_password").val();
+      var emailfilter = /^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i;
+
+      if(admin_name==''){
+          alert("Please Enter Name");
+      }
+      else if(admin_email ==''){
+         alert("Please Enter Email Address");
+      }
+      else if(admin_phone ==''){
+         alert("Please Enter Phone Number");
+      }
+      else if(admin_password ==''){
+          alert("Please Enter Password");
+      }
+      else{
+          var fd = new FormData();
+          fd.append('id','{{admin_obj.id}}');
+          fd.append('admin_name',admin_name);
+          fd.append('admin_email',admin_email);
+          fd.append('admin_phone',admin_phone);
+          fd.append('admin_password',admin_password);
+
+          $(_this).prop("disabled", true);
+          _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Updating...`;
+
+          $.ajax({
+              method: "POST",
+              url: "{% url 'Admin_Profile_Ajax' %}",
+              enctype: "multipart/form-data",
+              processData: false,
+              contentType: false,
+              cache: false,
+              data: fd,
+              success: function (response) {
+                  $(_this).prop("disabled", false);
+                  _this.innerHTML = `<i class="fa fa-user-edit mr-1"></i> Update Profile`;
+                  if (response.status == '1') {
+                      swal({
+                          title: response.msg,
+                          icon: 'success',
+                          confirmButtonColor: 'maroon',
+                          confirmButtonText: 'OK'
+                      }).then(() => {
+                          window.location.href ="{% url 'dashboard' %}"
+                      })
+                  }
+                  else {
+                      swal({
+                          title: response.msg,
+                          icon: 'error',
+                          confirmButtonColor: '#d33',
+                          confirmButtonText: 'Retry'
+                      })
+                  }
+              }
+          });
+      }
+    }
+</script>
+{% endblock %}

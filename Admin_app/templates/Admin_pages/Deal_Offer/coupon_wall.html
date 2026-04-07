@@ -1,0 +1,471 @@
+{% extends "Admin_pages/admin_base.html" %}
+
+{% block title %}Coupon Wall | PickleHub Nagpur{% endblock %}
+{% block page_title %}🎫 Coupon Wall{% endblock %}
+
+{% block nav_deal_wall %}active{% endblock %}
+{% block nav_deals_main %}active{% endblock %}
+{% block nav_deals_show %}show{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── WALL GRID ─────────────────────────────────────────── */
+.coupon-wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:16px;margin-bottom:32px;}
+.cw-item{background:#fff;border:2px dashed #e8ddd0;border-radius:16px;padding:20px;display:flex;gap:16px;align-items:center;position:relative;transition:all .2s;overflow:hidden;}
+.cw-item:hover{border-color:#c8470a;box-shadow:0 4px 16px rgba(28,18,8,.1);}
+.cw-item::before,.cw-item::after{content:'';position:absolute;width:20px;height:20px;background:#f0f2f5;border-radius:50%;top:50%;transform:translateY(-50%);}
+.cw-item::before{left:-10px;}.cw-item::after{right:-10px;}
+.cw-icon{width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.cw-body{flex:1;min-width:0;}
+.cw-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#c8470a;line-height:1;}
+.cw-desc{font-size:12px;color:#7a6a58;margin:3px 0 6px;}
+.cw-code-row{display:flex;align-items:center;gap:8px;}
+.cw-code{background:#f5ede0;border:1.5px dashed #e8ddd0;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:900;letter-spacing:2px;}
+.cw-copy-btn{font-size:12px;font-weight:800;color:#c8470a;cursor:pointer;padding:4px 10px;border:1.5px solid #c8470a;border-radius:6px;background:none;transition:all .2s;}
+.cw-copy-btn:hover{background:#c8470a;color:#fff;}
+.cw-exp{font-size:11px;color:#b5a898;margin-top:4px;}
+.cw-status-badge{position:absolute;top:10px;right:14px;font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:50px;text-transform:uppercase;}
+.cw-status-badge.active{background:#d4edda;color:#155724;}
+.cw-status-badge.inactive{background:#f8d7da;color:#721c24;}
+
+/* ── TOOLBAR ───────────────────────────────────────────── */
+.page-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.btn-add-coupon{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none;transition:.2s;}
+.btn-add-coupon:hover{box-shadow:0 4px 14px rgba(232,93,4,.4);color:#fff;transform:translateY(-1px);}
+
+/* ── MODAL OVERLAY ─────────────────────────────────────── */
+.ph-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:1050;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.ph-modal-overlay.open{opacity:1;pointer-events:all;}
+.ph-modal{background:#fff;border-radius:20px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);transform:translateY(20px);transition:transform .25s;}
+.ph-modal-overlay.open .ph-modal{transform:translateY(0);}
+.ph-modal-head{padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2;border-radius:20px 20px 0 0;}
+.ph-modal-head h3{font-size:16px;font-weight:800;color:#1a1a2e;margin:0;}
+.ph-modal-close{background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1;padding:4px;}
+.ph-modal-close:hover{color:#e85d04;}
+.ph-modal-body{padding:24px;}
+.ph-modal-footer{padding:16px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;border-radius:0 0 20px 20px;}
+
+/* ── FORM STYLES ───────────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid.full{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;}
+.form-group input,.form-group select,.form-group textarea{border:1.5px solid #e8e8e8;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border-color .2s;background:#fafafa;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#e85d04;background:#fff;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-section-label{font-size:10px;font-weight:700;color:#e85d04;letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 4px;grid-column:1/-1;border-bottom:1px solid #fde8d8;padding-bottom:4px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9fa;border-radius:8px;padding:10px 14px;}
+.toggle-row label{font-size:12px;font-weight:600;color:#444;}
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:50px;cursor:pointer;transition:.2s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle-switch input:checked + .toggle-slider{background:#e85d04;}
+.toggle-switch input:checked + .toggle-slider::before{transform:translateX(18px);}
+
+/* Color & Icon preview */
+.icon-preview-wrap{display:flex;align-items:center;gap:10px;}
+.icon-preview-wrap input{flex:1;}
+.icon-live-preview{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #e8ddd0;flex-shrink:0;transition:background .2s;}
+
+/* Buttons */
+.btn-cancel{background:#f0f0f0;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;color:#555;transition:.2s;}
+.btn-cancel:hover{background:#e0e0e0;}
+.btn-save{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-save:hover{box-shadow:0 4px 12px rgba(232,93,4,.4);}
+.btn-save:disabled{opacity:0.6;cursor:not-allowed;}
+
+/* Toast */
+.ph-toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:2000;transform:translateY(60px);opacity:0;transition:.3s;}
+.ph-toast.show{transform:translateY(0);opacity:1;}
+.ph-toast.success{border-left:4px solid #52b788;}
+.ph-toast.error{border-left:4px solid #e85d04;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- CSRF token for AJAX -->
+{% csrf_token %}
+
+<!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+<div class="page-toolbar">
+    <div>
+        <span style="font-size:13px;color:#888;">
+            Showing <strong>{{ coupon_wall|length }}</strong> public coupon{{ coupon_wall|length|pluralize }}
+        </span>
+    </div>
+    <button class="btn-add-coupon" onclick="openAddModal()">
+        <i class="fa fa-plus"></i> Add New Coupon
+    </button>
+</div>
+
+<!-- ── COUPON GRID ──────────────────────────────────────────── -->
+{% if coupon_wall %}
+<div class="coupon-wall-grid" id="couponGrid" role="list">
+    {% for c in coupon_wall %}
+    <div class="cw-item" role="listitem">
+        <span class="cw-status-badge {% if c.is_active %}active{% else %}inactive{% endif %}">
+            {% if c.is_active %}● Active{% else %}○ Inactive{% endif %}
+        </span>
+        <div class="cw-icon" style="background:{{ c.color_bg }}">{{ c.icon }}</div>
+        <div class="cw-body">
+            <div class="cw-val">{{ c.discount_val }}</div>
+            <div class="cw-desc">{{ c.description }}</div>
+            <div class="cw-code-row">
+                <span class="cw-code">{{ c.code }}</span>
+                <button class="cw-copy-btn" onclick="phCopyCoupon('{{ c.code }}', this)">Copy Code</button>
+            </div>
+            <div class="cw-exp">⏰ {{ c.expiry_note }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="sec-card" id="emptyCoupons">
+    <div class="sec-body" style="text-align:center;padding:48px 20px;color:#aaa;">
+        <div style="font-size:48px;margin-bottom:12px;">🎫</div>
+        <div style="font-size:15px;font-weight:600;">No public coupons yet</div>
+        <div style="font-size:13px;margin-top:4px;">Click <strong>Add New Coupon</strong> to get started.</div>
+    </div>
+</div>
+{% endif %}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     ADD COUPON MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="ph-modal-overlay" id="addCouponModal" onclick="handleOverlayClick(event)">
+  <div class="ph-modal">
+
+    <div class="ph-modal-head">
+      <h3>🎫 Add New Coupon</h3>
+      <button class="ph-modal-close" onclick="closeAddModal()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="ph-modal-body">
+      <div class="form-grid" id="couponForm">
+
+        <!-- ── BASIC INFO ── -->
+        <div class="form-section-label">Basic Info</div>
+
+        <div class="form-group">
+          <label>Coupon Code *</label>
+          <input type="text" id="f_code" placeholder="e.g. SUMMER20" style="text-transform:uppercase;"
+                 oninput="this.value=this.value.toUpperCase()">
+        </div>
+
+        <div class="form-group">
+          <label>Coupon Name *</label>
+          <input type="text" id="f_name" placeholder="e.g. Summer Sale 20% Off">
+        </div>
+
+        <div class="form-group form-grid full" style="grid-column:1/-1;">
+          <label>Description</label>
+          <textarea id="f_description" placeholder="Short description shown on the coupon card"></textarea>
+        </div>
+
+        <!-- ── DISCOUNT ── -->
+        <div class="form-section-label">Discount Settings</div>
+
+        <div class="form-group">
+          <label>Coupon Type *</label>
+          <select id="f_type">
+            <option value="percent">Percentage Off</option>
+            <option value="flat">Flat Discount (₹)</option>
+            <option value="free_del">Free Delivery</option>
+            <option value="bogo">Buy 1 Get 1</option>
+            <option value="coupon">Generic Coupon</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Discount Value</label>
+          <input type="number" id="f_discount_value" placeholder="e.g. 20 (for 20% or ₹20)">
+        </div>
+
+        <div class="form-group">
+          <label>Display Value (shown on card) *</label>
+          <input type="text" id="f_discount_val" placeholder="e.g. 20% OFF or ₹100 OFF or Buy 1 Get 1">
+        </div>
+
+        <div class="form-group">
+          <label>Min Order Value (₹)</label>
+          <input type="number" id="f_min_order" placeholder="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>Max Discount (₹) — for % coupons</label>
+          <input type="number" id="f_max_discount" placeholder="Leave blank for no cap">
+        </div>
+
+        <div class="form-group">
+          <label>Max Total Uses</label>
+          <input type="number" id="f_max_uses" placeholder="Leave blank for unlimited">
+        </div>
+
+        <!-- ── VALIDITY ── -->
+        <div class="form-section-label">Validity</div>
+
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="f_start_date">
+        </div>
+
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="f_end_date">
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Expiry Note (shown on card)</label>
+          <input type="text" id="f_expiry_note" placeholder="e.g. Valid till 30 Apr 2026" value="Valid till 30 Apr 2026">
+        </div>
+
+        <!-- ── APPEARANCE ── -->
+        <div class="form-section-label">Appearance</div>
+
+        <div class="form-group">
+          <label>Icon (emoji)</label>
+          <div class="icon-preview-wrap">
+            <input type="text" id="f_icon" placeholder="🎁" value="🎁" maxlength="4" oninput="updatePreview()">
+            <div class="icon-live-preview" id="iconPreview" style="background:#e4eeff;">🎁</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Background Color</label>
+          <div class="icon-preview-wrap">
+            <input type="color" id="f_color_bg" value="#e4eeff" oninput="updatePreview()" 
+                   style="height:42px;cursor:pointer;">
+            <span id="colorHex" style="font-size:12px;font-weight:700;color:#555;">#e4eeff</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" id="f_order" placeholder="0" value="0">
+        </div>
+
+        <!-- ── TOGGLES ── -->
+        <div class="form-section-label">Visibility & Rules</div>
+
+        <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:8px;">
+          <div class="toggle-row">
+            <label>Active (enabled for use)</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="f_is_active" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <label>Show on Coupon Wall</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="f_show_on_wall" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <label>Show on Offer Strip</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="f_show_on_strip">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <label>First Order Only</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="f_first_order_only">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <label>Public (visible to all users)</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="f_is_public" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div><!-- /form-grid -->
+    </div><!-- /modal-body -->
+
+    <div class="ph-modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-save" id="saveCouponBtn" onclick="saveCoupon()">
+        <i class="fa fa-save"></i> Save Coupon
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="ph-toast" id="phToast"></div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const CSRF = document.querySelector('[name=csrfmiddlewaretoken]').value;
+const SAVE_URL = "{% url 'coupon_add_ajax' %}";   // ← wire to your view below
+
+/* ── Modal open/close ───────────────────────────────────── */
+function openAddModal(){
+    document.getElementById('addCouponModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeAddModal(){
+    document.getElementById('addCouponModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function handleOverlayClick(e){
+    if(e.target === document.getElementById('addCouponModal')) closeAddModal();
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAddModal(); });
+
+/* ── Live icon/color preview ────────────────────────────── */
+function updatePreview(){
+    const icon  = document.getElementById('f_icon').value || '🎁';
+    const color = document.getElementById('f_color_bg').value;
+    document.getElementById('iconPreview').textContent = icon;
+    document.getElementById('iconPreview').style.background = color;
+    document.getElementById('colorHex').textContent = color;
+}
+
+/* ── Save via AJAX ──────────────────────────────────────── */
+async function saveCoupon(){
+    const btn = document.getElementById('saveCouponBtn');
+
+    // Basic validation
+    const code = document.getElementById('f_code').value.trim();
+    const name = document.getElementById('f_name').value.trim();
+    const discountVal = document.getElementById('f_discount_val').value.trim();
+    if(!code){ showToast('Coupon code is required', 'error'); return; }
+    if(!name){ showToast('Coupon name is required', 'error'); return; }
+    if(!discountVal){ showToast('Display value is required (shown on card)', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving…';
+
+    const payload = {
+        code,
+        name,
+        description:       document.getElementById('f_description').value.trim(),
+        coupon_type:       document.getElementById('f_type').value,
+        discount_value:    document.getElementById('f_discount_value').value || null,
+        max_discount:      document.getElementById('f_max_discount').value || null,
+        min_order_value:   document.getElementById('f_min_order').value || 0,
+        max_uses:          document.getElementById('f_max_uses').value || null,
+        start_date:        document.getElementById('f_start_date').value || null,
+        end_date:          document.getElementById('f_end_date').value || null,
+        discount_val:      discountVal,
+        expiry_note:       document.getElementById('f_expiry_note').value.trim(),
+        icon:              document.getElementById('f_icon').value.trim() || '🎁',
+        color_bg:          document.getElementById('f_color_bg').value,
+        order:             document.getElementById('f_order').value || 0,
+        is_active:         document.getElementById('f_is_active').checked,
+        show_on_wall:      document.getElementById('f_show_on_wall').checked,
+        show_on_strip:     document.getElementById('f_show_on_strip').checked,
+        first_order_only:  document.getElementById('f_first_order_only').checked,
+        is_public:         document.getElementById('f_is_public').checked,
+    };
+
+    try {
+        const res  = await fetch(SAVE_URL, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json', 'X-CSRFToken': CSRF},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if(data.success){
+            showToast('✅ Coupon saved!', 'success');
+            closeAddModal();
+            appendCouponCard(data.coupon);   // inject new card without page reload
+            resetForm();
+        } else {
+            showToast('Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+    } catch(err){
+        showToast('Network error — try again', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Save Coupon';
+    }
+}
+
+/* ── Append new card to grid without reload ─────────────── */
+function appendCouponCard(c){
+    // Remove empty state if present
+    const empty = document.getElementById('emptyCoupons');
+    if(empty) empty.remove();
+
+    let grid = document.getElementById('couponGrid');
+    if(!grid){
+        grid = document.createElement('div');
+        grid.className = 'coupon-wall-grid';
+        grid.id = 'couponGrid';
+        grid.setAttribute('role','list');
+        document.querySelector('.content').insertBefore(grid, document.querySelector('.ph-modal-overlay'));
+    }
+
+    const div = document.createElement('div');
+    div.className = 'cw-item';
+    div.setAttribute('role','listitem');
+    div.innerHTML = `
+        <span class="cw-status-badge ${c.is_active ? 'active':'inactive'}">${c.is_active ? '● Active':'○ Inactive'}</span>
+        <div class="cw-icon" style="background:${c.color_bg}">${c.icon}</div>
+        <div class="cw-body">
+            <div class="cw-val">${c.discount_val}</div>
+            <div class="cw-desc">${c.description || ''}</div>
+            <div class="cw-code-row">
+                <span class="cw-code">${c.code}</span>
+                <button class="cw-copy-btn" onclick="phCopyCoupon('${c.code}',this)">Copy Code</button>
+            </div>
+            <div class="cw-exp">⏰ ${c.expiry_note}</div>
+        </div>`;
+    grid.prepend(div);
+}
+
+/* ── Reset form ─────────────────────────────────────────── */
+function resetForm(){
+    ['f_code','f_name','f_description','f_discount_value','f_discount_val',
+     'f_max_discount','f_max_uses','f_start_date','f_end_date'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('f_type').value = 'percent';
+    document.getElementById('f_min_order').value = '0';
+    document.getElementById('f_expiry_note').value = 'Valid till 30 Apr 2026';
+    document.getElementById('f_icon').value = '🎁';
+    document.getElementById('f_color_bg').value = '#e4eeff';
+    document.getElementById('f_order').value = '0';
+    ['f_is_active','f_show_on_wall','f_is_public'].forEach(id => document.getElementById(id).checked = true);
+    ['f_show_on_strip','f_first_order_only'].forEach(id => document.getElementById(id).checked = false);
+    updatePreview();
+}
+
+/* ── Copy coupon code ───────────────────────────────────── */
+function phCopyCoupon(code, btn){
+    navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.style.cssText += 'background:#2d6a4f;color:#fff;border-color:#2d6a4f;';
+        setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.background = btn.style.color = btn.style.borderColor = '';
+        }, 1800);
+    });
+}
+
+/* ── Toast helper ───────────────────────────────────────── */
+function showToast(msg, type='success'){
+    const t = document.getElementById('phToast');
+    t.textContent = msg;
+    t.className = `ph-toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+{% endblock %}

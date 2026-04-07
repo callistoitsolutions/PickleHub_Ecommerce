@@ -1,0 +1,49 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+bin/
+lib/
+develop-eggs/
+dist/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Django ---
+db.sqlite3
+db.sqlite3-journal
+local_settings.py
+.env
+*.log
+
+# --- Media & Static ---
+# We usually don't track user-uploaded media
+media/
+# If you want to keep the folder but not the files, use:
+# media/*
+# !media/.gitkeep
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# --- Operating System ---
+.DS_Store
+Thumbs.db
+desktop.ini

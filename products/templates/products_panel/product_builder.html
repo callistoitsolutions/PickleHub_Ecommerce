@@ -1,0 +1,987 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Product Builder | PickleHub Admin{% endblock %}
+{% block page_title %}📦 Product Builder{% endblock %}
+
+{% block extra_css %}
+<style>
+.content{padding:0!important;}
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-edit{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-edit:hover{background:#1565c0;color:#fff;}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.sel{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;color:#1a1a2e;background:#fff;cursor:pointer;}
+.sel:focus{border-color:#e85d04;}
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+.section-divider{background:#f8f9fa;border-radius:10px;padding:10px 14px;margin:14px 0;font-size:11px;font-weight:800;color:#e85d04;border-left:3px solid #e85d04;}
+.prod-table{width:100%;border-collapse:separate;border-spacing:0;}
+.prod-table th{font-size:10px;font-weight:800;color:#aaa;text-transform:uppercase;padding:8px 10px;background:#f8f9fa;border-bottom:2px solid #f0f0f0;}
+.prod-table td{padding:10px;border-bottom:1px solid #f5f5f5;font-size:12px;vertical-align:middle;}
+.prod-table tr:hover td{background:#fff8f5;}
+.prod-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1.5px solid #f0f0f0;display:block;}
+.prod-emoji-fb{width:44px;height:44px;border-radius:8px;background:#f8f9fa;border:1.5px solid #f0f0f0;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.prod-name{font-weight:700;color:#1a1a2e;line-height:1.3;}
+.prod-brand{font-size:10px;color:#e85d04;font-weight:700;text-transform:uppercase;}
+.prod-price{font-weight:800;color:#e85d04;}
+.badge-chip{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;padding:2px 8px;border-radius:50px;font-size:9px;font-weight:700;}
+.status-active{background:#d4edda;color:#155724;padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700;}
+.status-inactive{background:#f5f5f5;color:#aaa;padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:20px;width:90%;max-width:780px;max-height:92vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:16px;font-weight:800;color:#1a1a2e;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;padding:4px 8px;border-radius:8px;}
+.modal-close:hover{background:#f0f0f0;color:#333;}
+.grad-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.grad-chip{width:26px;height:26px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:.2s;}
+.grad-chip:hover{transform:scale(1.1);}
+.grad-chip.sel{border-color:#e85d04;}
+.img-drop{border:2px dashed #e0e0e0;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa;position:relative;}
+.img-drop:hover{border-color:#e85d04;background:#fff8f5;}
+.img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.save-error-panel{display:none;margin-bottom:14px;background:#fdecea;border:1.5px solid #f5c6cb;border-radius:10px;padding:12px 14px;animation:errSlide .25s ease;}
+@keyframes errSlide{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.save-error-title{font-size:12px;font-weight:800;color:#c62828;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.save-error-detail{font-size:11px;color:#b71c1c;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-all;max-height:130px;overflow-y:auto;margin:0;background:rgba(198,40,40,.06);border-radius:6px;padding:8px 10px;line-height:1.5;}
+.save-error-dismiss{margin-left:auto;background:none;border:none;cursor:pointer;font-size:14px;color:#c62828;padding:0 2px;line-height:1;}
+.save-error-dismiss:hover{color:#7f0000;}
+.page{padding:22px 26px;}
+/* ── new: tags inside modal ── */
+.m-tag-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:10px;min-height:42px;cursor:text;align-items:center;transition:.2s;}
+.m-tag-wrap:focus-within{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.m-tag{background:#fff3e0;color:#e85d04;border:1px solid #f48c06;border-radius:50px;padding:2px 10px 2px 8px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
+.m-tag button{background:none;border:none;color:#e85d04;cursor:pointer;font-size:11px;padding:0;line-height:1;}
+/* ── new: coupon rows in modal ── */
+.m-coupon-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9fa;border-radius:10px;padding:10px 14px;border:1.5px solid #eee;transition:.2s;}
+.m-coupon-row.assigned{border-color:#2d6a4f;background:#f0faf5;}
+/* ── new: seo preview box ── */
+.seo-preview-box{background:#fff;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;}
+.seo-url-prev{font-size:12px;color:#006621;margin-bottom:2px;word-break:break-all;}
+.seo-title-prev{font-size:16px;color:#1a0dab;font-weight:500;margin-bottom:3px;line-height:1.3;}
+.seo-desc-prev{font-size:12px;color:#545454;line-height:1.5;}
+/* ── new: price calc badges ── */
+.disc-badge{display:inline-block;background:#d4edda;color:#155724;border-radius:50px;padding:2px 10px;font-size:11px;font-weight:700;}
+</style>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span id="productCountLabel" style="font-size:12px;color:#aaa;">Loading…</span>
+  <button class="btn-p" onclick="openModal(null)"><i class="fa fa-plus"></i> Add New Product</button>
+{% endblock %}
+
+{% block nav_prod_main %}active{% endblock %}
+{% block nav_prod_show %}show{% endblock %}
+{% block nav_prod_add %}active{% endblock %}
+
+{% block content %}
+
+<div class="page">
+  <div class="card">
+    <div class="card-head">
+      <span class="ch-ico">📦</span>
+      <span class="ch-title">All Products</span>
+      <span class="ch-sub">— click Edit to modify, trash to delete</span>
+      <div class="ch-right">
+        <input type="text" id="searchInput" placeholder="🔍 Search products…" oninput="filterTable(this.value)"
+          style="border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;width:200px;">
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;">
+      <table class="prod-table">
+        <thead>
+          <tr>
+            <th style="width:56px;">Image</th>
+            <th>Product</th>
+            <th>Brand</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Badge</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="prodTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL — ADD / EDIT PRODUCT
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="productModal">
+<div class="modal-box">
+  <div class="modal-head">
+    <div class="modal-title" id="modalTitle">➕ Add New Product</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <input type="hidden" id="m-id">
+
+  <!-- ── 1. IDENTITY & IMAGE ── -->
+  <div class="section-divider">🖼️ Identity & Image</div>
+  <div class="row g-3 mb-3">
+    <div class="col-2">
+      <label class="lbl">Emoji</label>
+      <input class="inp" id="m-emoji" value="🫙" maxlength="4" style="font-size:24px;text-align:center;padding:8px;">
+    </div>
+    <div class="col-6">
+      <label class="lbl">Product Name <span style="color:#e85d04;">*</span></label>
+      <input class="inp" id="m-name" placeholder="Rajasthani Mango Pickle" oninput="onNameInput()">
+    </div>
+    <div class="col-4">
+      <label class="lbl">Badge</label>
+      <select class="sel" id="m-badge">
+        <option value="">No Badge</option>
+        <option value="Bestseller">Bestseller</option>
+        <option value="New Arrival">New Arrival</option>
+        <option value="Premium">Premium</option>
+        <option value="Hot 🔥">Hot 🔥</option>
+        <option value="Organic">Organic</option>
+        <option value="Limited">Limited</option>
+        <option value="Rare Find">Rare Find</option>
+        <option value="Nagpur Special">Nagpur Special</option>
+      </select>
+    </div>
+    <div class="col-8">
+      <label class="lbl">Product Image <span style="font-size:10px;color:#aaa;">(replaces emoji on cards)</span></label>
+      <div class="img-drop" onclick="document.getElementById('m-image').click()">
+        <input type="file" id="m-image" accept="image/*" onchange="previewImage(this)">
+        <i class="fa fa-cloud-upload-alt" style="font-size:22px;color:#ccc;"></i>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">Click to upload · JPG PNG WEBP</div>
+      </div>
+    </div>
+    <div class="col-4" style="display:flex;align-items:center;justify-content:center;">
+      <img id="m-img-preview" src="" style="display:none;max-height:80px;max-width:110px;object-fit:cover;border-radius:10px;border:1.5px solid #e0e0e0;">
+      <div id="m-img-placeholder" style="width:80px;height:80px;border-radius:10px;background:#f8f9fa;border:1.5px solid #f0f0f0;display:flex;align-items:center;justify-content:center;font-size:36px;">🫙</div>
+    </div>
+  </div>
+
+  <!-- ── 2. RELATIONS ── -->
+  <div class="section-divider">🔗 Relations</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-6"><label class="lbl">Brand</label><select class="sel" id="m-brand"></select></div>
+    <div class="col-md-6"><label class="lbl">Category</label><select class="sel" id="m-category"></select></div>
+    <div class="col-md-4"><label class="lbl">Region</label><input class="inp" id="m-region" placeholder="e.g. Rajasthan"></div>
+    <div class="col-md-4"><label class="lbl">Oil Type</label><input class="inp" id="m-oiltype" placeholder="Mustard Oil"></div>
+    <div class="col-md-4"><label class="lbl">Weight / Size</label><input class="inp" id="m-weight" placeholder="500g"></div>
+  </div>
+
+  <!-- ── 3. DESCRIPTIONS (NEW) ── -->
+  <div class="section-divider">📝 Descriptions</div>
+  <div class="row g-3 mb-3">
+    <div class="col-12">
+      <label class="lbl">Short Description <span style="font-size:10px;color:#aaa;font-weight:400;">(shown on listing card — max 200)</span></label>
+      <textarea class="inp" id="m-shortdesc" rows="2" maxlength="200" placeholder="e.g. Authentic homemade mango pickle with traditional Nagpur spices. Made from raw Alphonso mangoes." style="resize:vertical;"></textarea>
+      <div style="font-size:10px;color:#aaa;text-align:right;margin-top:2px;"><span id="m-shortdesc-count">0</span>/200</div>
+    </div>
+    <div class="col-12">
+      <label class="lbl">Long Description <span style="font-size:10px;color:#aaa;font-weight:400;">(full detail on product page)</span></label>
+      <textarea class="inp" id="m-longdesc" rows="5" placeholder="Write detailed product description here...&#10;&#10;✅ Ingredients&#10;✅ How it's made&#10;✅ Storage instructions&#10;✅ Serving suggestions" style="resize:vertical;"></textarea>
+    </div>
+    <div class="col-12">
+      <label class="lbl">Key Highlights <span style="font-size:10px;color:#aaa;font-weight:400;">(one bullet per line — shown on product page)</span></label>
+      <textarea class="inp" id="m-highlights" rows="3" placeholder="✅ No preservatives&#10;✅ Cold-pressed mustard oil&#10;✅ Traditional family recipe" style="resize:vertical;"></textarea>
+    </div>
+  </div>
+
+  <!-- ── 4. EXTRA IDENTITY (NEW) ── -->
+  <div class="section-divider">📦 Extra Identity</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <label class="lbl">SKU / Product Code</label>
+      <div style="display:flex;gap:6px;">
+        <input class="inp" id="m-sku" placeholder="e.g. PH-MNG-500" style="flex:1;">
+        <button class="btn-s" style="white-space:nowrap;padding:8px 10px;font-size:11px;" onclick="autoSku()">⚡ Auto</button>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <label class="lbl">HSN Code <span style="font-size:10px;color:#aaa;font-weight:400;">(for GST)</span></label>
+      <input class="inp" id="m-hsn" placeholder="e.g. 2001" maxlength="8">
+    </div>
+    <div class="col-md-4">
+      <label class="lbl">Unit / Pack Type</label>
+      <select class="sel" id="m-unit">
+        <option value="grams">Grams (g)</option>
+        <option value="kg">Kilograms (kg)</option>
+        <option value="ml">Millilitres (ml)</option>
+        <option value="ltr">Litres (ltr)</option>
+        <option value="piece">Piece / Jar</option>
+        <option value="pack">Pack / Combo</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── 5. PRICING & STOCK ── -->
+  <div class="section-divider">💰 Pricing & Stock</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-3">
+      <label class="lbl">Sale Price (₹) <span style="color:#e85d04;">*</span></label>
+      <input class="inp" type="number" id="m-price" placeholder="320" oninput="calcModalDiscount()">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Old / MRP (₹)</label>
+      <input class="inp" type="number" id="m-oldprice" placeholder="450" oninput="calcModalDiscount()">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Cost Price ₹ <span style="font-size:10px;color:#aaa;font-weight:400;">(internal)</span></label>
+      <input class="inp" type="number" id="m-costprice" placeholder="0" oninput="calcModalDiscount()">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Discount Label</label>
+      <input class="inp" id="m-discount" placeholder="29% off">
+    </div>
+    <!-- auto-calc badges -->
+    <div class="col-12" id="m-calc-badges" style="display:none;">
+      <span id="m-disc-badge" class="disc-badge" style="display:none;"></span>
+      &nbsp;
+      <span id="m-margin-badge" class="disc-badge" style="background:#fff3cd;color:#856404;display:none;"></span>
+      &nbsp;
+      <span id="m-savings-badge" class="disc-badge" style="background:#e3f2fd;color:#1565c0;display:none;"></span>
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Stock Qty</label>
+      <input class="inp" type="number" id="m-stock" value="100">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Min Order Qty</label>
+      <input class="inp" type="number" id="m-minqty" value="1" min="1">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Max Order Qty</label>
+      <input class="inp" type="number" id="m-maxqty" value="5" min="1">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Low Stock Alert At</label>
+      <input class="inp" type="number" id="m-lowstockthreshold" placeholder="20">
+    </div>
+    <div class="col-md-6">
+      <label class="lbl">Low Stock Label</label>
+      <input class="inp" id="m-lowstock" placeholder="🔥 Only 12 left">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Rating (1-5)</label>
+      <input class="inp" type="number" step="0.1" min="1" max="5" id="m-rating" value="4.5">
+    </div>
+    <div class="col-md-3">
+      <label class="lbl">Review Count</label>
+      <input class="inp" type="number" id="m-reviews" value="0">
+    </div>
+  </div>
+
+  <!-- ── 6. PRICING EXTRAS (NEW) ── -->
+  <div class="section-divider">🧾 GST & Delivery</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <label class="lbl">GST Rate</label>
+      <select class="sel" id="m-gst">
+        <option value="0">0% (Exempt)</option>
+        <option value="5" selected>5%</option>
+        <option value="12">12%</option>
+        <option value="18">18%</option>
+        <option value="28">28%</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="lbl">Price Includes GST?</label>
+      <select class="sel" id="m-gstinc">
+        <option value="true">Yes — price is inclusive</option>
+        <option value="false">No — GST added at checkout</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="lbl">Free Delivery</label>
+      <select class="sel" id="m-freedeliv">
+        <option value="site_rule">Follow site rule (above ₹499)</option>
+        <option value="always">Always free</option>
+        <option value="never">Never free</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── 7. STOCK EXTRAS (NEW) ── -->
+  <div class="section-divider">🏭 Storage & Shelf Life</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <label class="lbl">Shelf Life</label>
+      <input class="inp" id="m-shelf" placeholder="e.g. 12 months">
+    </div>
+    <div class="col-md-6">
+      <label class="lbl">Storage Instructions</label>
+      <input class="inp" id="m-storage" placeholder="e.g. Cool & dry place, away from sunlight">
+    </div>
+  </div>
+
+  <!-- ── 8. APPEARANCE ── -->
+  <div class="section-divider">🎨 Appearance</div>
+  <div class="row g-3 mb-3">
+    <div class="col-12">
+      <label class="lbl">Card Background Gradient</label>
+      <div class="grad-presets" id="m-cardBgPresets"></div>
+      <input class="inp mt-2" id="m-cardbg" placeholder="linear-gradient(135deg,#fff3e0,#ffcc80)">
+    </div>
+    <div class="col-12">
+      <label class="lbl">Badge Colour Gradient</label>
+      <div class="grad-presets" id="m-badgeColorPresets"></div>
+      <input class="inp mt-2" id="m-badgecolor" placeholder="linear-gradient(135deg,#e85d04,#f48c06)">
+    </div>
+  </div>
+
+  <!-- ── 9. SETTINGS ── -->
+  <div class="section-divider">⚙️ Settings</div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4"><label class="lbl">WhatsApp Number</label><input class="inp" id="m-wa" value="919876543210"></div>
+    <div class="col-md-2"><label class="lbl">Sort Order</label><input class="inp" type="number" id="m-sort" value="0"></div>
+    <div class="col-md-3"><label class="lbl">Active</label><div class="tog-row mt-2"><div class="tog on" id="m-tog-active" onclick="this.classList.toggle('on')"></div><span class="tog-lbl">Visible</span></div></div>
+    <div class="col-md-3"><label class="lbl">Featured</label><div class="tog-row mt-2"><div class="tog" id="m-tog-featured" onclick="this.classList.toggle('on')"></div><span class="tog-lbl">In Best Sellers</span></div></div>
+  </div>
+
+  <!-- ── 10. ASSIGN COUPONS (NEW) ── -->
+  <div class="section-divider">🎟️ Assign Coupons <span style="font-weight:400;color:#888;font-size:10px;">(link existing coupons to this product)</span></div>
+  <div id="m-coupon-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px;max-height:220px;overflow-y:auto;"></div>
+  <div style="font-size:10px;color:#aaa;margin-bottom:14px;">
+    💡 Two ways coupons work: (1) Customer enters coupon code at checkout — works if you assign coupon here or to all products. (2) Coupon is auto-applied when product is added to cart — set this in the Coupon module.
+  </div>
+
+  <!-- ── 11. TAGS (NEW) ── -->
+  <div class="section-divider">🏷️ Tags & Search Keywords</div>
+  <div class="m-tag-wrap" id="m-tags-wrap" onclick="document.getElementById('m-tag-input').focus()">
+    <input id="m-tag-input" style="border:none;outline:none;font-size:12px;font-family:'Poppins',sans-serif;min-width:80px;flex:1;background:transparent;" placeholder="Type a tag and press Enter…">
+  </div>
+  <div style="font-size:10px;color:#aaa;margin-top:4px;margin-bottom:14px;">e.g. mango, spicy, traditional, Nagpur, gift, summer</div>
+
+  <!-- ── 12. SEO (NEW) ── -->
+  <div class="section-divider">🔍 SEO Settings</div>
+  <div class="row g-3 mb-3">
+    <div class="col-12">
+      <label class="lbl">SEO Title <span style="font-size:10px;color:#aaa;font-weight:400;">(max 60 chars)</span></label>
+      <input class="inp" id="m-seotitle" maxlength="60" placeholder="Buy Homemade Mango Pickle Online | PickleHub Nagpur" oninput="updateSeoPreview()">
+      <div style="font-size:10px;color:#aaa;text-align:right;margin-top:2px;"><span id="m-seotitle-count">0</span>/60</div>
+    </div>
+    <div class="col-12">
+      <label class="lbl">SEO Description <span style="font-size:10px;color:#aaa;font-weight:400;">(max 160 chars)</span></label>
+      <textarea class="inp" id="m-seodesc" rows="2" maxlength="160" placeholder="Order fresh homemade mango pickle online. Authentic Nagpur taste. Free delivery above ₹499." style="resize:vertical;" oninput="updateSeoPreview()"></textarea>
+      <div style="font-size:10px;color:#aaa;text-align:right;margin-top:2px;"><span id="m-seodesc-count">0</span>/160</div>
+    </div>
+    <div class="col-12">
+      <label class="lbl">Keywords <span style="font-size:10px;color:#aaa;font-weight:400;">(comma separated)</span></label>
+      <input class="inp" id="m-seokw" placeholder="e.g. mango pickle online, aam ka achar Nagpur, homemade achar">
+    </div>
+    <div class="col-12">
+      <label class="lbl">Live Google Preview</label>
+      <div class="seo-preview-box">
+        <div class="seo-url-prev" id="m-seo-url">picklehub.in/products/your-product-slug/</div>
+        <div class="seo-title-prev" id="m-seo-title-prev">Your SEO Title appears here</div>
+        <div class="seo-desc-prev" id="m-seo-desc-prev">Your SEO description will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ERROR PANEL ── -->
+  <div class="save-error-panel" id="save-error-panel">
+    <div class="save-error-title">
+      <i class="fa fa-exclamation-circle"></i>
+      <span id="save-error-title-text"></span>
+      <button class="save-error-dismiss" onclick="hideSaveError()" title="Dismiss">✕</button>
+    </div>
+    <pre class="save-error-detail" id="save-error-detail"></pre>
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <button class="btn-s" onclick="closeModal()">Cancel</button>
+    <button class="btn-p" id="btn-save-product" onclick="saveProduct()"><i class="fa fa-save"></i> Save Product</button>
+  </div>
+</div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.PRODUCTS_DATA   = {{ products_json|safe }};
+window.BRANDS_DATA     = {{ brands_json|safe }};
+window.CATEGORIES_DATA = {{ categories_json|safe }};
+window.COUPONS_DATA    = {{ coupons_json|safe }};
+
+var URLS = {
+  productSave:   "{% url 'save_product' %}",
+  productDelete: "{% url 'delete_product' product_id=0 %}".replace('/0/', '/'),
+};
+
+var GRAD_PRESETS = [
+  {label:'Mango',    val:'linear-gradient(135deg,#fff3e0,#ffcc80)'},
+  {label:'Garlic',   val:'linear-gradient(135deg,#fce4ec,#f8bbd9)'},
+  {label:'Lemon',    val:'linear-gradient(135deg,#f9fbe7,#f0f4c3)'},
+  {label:'Chilli',   val:'linear-gradient(135deg,#fce4ec,#ffcdd2)'},
+  {label:'Mixed',    val:'linear-gradient(135deg,#e8f5e9,#c8e6c9)'},
+  {label:'Regional', val:'linear-gradient(135deg,#e3f2fd,#bbdefb)'},
+  {label:'Purple',   val:'linear-gradient(135deg,#f3e5f5,#e1bee7)'},
+  {label:'Teal',     val:'linear-gradient(135deg,#e0f7fa,#b2ebf2)'},
+];
+var BADGE_GRADS = [
+  {label:'Orange',val:'linear-gradient(135deg,#e85d04,#f48c06)'},
+  {label:'Green', val:'linear-gradient(135deg,#2d6a4f,#52b788)'},
+  {label:'Blue',  val:'linear-gradient(135deg,#0f3460,#533483)'},
+  {label:'Red',   val:'linear-gradient(135deg,#e85d04,#9d0208)'},
+  {label:'Gold',  val:'linear-gradient(135deg,#e85d04,#ffd60a)'},
+  {label:'Purple',val:'linear-gradient(135deg,#533483,#0f3460)'},
+];
+
+var STATE = { products: [] };
+
+/* ════════════════════════════════════
+   TABLE
+════════════════════════════════════ */
+function renderTable(filter) {
+  var tbody = document.getElementById('prodTableBody');
+  var list  = filter
+    ? STATE.products.filter(function(p){ return p.name.toLowerCase().includes(filter.toLowerCase()); })
+    : STATE.products;
+  document.getElementById('productCountLabel').textContent = list.length + ' product' + (list.length !== 1 ? 's' : '') + ' total';
+  tbody.innerHTML = list.map(function(p) {
+    var thumbHtml = p.image_url
+      ? '<img src="' + esc(p.image_url) + '" class="prod-thumb" alt="">'
+      : '<div class="prod-emoji-fb">' + esc(p.emoji) + '</div>';
+    return '<tr>' +
+      '<td>' + thumbHtml + '</td>' +
+      '<td><div class="prod-name">' + esc(p.name) + '</div><div class="prod-brand">' + esc(p.brand_name||'') + '</div></td>' +
+      '<td style="font-size:11px;color:#666;">' + esc(p.brand_name||'—') + '</td>' +
+      '<td class="prod-price">₹' + p.price + '<br><span style="font-size:10px;color:#aaa;text-decoration:line-through;">₹' + p.old_price + '</span></td>' +
+      '<td>' + p.stock + '</td>' +
+      '<td>' + (p.badge ? '<span class="badge-chip">' + esc(p.badge) + '</span>' : '<span style="color:#ccc;font-size:11px;">—</span>') + '</td>' +
+      '<td><span class="' + (p.is_active?'status-active':'status-inactive') + '">' + (p.is_active?'Active':'Hidden') + '</span></td>' +
+      '<td style="display:flex;gap:5px;">' +
+        '<button class="btn-edit" onclick="openModal(' + p.id + ')"><i class="fa fa-edit"></i> Edit</button>' +
+        '<button class="btn-danger" onclick="deleteProduct(' + p.id + ',\'' + esc(p.name) + '\')"><i class="fa fa-trash"></i></button>' +
+      '</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:#aaa;">No products yet — click Add New Product</td></tr>';
+}
+function filterTable(val){ renderTable(val); }
+
+/* ════════════════════════════════════
+   GRADIENT CHIP HELPERS
+════════════════════════════════════ */
+function buildGradChips(cid, presets, iid) {
+  document.getElementById(cid).innerHTML = presets.map(function(p){
+    return '<div class="grad-chip" title="'+p.label+'" style="background:'+p.val+';" onclick="setGradChip(\''+cid+'\',\''+iid+'\',\''+p.val.replace(/'/g,"\\'")+'\',this)"></div>';
+  }).join('');
+}
+function setGradChip(cid,iid,val,el){
+  document.getElementById(iid).value=val;
+  document.getElementById(cid).querySelectorAll('.grad-chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+/* ════════════════════════════════════
+   IMAGE PREVIEW
+════════════════════════════════════ */
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('m-img-preview').src = e.target.result;
+      document.getElementById('m-img-preview').style.display = 'block';
+      document.getElementById('m-img-placeholder').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+/* ════════════════════════════════════
+   PRICE CALC BADGES
+════════════════════════════════════ */
+function calcModalDiscount() {
+  var mrp   = parseFloat(document.getElementById('m-oldprice').value) || 0;
+  var price = parseFloat(document.getElementById('m-price').value)    || 0;
+  var cost  = parseFloat(document.getElementById('m-costprice').value) || 0;
+  var db = document.getElementById('m-disc-badge');
+  var mb = document.getElementById('m-margin-badge');
+  var sb = document.getElementById('m-savings-badge');
+  var wrap = document.getElementById('m-calc-badges');
+  var any = false;
+  if (mrp > 0 && price > 0 && price < mrp) {
+    var pct = Math.round((mrp - price) / mrp * 100);
+    db.textContent = pct + '% OFF from MRP'; db.style.display = 'inline-block';
+    sb.textContent = 'Customer saves ₹' + (mrp - price).toFixed(0); sb.style.display = 'inline-block';
+    any = true;
+  } else { db.style.display = 'none'; sb.style.display = 'none'; }
+  if (cost > 0 && price > 0) {
+    var margin = Math.round((price - cost) / price * 100);
+    mb.textContent = 'Margin: ' + margin + '%'; mb.style.display = 'inline-block';
+    any = true;
+  } else { mb.style.display = 'none'; }
+  wrap.style.display = any ? '' : 'none';
+}
+
+/* ════════════════════════════════════
+   SEO PREVIEW
+════════════════════════════════════ */
+function slugify(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+
+function updateSeoPreview() {
+  var name  = document.getElementById('m-name').value || '';
+  var slug  = slugify(name);
+  var title = document.getElementById('m-seotitle').value || ('Buy ' + name + ' Online | PickleHub Nagpur');
+  var desc  = document.getElementById('m-seodesc').value  || ('Order fresh ' + name + '. Authentic homemade Nagpur taste. Free delivery above ₹499.');
+  document.getElementById('m-seo-url').textContent        = 'picklehub.in/products/' + (slug || 'your-product-slug') + '/';
+  document.getElementById('m-seo-title-prev').textContent = title || 'Your SEO Title appears here';
+  document.getElementById('m-seo-desc-prev').textContent  = desc  || 'Your SEO description will appear here.';
+  document.getElementById('m-seotitle-count').textContent = document.getElementById('m-seotitle').value.length;
+  document.getElementById('m-seodesc-count').textContent  = document.getElementById('m-seodesc').value.length;
+}
+
+function onNameInput() {
+  updateSeoPreview();
+  /* auto-fill SEO title if empty */
+  var name = document.getElementById('m-name').value;
+  if (!document.getElementById('m-seotitle').value)
+    document.getElementById('m-seotitle').value = ('Buy ' + name + ' Online | PickleHub Nagpur').slice(0, 60);
+  if (!document.getElementById('m-seodesc').value)
+    document.getElementById('m-seodesc').value = ('Order fresh ' + name + '. Authentic homemade Nagpur taste. Free delivery above ₹499.').slice(0, 160);
+  document.getElementById('m-shortdesc-count').textContent = document.getElementById('m-shortdesc').value.length;
+  updateSeoPreview();
+}
+
+/* ════════════════════════════════════
+   SHORT DESC CHAR COUNTER
+════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('m-shortdesc').addEventListener('input', function() {
+    document.getElementById('m-shortdesc-count').textContent = this.value.length;
+  });
+});
+
+/* ════════════════════════════════════
+   AUTO SKU
+════════════════════════════════════ */
+function autoSku() {
+  var cat = (document.getElementById('m-category').value || 'PRD').slice(0, 3).toUpperCase();
+  var num = Math.floor(Math.random() * 900) + 100;
+  document.getElementById('m-sku').value = 'PH-' + cat + '-' + num;
+}
+
+/* ════════════════════════════════════
+   TAG SYSTEM
+════════════════════════════════════ */
+var mTags = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('m-tag-input').addEventListener('keydown', function(e) {
+    if ((e.key === 'Enter' || e.key === ',') && this.value.trim()) {
+      e.preventDefault();
+      addMTag(this.value.trim().replace(/,/g, ''));
+      this.value = '';
+    } else if (e.key === 'Backspace' && !this.value && mTags.length) {
+      removeMTag(mTags[mTags.length - 1]);
+    }
+  });
+});
+
+function addMTag(val) {
+  if (!val || mTags.indexOf(val) > -1) return;
+  mTags.push(val);
+  var wrap = document.getElementById('m-tags-wrap');
+  var t = document.createElement('span');
+  t.className = 'm-tag';
+  t.dataset.val = val;
+  t.innerHTML = esc(val) + '<button onclick="removeMTag(\'' + esc(val) + '\')">✕</button>';
+  wrap.insertBefore(t, document.getElementById('m-tag-input'));
+}
+function removeMTag(val) {
+  mTags = mTags.filter(function(t) { return t !== val; });
+  document.querySelectorAll('#m-tags-wrap .m-tag[data-val="' + val + '"]').forEach(function(el) { el.remove(); });
+}
+function clearMTags() {
+  mTags = [];
+  document.querySelectorAll('#m-tags-wrap .m-tag').forEach(function(el) { el.remove(); });
+}
+
+/* ════════════════════════════════════
+   COUPON LIST
+════════════════════════════════════ */
+var mSelectedCoupons = [];
+
+function renderModalCoupons() {
+  var wrap = document.getElementById('m-coupon-list');
+  if (!wrap) return;
+  var coupons = window.COUPONS_DATA || [];
+  if (!coupons.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:12px;background:#f8f9fa;border-radius:10px;">No active coupons found. Create coupons in the Coupons module first.</div>';
+    return;
+  }
+  wrap.innerHTML = coupons.map(function(c) {
+    var sel = mSelectedCoupons.indexOf(c.id) > -1;
+    return '<div class="m-coupon-row' + (sel ? ' assigned' : '') + '">' +
+      '<div>' +
+        '<div style="font-family:monospace;font-weight:800;font-size:13px;color:#e85d04;letter-spacing:2px;">' + esc(c.code) + '</div>' +
+        '<div style="font-size:11px;color:#888;">' + esc(c.type) + ' &nbsp;|&nbsp; Expires: ' + esc(c.expiry) + '</div>' +
+      '</div>' +
+      '<button class="' + (sel ? 'btn-p' : 'btn-s') + '" style="font-size:11px;padding:5px 12px;" onclick="toggleMCoupon(' + c.id + ')">' +
+        (sel ? '✅ Assigned' : '+ Assign') +
+      '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleMCoupon(id) {
+  var i = mSelectedCoupons.indexOf(id);
+  if (i > -1) mSelectedCoupons.splice(i, 1); else mSelectedCoupons.push(id);
+  renderModalCoupons();
+}
+
+/* ════════════════════════════════════
+   OPEN MODAL
+════════════════════════════════════ */
+function openModal(pid) {
+  hideSaveError();
+
+  /* populate dropdowns */
+  document.getElementById('m-brand').innerHTML =
+    '<option value="">— No Brand —</option>' +
+    (window.BRANDS_DATA||[]).map(function(b){
+      return '<option value="'+b.id+'">'+esc(b.emoji+' '+b.name)+'</option>';
+    }).join('');
+  document.getElementById('m-category').innerHTML =
+    '<option value="">— No Category —</option>' +
+    (window.CATEGORIES_DATA||[]).map(function(c,i){
+      return '<option value="'+(i+1)+'">'+esc((c.emoji||'')+(c.emoji?' ':'')+c.name)+'</option>';
+    }).join('');
+
+  buildGradChips('m-cardBgPresets', GRAD_PRESETS, 'm-cardbg');
+  buildGradChips('m-badgeColorPresets', BADGE_GRADS, 'm-badgecolor');
+
+  /* reset image */
+  document.getElementById('m-image').value = '';
+  document.getElementById('m-img-preview').style.display = 'none';
+  document.getElementById('m-img-placeholder').style.display = 'flex';
+  document.getElementById('m-img-placeholder').textContent = '🫙';
+
+  /* reset tags & coupons */
+  clearMTags();
+  mSelectedCoupons = [];
+
+  if (!pid) {
+    /* ── ADD MODE: reset all fields ── */
+    document.getElementById('modalTitle').textContent = '➕ Add New Product';
+
+    /* identity */
+    document.getElementById('m-id').value         = '';
+    document.getElementById('m-emoji').value       = '🫙';
+    document.getElementById('m-name').value        = '';
+    document.getElementById('m-badge').value       = '';
+    /* relations */
+    document.getElementById('m-brand').value       = '';
+    document.getElementById('m-category').value    = '';
+    document.getElementById('m-region').value      = '';
+    document.getElementById('m-oiltype').value     = 'Mustard Oil';
+    document.getElementById('m-weight').value      = '500g';
+    /* descriptions */
+    document.getElementById('m-shortdesc').value   = '';
+    document.getElementById('m-longdesc').value    = '';
+    document.getElementById('m-highlights').value  = '';
+    /* extra identity */
+    document.getElementById('m-sku').value         = '';
+    document.getElementById('m-hsn').value         = '';
+    document.getElementById('m-unit').value        = 'grams';
+    /* pricing */
+    document.getElementById('m-price').value       = '';
+    document.getElementById('m-oldprice').value    = '';
+    document.getElementById('m-costprice').value   = '';
+    document.getElementById('m-discount').value    = '';
+    document.getElementById('m-stock').value       = '100';
+    document.getElementById('m-minqty').value      = '1';
+    document.getElementById('m-maxqty').value      = '5';
+    document.getElementById('m-lowstockthreshold').value = '20';
+    document.getElementById('m-lowstock').value    = '';
+    document.getElementById('m-rating').value      = '4.5';
+    document.getElementById('m-reviews').value     = '0';
+    /* gst & delivery */
+    document.getElementById('m-gst').value         = '5';
+    document.getElementById('m-gstinc').value      = 'true';
+    document.getElementById('m-freedeliv').value   = 'site_rule';
+    /* storage */
+    document.getElementById('m-shelf').value       = '';
+    document.getElementById('m-storage').value     = '';
+    /* appearance */
+    document.getElementById('m-cardbg').value      = 'linear-gradient(135deg,#fff3e0,#ffcc80)';
+    document.getElementById('m-badgecolor').value  = 'linear-gradient(135deg,#e85d04,#f48c06)';
+    /* settings */
+    document.getElementById('m-wa').value          = '919876543210';
+    document.getElementById('m-sort').value        = '0';
+    document.getElementById('m-tog-active').classList.add('on');
+    document.getElementById('m-tog-featured').classList.remove('on');
+    /* seo */
+    document.getElementById('m-seotitle').value    = '';
+    document.getElementById('m-seodesc').value     = '';
+    document.getElementById('m-seokw').value       = '';
+
+  } else {
+    /* ── EDIT MODE: fill all fields ── */
+    var p = STATE.products.find(function(x){ return x.id===pid; });
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = '✏️ Edit Product';
+
+    /* identity */
+    document.getElementById('m-id').value         = p.id;
+    document.getElementById('m-emoji').value       = p.emoji;
+    document.getElementById('m-name').value        = p.name;
+    document.getElementById('m-badge').value       = p.badge;
+    /* relations */
+    document.getElementById('m-brand').value       = p.brand_id    || '';
+    document.getElementById('m-category').value    = p.category_id || '';
+    document.getElementById('m-region').value      = p.region      || '';
+    document.getElementById('m-oiltype').value     = p.oil_type    || '';
+    document.getElementById('m-weight').value      = p.weight      || '';
+    /* descriptions */
+    document.getElementById('m-shortdesc').value   = p.short_description || '';
+    document.getElementById('m-longdesc').value    = p.long_description  || '';
+    document.getElementById('m-highlights').value  = (p.highlights || []).join('\n');
+    /* extra identity */
+    document.getElementById('m-sku').value         = p.sku      || '';
+    document.getElementById('m-hsn').value         = p.hsn_code || '';
+    document.getElementById('m-unit').value        = p.unit_type || 'grams';
+    /* pricing */
+    document.getElementById('m-price').value       = p.price;
+    document.getElementById('m-oldprice').value    = p.old_price;
+    document.getElementById('m-costprice').value   = p.cost_price   || '';
+    document.getElementById('m-discount').value    = p.discount     || '';
+    document.getElementById('m-stock').value       = p.stock;
+    document.getElementById('m-minqty').value      = p.min_order_qty || '1';
+    document.getElementById('m-maxqty').value      = p.max_order_qty || '5';
+    document.getElementById('m-lowstockthreshold').value = p.low_stock_threshold || '20';
+    document.getElementById('m-lowstock').value    = p.low_stock_label || '';
+    document.getElementById('m-rating').value      = p.rating;
+    document.getElementById('m-reviews').value     = p.review_count;
+    /* gst & delivery */
+    document.getElementById('m-gst').value         = String(p.gst_rate || '5');
+    document.getElementById('m-gstinc').value      = p.gst_inclusive ? 'true' : 'false';
+    document.getElementById('m-freedeliv').value   = p.free_delivery || 'site_rule';
+    /* storage */
+    document.getElementById('m-shelf').value       = p.shelf_life   || '';
+    document.getElementById('m-storage').value     = p.storage_info || '';
+    /* appearance */
+    document.getElementById('m-cardbg').value      = p.card_bg    || 'linear-gradient(135deg,#fff3e0,#ffcc80)';
+    document.getElementById('m-badgecolor').value  = p.badge_color || 'linear-gradient(135deg,#e85d04,#f48c06)';
+    /* settings */
+    document.getElementById('m-wa').value          = p.whatsapp_number || '919876543210';
+    document.getElementById('m-sort').value        = p.sort_order || 0;
+    if (p.is_active)   document.getElementById('m-tog-active').classList.add('on');
+    else               document.getElementById('m-tog-active').classList.remove('on');
+    if (p.is_featured) document.getElementById('m-tog-featured').classList.add('on');
+    else               document.getElementById('m-tog-featured').classList.remove('on');
+    /* image */
+    if (p.image_url) {
+      document.getElementById('m-img-preview').src = p.image_url;
+      document.getElementById('m-img-preview').style.display = 'block';
+      document.getElementById('m-img-placeholder').style.display = 'none';
+    }
+    document.getElementById('m-img-placeholder').textContent = p.emoji || '🫙';
+    /* tags */
+    (p.tags || []).forEach(function(t) { addMTag(t); });
+    /* coupons */
+    mSelectedCoupons = (p.assigned_coupon_ids || []).slice();
+    /* seo */
+    document.getElementById('m-seotitle').value    = p.seo_title       || '';
+    document.getElementById('m-seodesc').value     = p.seo_description || '';
+    document.getElementById('m-seokw').value       = p.seo_keywords    || '';
+  }
+
+  renderModalCoupons();
+  calcModalDiscount();
+  updateSeoPreview();
+  document.getElementById('m-shortdesc-count').textContent = document.getElementById('m-shortdesc').value.length;
+  document.getElementById('productModal').classList.add('show');
+}
+
+function closeModal(){ document.getElementById('productModal').classList.remove('show'); }
+
+/* ════════════════════════════════════
+   ERROR PANEL
+════════════════════════════════════ */
+function showSaveError(title, detail) {
+  var panel = document.getElementById('save-error-panel');
+  document.getElementById('save-error-title-text').textContent = title;
+  document.getElementById('save-error-detail').textContent = detail;
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideSaveError(){ document.getElementById('save-error-panel').style.display = 'none'; }
+
+/* ════════════════════════════════════
+   SAVE PRODUCT
+════════════════════════════════════ */
+function saveProduct() {
+  var name = document.getElementById('m-name').value.trim();
+  if (!name){ toast('❌ Product name is required','err'); return; }
+  hideSaveError();
+
+  var btn = document.getElementById('btn-save-product');
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving…';
+
+  var fd = new FormData();
+
+  /* ── existing fields ── */
+  fd.append('id',              document.getElementById('m-id').value || '');
+  fd.append('emoji',           document.getElementById('m-emoji').value);
+  fd.append('name',            name);
+  fd.append('brand_id',        document.getElementById('m-brand').value    || '');
+  fd.append('category_id',     document.getElementById('m-category').value || '');
+  fd.append('region',          document.getElementById('m-region').value);
+  fd.append('oil_type',        document.getElementById('m-oiltype').value);
+  fd.append('weight',          document.getElementById('m-weight').value);
+  fd.append('badge',           document.getElementById('m-badge').value);
+  fd.append('badge_color',     document.getElementById('m-badgecolor').value);
+  fd.append('card_bg',         document.getElementById('m-cardbg').value);
+  fd.append('price',           document.getElementById('m-price').value    || '0');
+  fd.append('old_price',       document.getElementById('m-oldprice').value || '0');
+  fd.append('discount',        document.getElementById('m-discount').value);
+  fd.append('stock',           document.getElementById('m-stock').value    || '100');
+  fd.append('low_stock_label', document.getElementById('m-lowstock').value);
+  fd.append('rating',          document.getElementById('m-rating').value   || '4.5');
+  fd.append('review_count',    document.getElementById('m-reviews').value  || '0');
+  fd.append('whatsapp_number', document.getElementById('m-wa').value);
+  fd.append('sort_order',      document.getElementById('m-sort').value     || '0');
+  fd.append('is_active',       document.getElementById('m-tog-active').classList.contains('on')   ? 'true' : 'false');
+  fd.append('is_featured',     document.getElementById('m-tog-featured').classList.contains('on') ? 'true' : 'false');
+
+  /* ── new fields ── */
+  fd.append('short_description', document.getElementById('m-shortdesc').value   || '');
+  fd.append('long_description',  document.getElementById('m-longdesc').value    || '');
+  /* highlights: textarea lines → JSON array */
+  var hlLines = (document.getElementById('m-highlights').value || '')
+    .split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  fd.append('highlights',        JSON.stringify(hlLines));
+  fd.append('sku',               document.getElementById('m-sku').value         || '');
+  fd.append('hsn_code',          document.getElementById('m-hsn').value         || '');
+  fd.append('unit_type',         document.getElementById('m-unit').value        || 'grams');
+  fd.append('cost_price',        document.getElementById('m-costprice').value   || '0');
+  fd.append('gst_rate',          document.getElementById('m-gst').value         || '5');
+  fd.append('gst_inclusive',     document.getElementById('m-gstinc').value      || 'true');
+  fd.append('free_delivery',     document.getElementById('m-freedeliv').value   || 'site_rule');
+  fd.append('min_order_qty',     document.getElementById('m-minqty').value      || '1');
+  fd.append('max_order_qty',     document.getElementById('m-maxqty').value      || '5');
+  fd.append('low_stock_threshold', document.getElementById('m-lowstockthreshold').value || '20');
+  fd.append('shelf_life',        document.getElementById('m-shelf').value       || '');
+  fd.append('storage_info',      document.getElementById('m-storage').value     || '');
+  fd.append('seo_title',         document.getElementById('m-seotitle').value    || '');
+  fd.append('seo_description',   document.getElementById('m-seodesc').value     || '');
+  fd.append('seo_keywords',      document.getElementById('m-seokw').value       || '');
+  fd.append('tags',              JSON.stringify(mTags));
+  fd.append('assigned_coupon_ids', JSON.stringify(mSelectedCoupons));
+
+  /* image */
+  var imgFile = document.getElementById('m-image').files[0];
+  if (imgFile) fd.append('image', imgFile);
+
+  fetch(URLS.productSave, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    body: fd,
+  })
+  .then(function(r){
+    if (!r.ok) return r.text().then(function(body){ throw {status:r.status, body:body}; });
+    return r.json();
+  })
+  .then(function(res){
+    if (res.ok){
+      toast('✅ Product saved!','ok');
+      closeModal();
+      setTimeout(function(){ location.reload(); }, 800);
+    } else {
+      var msg = res.error || 'Save failed';
+      toast('❌ ' + msg, 'err');
+      showSaveError('❌ Save failed', msg);
+    }
+  })
+  .catch(function(err){
+    var isHttp = err && typeof err.status === 'number';
+    var title  = isHttp ? '❌ Server error ' + err.status : '❌ Network error';
+    var detail = isHttp ? ('HTTP ' + err.status + '\n\n' + (err.body || '(empty)')) : (err.message || String(err));
+    toast(title, 'err');
+    showSaveError(title, detail);
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-save"></i> Save Product';
+  });
+}
+
+/* ════════════════════════════════════
+   DELETE PRODUCT
+════════════════════════════════════ */
+function deleteProduct(pid, name) {
+  if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+  fetch(URLS.productDelete + pid + '/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+  })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(res){
+    if (res.ok){
+      STATE.products = STATE.products.filter(function(p){ return p.id !== pid; });
+      renderTable();
+      toast('🗑️ Deleted', 'ok');
+    } else {
+      toast('❌ ' + (res.error || 'Delete failed'), 'err');
+    }
+  })
+  .catch(function(err){ toast('❌ Network error: ' + err.message, 'err'); });
+}
+
+/* ════════════════════════════════════
+   UTILITIES
+════════════════════════════════════ */
+function toast(msg, type){
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 't-item' + (type === 'err' ? ' err' : '');
+  t.textContent = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('show'); }); });
+  setTimeout(function(){
+    t.classList.remove('show');
+    setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 400);
+  }, 3000);
+}
+function getCookie(n){
+  var v = document.cookie.match('(^|;) ?' + n + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+function esc(s){
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── close modal on backdrop click ── */
+document.getElementById('productModal').addEventListener('click', function(e){
+  if (e.target === this) closeModal();
+});
+
+/* ── boot ── */
+STATE.products = window.PRODUCTS_DATA || [];
+renderTable();
+</script>
+{% endblock %}

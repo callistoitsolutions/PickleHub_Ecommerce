@@ -1,0 +1,325 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+
+{% block title %}Filter Settings | PickleHub Admin{% endblock %}
+{% block page_title %}🔍 Filter Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+.content{padding:0!important;}
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}
+.card-body{padding:20px;}
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+.filter-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;}
+.filter-toggle-row:last-child{border-bottom:none;}
+.filter-toggle-label{font-size:13px;font-weight:600;color:#1a1a2e;display:flex;align-items:center;gap:8px;}
+.list-row{background:#f8f9fa;border-radius:8px;padding:9px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;border:1.5px solid #f0f0f0;}
+.list-row:hover{border-color:#e85d04;}
+.preview-wrap{position:sticky;top:80px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;font-size:11px;}
+.pv-sidebar{background:#fff;padding:14px;}
+.pv-filt-sec{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0f0f0;}
+.pv-filt-sec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.pv-filt-title{font-size:11px;font-weight:800;color:#1a1a2e;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.pv-filt-check{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;color:#444;}
+.pv-filt-count{font-size:9px;color:#aaa;background:#f5f5f5;padding:1px 5px;border-radius:50px;margin-left:auto;}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.page{padding:22px 26px;}
+</style>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+  <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+{% endblock %}
+
+{% block nav_prod_main %}active{% endblock %}
+{% block nav_prod_show %}show{% endblock %}
+{% block nav_prod_inventory %}active{% endblock %}
+
+{% block content %}
+<div class="page">
+<div class="row g-4">
+
+  <!-- LEFT -->
+  <div class="col-lg-7">
+
+    <div class="card">
+      <div class="card-head"><span class="ch-ico">👁️</span><span class="ch-title">Filter Visibility</span><span class="ch-sub">— toggle which filters appear on Products page</span></div>
+      <div class="card-body">
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>🏷️</span> Category Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-cat" onclick="togSwitch(this,'tog-cat')"></div><span class="tog-lbl" id="tog-cat-lbl">Visible</span></div>
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>🏢</span> Brand Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-brand" onclick="togSwitch(this,'tog-brand')"></div><span class="tog-lbl" id="tog-brand-lbl">Visible</span></div>
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>💰</span> Price Range Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-price" onclick="togSwitch(this,'tog-price')"></div><span class="tog-lbl" id="tog-price-lbl">Visible</span></div>
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>🗺️</span> Region Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-region" onclick="togSwitch(this,'tog-region')"></div><span class="tog-lbl" id="tog-region-lbl">Visible</span></div>
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>⭐</span> Rating Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-rating" onclick="togSwitch(this,'tog-rating')"></div><span class="tog-lbl" id="tog-rating-lbl">Visible</span></div>
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label"><span>⚖️</span> Weight Filter</span>
+          <div class="tog-row"><div class="tog on" id="tog-weight" onclick="togSwitch(this,'tog-weight')"></div><span class="tog-lbl" id="tog-weight-lbl">Visible</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="ch-ico">💰</span><span class="ch-title">Price Range</span><span class="ch-sub">— slider min / max</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="lbl">Minimum Price (₹)</label><input class="inp" type="number" id="priceMin" value="50" oninput="updatePreview();markUnsaved()"></div>
+          <div class="col-md-6"><label class="lbl">Maximum Price (₹)</label><input class="inp" type="number" id="priceMax" value="800" oninput="updatePreview();markUnsaved()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="ch-ico">🗺️</span><span class="ch-title">Region Options</span><span class="ch-sub">— regions shown in filter</span></div>
+      <div class="card-body">
+        <div id="regionsList"></div>
+        <button class="btn-add mt-2" onclick="addRegion()"><i class="fa fa-plus"></i> Add Region</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="ch-ico">⚖️</span><span class="ch-title">Weight Options</span><span class="ch-sub">— weight ranges shown in filter</span></div>
+      <div class="card-body">
+        <div id="weightsList"></div>
+        <button class="btn-add mt-2" onclick="addWeight()"><i class="fa fa-plus"></i> Add Weight Range</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="ch-ico">⚙️</span><span class="ch-title">Page Settings</span></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12"><label class="lbl">Page Title (SEO)</label><input class="inp" id="pageTitle" value="All Pickles - Shop by Brand, Category &amp; Region | PickleHub Nagpur" oninput="markUnsaved()"></div>
+          <div class="col-md-6">
+            <label class="lbl">WhatsApp Number</label>
+            <input class="inp" id="waNumber" value="919876543210" oninput="markUnsaved()">
+            <div style="font-size:10px;color:#aaa;margin-top:4px;">Without + sign e.g. 919876543210</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /col left -->
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="col-lg-5">
+    <div class="preview-wrap">
+      <div class="prev-lbl">👁️ Filter Sidebar Preview</div>
+      <div class="pv-box">
+        <div class="pv-sidebar">
+          <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i class="fa fa-filter" style="color:#e85d04;"></i> Filters
+            <span style="margin-left:auto;font-size:11px;color:#e85d04;cursor:pointer;">Clear All</span>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-cat">
+            <div class="pv-filt-title">🏷️ Category <span style="font-size:9px;color:#e85d04;background:#fff3e0;padding:1px 6px;border-radius:50px;margin-left:auto;cursor:pointer;">Clear</span></div>
+            <div id="pv-cats-list"></div>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-brand">
+            <div class="pv-filt-title">🏢 Brand <span style="font-size:9px;color:#e85d04;background:#fff3e0;padding:1px 6px;border-radius:50px;margin-left:auto;cursor:pointer;">Clear</span></div>
+            <div id="pv-brands-list"></div>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-price">
+            <div class="pv-filt-title">💰 Price Range <span style="font-size:9px;color:#e85d04;background:#fff3e0;padding:1px 6px;border-radius:50px;margin-left:auto;cursor:pointer;">Clear</span></div>
+            <input type="range" style="width:100%;accent-color:#e85d04;" id="pv-priceSlider">
+            <div style="display:flex;justify-content:space-between;margin-top:4px;">
+              <span style="font-size:10px;color:#666;" id="pv-priceMin">₹50</span>
+              <span style="font-size:11px;font-weight:700;color:#e85d04;" id="pv-priceDisplay">Max: ₹800</span>
+              <span style="font-size:10px;color:#666;" id="pv-priceMax">₹800</span>
+            </div>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-region">
+            <div class="pv-filt-title">🗺️ Region <span style="font-size:9px;color:#e85d04;background:#fff3e0;padding:1px 6px;border-radius:50px;margin-left:auto;cursor:pointer;">Clear</span></div>
+            <div id="pv-regions-list"></div>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-rating">
+            <div class="pv-filt-title">⭐ Minimum Rating</div>
+            <div class="pv-filt-check"><input type="radio" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">★★★★☆ 4 &amp; above</span></div>
+            <div class="pv-filt-check"><input type="radio" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">★★★☆☆ 3 &amp; above</span></div>
+            <div class="pv-filt-check"><input type="radio" checked style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">All Ratings</span></div>
+          </div>
+          <div class="pv-filt-sec" id="pv-sec-weight">
+            <div class="pv-filt-title">⚖️ Weight</div>
+            <div id="pv-weights-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.SETTINGS_DATA   = {{ settings_json|safe }};
+window.CATEGORIES_DATA = {{ categories_json|safe }};
+window.BRANDS_DATA     = {{ brands_json|safe }};
+
+var URLS = { filterSave: "{% url 'save_product_filter' %}" };
+var STATE = { regions: [], weights: [] };
+var unsaved = false;
+
+function togSwitch(el, id) {
+  el.classList.toggle('on');
+  var on = el.classList.contains('on');
+  document.getElementById(id+'-lbl').textContent = on ? 'Visible' : 'Hidden';
+  updatePreview(); markUnsaved();
+}
+
+function renderRegions() {
+  var el = document.getElementById('regionsList'); el.innerHTML = '';
+  STATE.regions.forEach(function(r, i) {
+    var d = document.createElement('div'); d.className = 'list-row';
+    d.innerHTML =
+      '<input class="inp-sm" style="flex:1;" placeholder="Andhra Pradesh" value="' + esc(r.name) + '" oninput="STATE.regions[' + i + '].name=this.value;updatePreview();markUnsaved()">' +
+      '<input class="inp-sm" style="width:60px;" type="number" min="0" value="' + esc(r.count) + '" oninput="STATE.regions[' + i + '].count=parseInt(this.value)||0;updatePreview();markUnsaved()">' +
+      '<button class="btn-danger" onclick="STATE.regions.splice(' + i + ',1);renderRegions();updatePreview();markUnsaved()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addRegion() { STATE.regions.push({name:'New Region',count:0}); renderRegions(); updatePreview(); markUnsaved(); }
+
+function renderWeights() {
+  var el = document.getElementById('weightsList'); el.innerHTML = '';
+  STATE.weights.forEach(function(w, i) {
+    var d = document.createElement('div'); d.className = 'list-row';
+    d.innerHTML =
+      '<input class="inp-sm" style="flex:1;" placeholder="250g - 500g" value="' + esc(w.label) + '" oninput="STATE.weights[' + i + '].label=this.value;updatePreview();markUnsaved()">' +
+      '<button class="btn-danger" onclick="STATE.weights.splice(' + i + ',1);renderWeights();updatePreview();markUnsaved()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addWeight() { STATE.weights.push({label:'New Range'}); renderWeights(); updatePreview(); markUnsaved(); }
+
+function updatePreview() {
+  ['cat','brand','price','region','rating','weight'].forEach(function(k){
+    document.getElementById('pv-sec-'+k).style.display = document.getElementById('tog-'+k).classList.contains('on') ? '' : 'none';
+  });
+  var pmin = parseInt(document.getElementById('priceMin').value)||50;
+  var pmax = parseInt(document.getElementById('priceMax').value)||800;
+  var sl = document.getElementById('pv-priceSlider');
+  sl.min=pmin; sl.max=pmax; sl.value=pmax;
+  document.getElementById('pv-priceMin').textContent='₹'+pmin;
+  document.getElementById('pv-priceMax').textContent='₹'+pmax;
+  document.getElementById('pv-priceDisplay').textContent='Max: ₹'+pmax;
+  var cats = (window.CATEGORIES_DATA && window.CATEGORIES_DATA.items_json) || [];
+  document.getElementById('pv-cats-list').innerHTML = cats.map(function(c){
+    return '<div class="pv-filt-check"><input type="checkbox" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">'+esc(c.name)+'</span><span class="pv-filt-count">'+(c.count||'')+'</span></div>';
+  }).join('');
+  document.getElementById('pv-brands-list').innerHTML = (window.BRANDS_DATA||[]).map(function(b){
+    return '<div class="pv-filt-check"><input type="checkbox" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">'+esc(b.name)+'</span><span class="pv-filt-count">'+b.product_count+'</span></div>';
+  }).join('');
+  document.getElementById('pv-regions-list').innerHTML = STATE.regions.map(function(r){
+    return '<div class="pv-filt-check"><input type="checkbox" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;flex:1;">'+esc(r.name)+'</span><span class="pv-filt-count">'+r.count+'</span></div>';
+  }).join('');
+  document.getElementById('pv-weights-list').innerHTML = STATE.weights.map(function(w){
+    return '<div class="pv-filt-check"><input type="checkbox" style="accent-color:#e85d04;width:12px;height:12px;"><span style="font-size:10px;">'+esc(w.label)+'</span></div>';
+  }).join('');
+}
+
+function markUnsaved() {
+  if (unsaved) return;
+  unsaved = true;
+  document.getElementById('saveStatus').textContent='⏳ Unsaved changes';
+  document.getElementById('saveStatus').className='s-pill sp-yellow';
+}
+
+function saveAll() {
+  var payload = {
+    show_category_filter: document.getElementById('tog-cat').classList.contains('on'),
+    show_brand_filter:    document.getElementById('tog-brand').classList.contains('on'),
+    show_price_filter:    document.getElementById('tog-price').classList.contains('on'),
+    show_region_filter:   document.getElementById('tog-region').classList.contains('on'),
+    show_rating_filter:   document.getElementById('tog-rating').classList.contains('on'),
+    show_weight_filter:   document.getElementById('tog-weight').classList.contains('on'),
+    price_min:            parseInt(document.getElementById('priceMin').value)||50,
+    price_max:            parseInt(document.getElementById('priceMax').value)||800,
+    regions_json:         STATE.regions,
+    weights_json:         STATE.weights,
+    page_title:           document.getElementById('pageTitle').value,
+    whatsapp_number:      document.getElementById('waNumber').value,
+  };
+  toast('💾 Saving…','ok');
+  document.getElementById('saveStatus').textContent='⏳ Saving…';
+  document.getElementById('saveStatus').className='s-pill sp-yellow';
+  fetch(URLS.filterSave,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify(payload)})
+  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(res){
+    if(res.ok){ unsaved=false; document.getElementById('saveStatus').textContent='✅ All Changes Saved'; document.getElementById('saveStatus').className='s-pill sp-green'; toast('✅ Filter settings saved!','ok'); }
+    else { toast('❌ '+(res.error||'Save failed'),'err'); document.getElementById('saveStatus').textContent='❌ Save failed'; document.getElementById('saveStatus').className='s-pill sp-yellow'; }
+  })
+  .catch(function(err){ toast('❌ Network error: '+err.message,'err'); document.getElementById('saveStatus').textContent='❌ Save failed'; document.getElementById('saveStatus').className='s-pill sp-yellow'; });
+}
+
+function toast(msg,type){
+  var wrap=document.getElementById('toastWrap'); var t=document.createElement('div');
+  t.className='t-item'+(type==='err'?' err':''); t.textContent=msg; wrap.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
+  setTimeout(function(){t.classList.remove('show');setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},400);},3000);
+}
+function getCookie(n){var v=document.cookie.match('(^|;) ?'+n+'=([^;]*)(;|$)');return v?v[2]:'';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+(function init(){
+  var sd=window.SETTINGS_DATA||{};
+  ['cat','brand','price','region','rating','weight'].forEach(function(key){
+    var field='show_'+(key==='cat'?'category':key)+'_filter';
+    if(sd[field]===false){ document.getElementById('tog-'+key).classList.remove('on'); document.getElementById('tog-'+key+'-lbl').textContent='Hidden'; }
+  });
+  if(sd.price_min)       document.getElementById('priceMin').value=sd.price_min;
+  if(sd.price_max)       document.getElementById('priceMax').value=sd.price_max;
+  if(sd.page_title)      document.getElementById('pageTitle').value=sd.page_title;
+  if(sd.whatsapp_number) document.getElementById('waNumber').value=sd.whatsapp_number;
+  STATE.regions=sd.regions_json||[]; STATE.weights=sd.weights_json||[];
+  renderRegions(); renderWeights(); updatePreview();
+  unsaved=false;
+  document.getElementById('saveStatus').textContent='✅ All Changes Saved';
+  document.getElementById('saveStatus').className='s-pill sp-green';
+})();
+</script>
+{% endblock %}

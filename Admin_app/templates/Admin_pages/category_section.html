@@ -1,0 +1,387 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Category Section Settings | PickleHub Admin{% endblock %}
+{% block page_title %}📂 Category Section Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+.content{padding:0!important;}
+/* ── buttons ── */
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+/* ── card ── */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+/* ── form ── */
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.inp-flex{flex:1;min-width:80px;}.inp-w100{width:100px;}
+/* ── toggle ── */
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+/* ── category row ── */
+.cat-row{background:#f8f9fa;border-radius:12px;padding:13px 14px;margin-bottom:10px;border:1.5px solid #f0f0f0;transition:.2s;}
+.cat-row:hover{border-color:#e85d04;background:#fff;}
+.cat-row-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.si{font-size:14px;color:#ccc;cursor:grab;}
+/* ── gradient picker ── */
+.grad-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.grad-chip{width:28px;height:28px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0;}
+.grad-chip:hover{transform:scale(1.1);}
+.grad-chip.sel{border-color:#e85d04;transform:scale(1.15);}
+.grad-custom-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.grad-preview{width:36px;height:36px;border-radius:8px;border:1.5px solid #e0e0e0;flex-shrink:0;}
+/* ── misc ── */
+.section-divider{background:#f8f9fa;border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:11px;font-weight:800;color:#e85d04;border-left:3px solid #e85d04;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+/* ── preview ── */
+.preview-wrap{position:sticky;top:80px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;}
+.pv-cats-section{background:#fff;padding:16px;}
+.pv-cats-heading{text-align:center;margin-bottom:12px;}
+.pv-cats-heading h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:2px;}
+.pv-cats-heading h3 span{color:#e85d04;}
+.pv-cats-heading p{font-size:10px;color:#888;}
+.pv-cats-divider{width:40px;height:3px;background:linear-gradient(135deg,#e85d04,#f48c06);border-radius:2px;margin:6px auto 0;}
+.pv-cats-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.pv-cat-card{border-radius:11px;padding:10px 8px;text-align:center;min-width:72px;max-width:90px;flex:1;}
+.pv-cat-icon{font-size:22px;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;margin:0 auto 5px;}
+.pv-cat-name{font-size:9px;font-weight:700;color:#1a1a2e;line-height:1.3;}
+.pv-cat-count{font-size:8px;color:#888;margin-top:2px;}
+/* ── toast ── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.info-tip{background:#fff8f5;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#e85d04;font-weight:600;border-left:3px solid #e85d04;}
+.page{padding:22px 26px;}
+</style>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+  <button class="btn-s" onclick="resetSection()"><i class="fa fa-undo"></i> Reset</button>
+  <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+{% endblock %}
+
+{% block nav_builders_main %}active{% endblock %}
+{% block nav_builders_show %}show{% endblock %}
+{% block nav_build_shopcat %}active{% endblock %}
+
+{% block content %}
+
+<script>window.CATEGORY_DATA = {{ category_json|safe }};</script>
+
+<div class="page">
+<div class="row g-4">
+
+  <!-- ══ LEFT: BUILDER ══ -->
+  <div class="col-lg-7">
+
+    <!-- Section Settings -->
+    <div class="card">
+      <div class="card-head">
+        <span class="ch-ico">⚙️</span>
+        <span class="ch-title">Section Settings</span>
+        <span class="ch-sub">— heading & visibility</span>
+        <div class="ch-right">
+          <div class="tog-row">
+            <div class="tog on" id="tog-cats" onclick="togSwitch(this,'tog-cats')"></div>
+            <span class="tog-lbl" id="tog-cats-lbl">Visible</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="lbl">Section Title <span style="color:#e85d04;">*</span></label>
+            <input class="inp" id="catTitle" value="Shop by Category" oninput="updatePreview();markUnsaved()">
+            <div style="font-size:10px;color:#aaa;margin-top:4px;">💡 Wrap a word in ** to highlight in orange e.g. <code>Shop by **Category**</code></div>
+          </div>
+          <div class="col-md-6">
+            <label class="lbl">Section Subtitle</label>
+            <input class="inp" id="catSubtitle" value="Browse our wide range of authentic pickle varieties" oninput="updatePreview();markUnsaved()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Cards Builder -->
+    <div class="card">
+      <div class="card-head">
+        <span class="ch-ico">📂</span>
+        <span class="ch-title">Category Cards</span>
+        <span class="ch-sub">— drag to reorder</span>
+        <div class="ch-right">
+          <span id="catCount" style="font-size:11px;font-weight:700;color:#888;"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="info-tip">
+          💡 Each card has an emoji icon, name, product count, link URL and a background gradient. Pick from presets or enter a custom CSS gradient.
+        </div>
+        <div id="catsList"></div>
+        <button class="btn-add" onclick="addCat()"><i class="fa fa-plus"></i> Add Category Card</button>
+      </div>
+    </div>
+
+  </div><!-- /col left -->
+
+  <!-- ══ RIGHT: PREVIEW ══ -->
+  <div class="col-lg-5">
+    <div class="preview-wrap">
+      <div class="prev-lbl">👁️ Live Section Preview</div>
+      <div class="pv-box">
+        <div class="pv-cats-section" id="pv-cats-section">
+          <div class="pv-cats-heading">
+            <h3 id="pv-catTitle">Shop by <span>Category</span></h3>
+            <p id="pv-catSubtitle">Browse our wide range of authentic pickle varieties</p>
+            <div class="pv-cats-divider"></div>
+          </div>
+          <div class="pv-cats-grid" id="pv-catsGrid"></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-top:14px;border:1.5px solid #f0f0f0;">
+        <div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:8px;">🎨 Gradient Presets</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#fff3e0,#ffcc80);"></div><span style="font-size:10px;color:#888;margin-right:8px;">Mango</span>
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#fce4ec,#f8bbd9);"></div><span style="font-size:10px;color:#888;margin-right:8px;">Garlic</span>
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#f9fbe7,#f0f4c3);"></div><span style="font-size:10px;color:#888;margin-right:8px;">Lemon</span>
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);"></div><span style="font-size:10px;color:#888;margin-right:8px;">Mixed</span>
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);"></div><span style="font-size:10px;color:#888;">Regional</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:10px;line-height:2;">
+          ① Add / edit / remove category cards<br>
+          ② Pick gradient or type custom CSS<br>
+          ③ <strong>Save & Publish</strong> → saves to Django DB<br>
+          ④ Template reads <code>{% verbatim %}{{ categories }}{% endverbatim %}</code>
+        </div>
+      </div>
+    </div>
+  </div><!-- /col right -->
+
+</div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.CATEGORY_DATA = window.CATEGORY_DATA || {};
+
+var GRAD_PRESETS = [
+  {label:'Mango',    val:'linear-gradient(135deg,#fff3e0,#ffcc80)'},
+  {label:'Garlic',   val:'linear-gradient(135deg,#fce4ec,#f8bbd9)'},
+  {label:'Lemon',    val:'linear-gradient(135deg,#f9fbe7,#f0f4c3)'},
+  {label:'Chilli',   val:'linear-gradient(135deg,#fce4ec,#ffcdd2)'},
+  {label:'Mixed',    val:'linear-gradient(135deg,#e8f5e9,#c8e6c9)'},
+  {label:'Regional', val:'linear-gradient(135deg,#e3f2fd,#bbdefb)'},
+  {label:'Purple',   val:'linear-gradient(135deg,#f3e5f5,#e1bee7)'},
+  {label:'Teal',     val:'linear-gradient(135deg,#e0f7fa,#b2ebf2)'},
+  {label:'Gold',     val:'linear-gradient(135deg,#fffde7,#fff59d)'},
+  {label:'Pink',     val:'linear-gradient(135deg,#fce4ec,#f48fb1)'},
+  {label:'Mint',     val:'linear-gradient(135deg,#e8f8f5,#a8e6cf)'},
+  {label:'Peach',    val:'linear-gradient(135deg,#fff0e6,#ffcba4)'},
+];
+
+var STATE = {
+  cats: [
+    {emoji:'🥭', name:'Mango Pickle',      count:'32 products', url:'/category/mango/',    bg_gradient:'linear-gradient(135deg,#fff3e0,#ffcc80)'},
+    {emoji:'🧄', name:'Garlic Pickle',     count:'18 products', url:'/category/garlic/',   bg_gradient:'linear-gradient(135deg,#fce4ec,#f8bbd9)'},
+    {emoji:'🍋', name:'Lemon Pickle',      count:'24 products', url:'/category/lemon/',    bg_gradient:'linear-gradient(135deg,#f9fbe7,#f0f4c3)'},
+    {emoji:'🌶️',name:'Chilli Pickle',     count:'15 products', url:'/category/chilli/',   bg_gradient:'linear-gradient(135deg,#fce4ec,#ffcdd2)'},
+    {emoji:'🫙', name:'Mixed Pickle',      count:'20 products', url:'/category/mixed/',    bg_gradient:'linear-gradient(135deg,#e8f5e9,#c8e6c9)'},
+    {emoji:'🗺️',name:'Regional Specials', count:'40 products', url:'/category/regional/', bg_gradient:'linear-gradient(135deg,#e3f2fd,#bbdefb)'},
+  ]
+};
+
+function renderCats() {
+  var el = document.getElementById('catsList');
+  el.innerHTML = '';
+  STATE.cats.forEach(function(c, i) {
+    var d = document.createElement('div');
+    d.className = 'cat-row';
+    var presetsHtml = GRAD_PRESETS.map(function(p) {
+      var isSel = (c.bg_gradient === p.val) ? ' sel' : '';
+      return '<div class="grad-chip' + isSel + '" title="' + p.label + '" style="background:' + p.val + ';" onclick="setGrad(' + i + ',\'' + p.val.replace(/'/g,"\\'") + '\',this)"></div>';
+    }).join('');
+    d.innerHTML =
+      '<div class="cat-row-top">' +
+        '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+        '<div style="display:flex;flex-direction:column;gap:3px;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Emoji</span>' +
+          '<input class="inp-sm" style="width:54px;font-size:22px;text-align:center;padding:4px;" maxlength="4" value="' + esc(c.emoji) + '" oninput="STATE.cats[' + i + '].emoji=this.value;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:3px;flex:1;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Category Name</span>' +
+          '<input class="inp-sm inp-flex" placeholder="Mango Pickle" value="' + esc(c.name) + '" oninput="STATE.cats[' + i + '].name=this.value;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:3px;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Count</span>' +
+          '<input class="inp-sm inp-w100" placeholder="32 products" value="' + esc(c.count) + '" oninput="STATE.cats[' + i + '].count=this.value;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<button class="btn-danger" onclick="removeCat(' + i + ')"><i class="fa fa-trash"></i></button>' +
+      '</div>' +
+      '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0;">' +
+        '<div class="row g-2">' +
+          '<div class="col-12">' +
+            '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Link URL</span>' +
+            '<input class="inp-sm" style="width:100%;margin-top:3px;" placeholder="/category/mango/" value="' + esc(c.url) + '" oninput="STATE.cats[' + i + '].url=this.value;markUnsaved()">' +
+          '</div>' +
+          '<div class="col-12">' +
+            '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Icon Background Gradient</span>' +
+            '<div class="grad-presets" id="gp-' + i + '">' + presetsHtml + '</div>' +
+            '<div class="grad-custom-row">' +
+              '<div class="grad-preview" id="gpreview-' + i + '" style="background:' + esc(c.bg_gradient) + ';"></div>' +
+              '<input class="inp-sm inp-flex" placeholder="linear-gradient(...)" value="' + esc(c.bg_gradient) + '" id="ginp-' + i + '" oninput="STATE.cats[' + i + '].bg_gradient=this.value;document.getElementById(\'gpreview-' + i + '\').style.background=this.value;updatePreview();markUnsaved()">' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    el.appendChild(d);
+  });
+  document.getElementById('catCount').textContent = STATE.cats.length + ' card' + (STATE.cats.length !== 1 ? 's' : '');
+}
+
+function setGrad(i, val, chipEl) {
+  STATE.cats[i].bg_gradient = val;
+  var inp = document.getElementById('ginp-' + i);
+  var pv  = document.getElementById('gpreview-' + i);
+  if (inp) inp.value = val;
+  if (pv)  pv.style.background = val;
+  var container = document.getElementById('gp-' + i);
+  if (container) container.querySelectorAll('.grad-chip').forEach(function(c){ c.classList.remove('sel'); });
+  chipEl.classList.add('sel');
+  updatePreview(); markUnsaved();
+}
+
+function addCat() {
+  STATE.cats.push({emoji:'🫙', name:'New Category', count:'0 products', url:'/category/new/', bg_gradient:'linear-gradient(135deg,#f3e5f5,#e1bee7)'});
+  renderCats(); updatePreview(); markUnsaved();
+  toast('✅ Category card added', 'ok');
+  var el = document.getElementById('catsList');
+  if (el && el.lastElementChild) el.lastElementChild.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function removeCat(i) {
+  STATE.cats.splice(i, 1);
+  renderCats(); updatePreview(); markUnsaved();
+  toast('🗑️ Category removed', 'ok');
+}
+
+function togSwitch(el, id) {
+  el.classList.toggle('on');
+  var on = el.classList.contains('on');
+  document.getElementById(id + '-lbl').textContent = on ? 'Visible' : 'Hidden';
+  var sec = document.getElementById('pv-cats-section');
+  if (sec) sec.style.opacity = on ? '1' : '0.35';
+  markUnsaved();
+}
+
+function updatePreview() {
+  var rawTitle = document.getElementById('catTitle').value || 'Shop by Category';
+  var titleHtml = rawTitle.replace(/\*\*(.+?)\*\*/g, '<span>$1</span>');
+  if (rawTitle.indexOf('**') === -1) {
+    var parts = rawTitle.trim().split(' ');
+    var last = parts.pop();
+    titleHtml = (parts.length ? parts.join(' ') + ' ' : '') + '<span>' + esc(last) + '</span>';
+  }
+  document.getElementById('pv-catTitle').innerHTML = titleHtml;
+  document.getElementById('pv-catSubtitle').textContent = document.getElementById('catSubtitle').value;
+  document.getElementById('pv-catsGrid').innerHTML = STATE.cats.map(function(c) {
+    return '<div class="pv-cat-card"><div class="pv-cat-icon" style="background:' + (c.bg_gradient||'#f0f0f0') + ';"><span style="font-size:20px;">' + (c.emoji||'🫙') + '</span></div><div class="pv-cat-name">' + esc(c.name||'Category') + '</div><div class="pv-cat-count">' + esc(c.count||'') + '</div></div>';
+  }).join('');
+}
+
+var unsaved = false;
+function markUnsaved() {
+  if (unsaved) return;
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⏳ Unsaved changes';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+}
+
+function saveAll() {
+  var payload = {
+    section_title:    document.getElementById('catTitle').value,
+    section_subtitle: document.getElementById('catSubtitle').value,
+    items_json:       STATE.cats,
+    is_visible:       document.getElementById('tog-cats').classList.contains('on'),
+  };
+  toast('💾 Saving…', 'ok');
+  document.getElementById('saveStatus').textContent = '⏳ Saving…';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+  fetch('/api/category/save/', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+    body: JSON.stringify(payload),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    if (res.ok) {
+      unsaved = false;
+      document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+      document.getElementById('saveStatus').className   = 's-pill sp-green';
+      toast('✅ Category section saved & published!', 'ok');
+    } else {
+      toast('❌ Save failed: ' + (res.error||'unknown'), 'err');
+      document.getElementById('saveStatus').textContent = '❌ Save failed';
+    }
+  })
+  .catch(function(){ toast('❌ Network error', 'err'); document.getElementById('saveStatus').textContent = '❌ Save failed'; });
+}
+
+function resetSection() {
+  if (!confirm('Reset category section to last saved state?')) return;
+  location.reload();
+}
+
+function getCookie(name) { var v=document.cookie.match('(^|;) ?'+name+'=([^;]*)(;|$)'); return v?v[2]:''; }
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type) {
+  var wrap=document.getElementById('toastWrap');
+  var t=document.createElement('div');
+  t.className='t-item'+(type==='err'?' err':'');
+  t.textContent=msg; wrap.appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('show'); }); });
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },400); },3000);
+}
+
+(function init() {
+  var cd = window.CATEGORY_DATA || {};
+  if (cd.section_title)    document.getElementById('catTitle').value    = cd.section_title;
+  if (cd.section_subtitle) document.getElementById('catSubtitle').value = cd.section_subtitle;
+  if (cd.items_json && cd.items_json.length) STATE.cats = cd.items_json;
+  if (cd.is_visible === false) {
+    document.getElementById('tog-cats').classList.remove('on');
+    document.getElementById('tog-cats-lbl').textContent = 'Hidden';
+    document.getElementById('pv-cats-section').style.opacity = '0.35';
+  }
+  renderCats(); updatePreview();
+  unsaved = false;
+  document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+  document.getElementById('saveStatus').className   = 's-pill sp-green';
+})();
+</script>
+{% endblock %}

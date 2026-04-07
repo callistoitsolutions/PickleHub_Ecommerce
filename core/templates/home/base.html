@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}PickleHub Nagpur | Best Exclusive Pickle Brands in Nagpur - Buy Online{% endblock %}</title>
+    <meta name="description" content="PickleHub Nagpur - Discover exclusive and rare pickle brands available in Nagpur. Order Mango, Garlic, Lemon, Andhra, Rajasthani pickles online. 24-hour delivery in Nagpur.">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        :root {
+            --primary: #e85d04;
+            --primary-dark: #9d0208;
+            --secondary: #f48c06;
+            --accent: #ffd60a;
+            --green: #2d6a4f;
+            --green-light: #52b788;
+            --dark: #1a1a2e;
+            --light-bg: #fff8f0;
+            --card-shadow: 0 8px 30px rgba(232, 93, 4, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #fff8f0; color: #333; }
+
+        /* ===== TOP BAR ===== */
+        .top-bar { background: linear-gradient(90deg, #9d0208, #e85d04); color: #fff; font-size: 13px; padding: 6px 0; }
+        .top-bar a { color: #ffd60a; text-decoration: none; }
+        .top-bar .marquee-text { animation: marquee 25s linear infinite; white-space: nowrap; display: inline-block; }
+        @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+
+        /* ===== HEADER / NAVBAR ===== */
+        .navbar-main { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 1000; }
+        .navbar-brand-logo { display: flex; align-items: center; text-decoration: none; }
+        .logo-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #e85d04, #ffd60a); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 10px; box-shadow: 0 4px 15px rgba(232,93,4,0.4); }
+        .brand-text h1 { font-size: 22px; font-weight: 800; color: #ffd60a; line-height: 1; font-family: 'Playfair Display', serif; }
+        .brand-text span { font-size: 11px; color: #f48c06; letter-spacing: 2px; text-transform: uppercase; }
+
+        .nav-search-bar { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; overflow: hidden; display: flex; max-width: 400px; }
+        .nav-search-bar input { background: transparent; border: none; color: #fff; padding: 8px 16px; flex: 1; outline: none; font-size: 14px; }
+        .nav-search-bar input::placeholder { color: rgba(255,255,255,0.5); }
+        .nav-search-bar button { background: linear-gradient(135deg, #e85d04, #f48c06); border: none; padding: 8px 18px; color: #fff; cursor: pointer; font-size: 14px; }
+
+        .nav-icons a { color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 8px; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative; }
+        .nav-icons a:hover { background: rgba(232,93,4,0.3); color: #ffd60a; }
+        .nav-icons a i { font-size: 18px; }
+        .cart-badge { background: #e85d04; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; position: absolute; top: -4px; right: -4px; }
+
+        /* ===== NAV LINKS BAR ===== */
+        .nav-links-bar { background: linear-gradient(90deg, #e85d04, #f48c06, #ffd60a, #f48c06, #e85d04); background-size: 200% auto; animation: gradientFlow 4s ease infinite; padding: 0; }
+        @keyframes gradientFlow { 0% { background-position: 0% center; } 50% { background-position: 100% center; } 100% { background-position: 0% center; } }
+        .nav-links-bar .nav-link { color: #1a1a2e !important; font-weight: 600; font-size: 13px; padding: 10px 18px !important; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; }
+        .nav-links-bar .nav-link:hover { background: rgba(0,0,0,0.15); border-radius: 4px; color: #fff !important; }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section { background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 40%, #16213e 100%); min-height: 520px; display: flex; align-items: center; position: relative; overflow: hidden; padding: 60px 0; }
+        .hero-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='rgba(232,93,4,0.05)' stroke-width='2'/%3E%3C/svg%3E") repeat; }
+        .hero-badge { background: linear-gradient(135deg, #e85d04, #ffd60a); color: #1a1a2e; font-weight: 700; font-size: 12px; padding: 6px 16px; border-radius: 50px; display: inline-block; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .hero-title { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 15px; }
+        .hero-title span { color: #ffd60a; }
+        .hero-subtitle { font-size: 16px; color: rgba(255,255,255,0.75); margin-bottom: 30px; line-height: 1.6; }
+        .hero-btns { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn-hero-primary { background: linear-gradient(135deg, #e85d04, #f48c06); color: #fff; padding: 14px 32px; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 15px; transition: all 0.3s; box-shadow: 0 6px 20px rgba(232,93,4,0.4); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(232,93,4,0.5); color: #fff; }
+        .btn-hero-secondary { background: transparent; color: #ffd60a; border: 2px solid #ffd60a; padding: 14px 32px; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 15px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-hero-secondary:hover { background: #ffd60a; color: #1a1a2e; }
+        .hero-stats { display: flex; gap: 30px; margin-top: 40px; flex-wrap: wrap; }
+        .hero-stat { text-align: center; }
+        .hero-stat .number { font-size: 28px; font-weight: 800; color: #ffd60a; display: block; }
+        .hero-stat .label { font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
+        .hero-jar-display { position: relative; text-align: center; }
+        .floating-jar { font-size: 140px; animation: floatJar 3s ease-in-out infinite; filter: drop-shadow(0 20px 40px rgba(232,93,4,0.4)); display: block; }
+        @keyframes floatJar { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
+        .badge-float { position: absolute; background: linear-gradient(135deg, #e85d04, #ffd60a); color: #fff; padding: 8px 14px; border-radius: 12px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .badge-float.b1 { top: 20px; left: 10%; animation: pulse 2s infinite; }
+        .badge-float.b2 { top: 40%; right: 5%; animation: pulse 2s infinite 0.5s; }
+        .badge-float.b3 { bottom: 10%; left: 15%; animation: pulse 2s infinite 1s; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+        /* ===== GLOBALS & CARDS ===== */
+        .section-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 700; color: #1a1a2e; }
+        .section-title span { color: #e85d04; }
+        .section-divider { width: 60px; height: 4px; background: linear-gradient(90deg, #e85d04, #ffd60a); border-radius: 2px; margin: 10px auto 0; }
+        .category-card { background: #fff; border-radius: 20px; padding: 25px 15px; text-align: center; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.06); cursor: pointer; border: 2px solid transparent; text-decoration: none; color: inherit; display: block; }
+        .category-card:hover { transform: translateY(-8px); box-shadow: var(--card-shadow); border-color: #e85d04; }
+        .cat-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 12px; }
+        .cat-name { font-weight: 600; font-size: 14px; color: #1a1a2e; }
+        .cat-count { font-size: 12px; color: #888; margin-top: 4px; }
+        
+        .offer-banner { background: linear-gradient(135deg, #2d6a4f, #52b788); border-radius: 20px; padding: 30px; color: #fff; position: relative; overflow: hidden; }
+        .offer-banner::before { content: '🥒'; font-size: 100px; position: absolute; right: -10px; bottom: -20px; opacity: 0.15; }
+        .offer-badge { background: #ffd60a; color: #1a1a2e; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 10px; }
+
+        .product-card { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); transition: all 0.3s; position: relative; height: 100%; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: var(--card-shadow); }
+        .product-img { height: 180px; background: linear-gradient(135deg, #fff3e0, #ffe0b2); display: flex; align-items: center; justify-content: center; font-size: 70px; position: relative; }
+        .product-badge { position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #e85d04, #f48c06); color: #fff; padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .product-wishlist { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: none; color: #ccc; font-size: 14px; transition: all 0.3s; }
+        .product-wishlist:hover { color: #e85d04; }
+        .product-body { padding: 16px; }
+        .product-brand { font-size: 11px; color: #e85d04; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .product-name { font-size: 15px; font-weight: 700; color: #1a1a2e; margin: 4px 0; line-height: 1.3; }
+        .product-weight { font-size: 12px; color: #888; }
+        .product-stars { color: #ffd60a; font-size: 12px; }
+        .product-reviews { font-size: 11px; color: #888; }
+        .product-price { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #e85d04, #f48c06); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .product-price-old { font-size: 14px; color: #bbb; text-decoration: line-through; }
+        .product-discount { background: #e8f5e9; color: #2d6a4f; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 50px; }
+        
+        .btn-add-cart { background: linear-gradient(135deg, #e85d04, #f48c06); color: #fff; border: none; border-radius: 50px; padding: 10px 0; width: 100%; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-add-cart:hover { background: linear-gradient(135deg, #9d0208, #e85d04); transform: scale(1.02); }
+        .btn-whatsapp { background: #25D366; color: #fff; border: none; border-radius: 50px; padding: 8px 0; width: 100%; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 6px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-whatsapp:hover { background: #128C7E; }
+
+        .features-strip { background: #1a1a2e; padding: 20px 0; }
+        .feature-item { display: flex; align-items: center; gap: 12px; color: #fff; }
+        .feature-item .icon-wrap { width: 45px; height: 45px; border-radius: 12px; background: linear-gradient(135deg, #e85d04, #ffd60a); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .feature-item h6 { font-size: 14px; font-weight: 600; margin: 0; color: #ffd60a; }
+        .feature-item p { font-size: 12px; color: rgba(255,255,255,0.6); margin: 0; }
+
+        .brand-chip { background: #fff; border-radius: 50px; padding: 10px 24px; font-size: 14px; font-weight: 600; color: #1a1a2e; box-shadow: 0 4px 15px rgba(0,0,0,0.07); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; text-decoration: none; }
+        .brand-chip:hover { border-color: #e85d04; color: #e85d04; transform: scale(1.05); }
+
+        .testimonial-card { background: #fff; border-radius: 18px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); border-left: 4px solid #e85d04; height: 100%; }
+        .reviewer-avatar { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+
+        .newsletter-section { background: linear-gradient(135deg, #e85d04 0%, #9d0208 50%, #e85d04 100%); background-size: 200% auto; animation: gradientFlow 5s ease infinite; }
+        .newsletter-input-wrap { background: rgba(255,255,255,0.15); border-radius: 50px; overflow: hidden; display: flex; max-width: 500px; }
+        .newsletter-input-wrap input { background: transparent; border: none; color: #fff; padding: 14px 20px; flex: 1; outline: none; font-size: 14px; }
+        .newsletter-input-wrap input::placeholder { color: rgba(255,255,255,0.6); }
+        .newsletter-input-wrap button { background: #ffd60a; color: #1a1a2e; border: none; padding: 14px 28px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .newsletter-input-wrap button:hover { background: #fff; }
+
+        .potw-card { background: linear-gradient(135deg, #9d0208, #e85d04); border-radius: 20px; padding: 30px; color: #fff; position: relative; overflow: hidden; }
+        .potw-card::after { content: '🏆'; position: absolute; right: 20px; top: 20px; font-size: 50px; opacity: 0.3; }
+        .potw-badge { background: #ffd60a; color: #1a1a2e; padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 12px; display: inline-block; margin-bottom: 15px; }
+        .potw-price { font-size: 36px; font-weight: 800; color: #ffd60a; }
+        .potw-old-price { font-size: 18px; color: rgba(255,255,255,0.5); text-decoration: line-through; }
+        .countdown { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .countdown-item { background: rgba(0,0,0,0.3); padding: 8px 14px; border-radius: 10px; text-align: center; }
+        .countdown-item .num { font-size: 22px; font-weight: 800; color: #ffd60a; display: block; }
+        .countdown-item .lbl { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+
+        /* ===== FOOTER ===== */
+        footer { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: rgba(255,255,255,0.8); padding: 60px 0 0; }
+        .footer-logo { font-family: 'Playfair Display', serif; font-size: 28px; color: #ffd60a; font-weight: 700; }
+        .footer-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-top: 10px; }
+        .footer-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 18px; position: relative; padding-bottom: 10px; }
+        .footer-title::after { content: ''; position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: #e85d04; }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 8px; }
+        .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+        .footer-links a:hover { color: #ffd60a; padding-left: 5px; }
+        .footer-links a::before { content: "›"; color: #e85d04; }
+        .social-icons { display: flex; gap: 10px; margin-top: 15px; }
+        .social-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; text-decoration: none; transition: all 0.3s; }
+        .social-icon.facebook { background: #1877F2; }
+        .social-icon.instagram { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+        .social-icon.whatsapp { background: #25D366; }
+        .social-icon.youtube { background: #FF0000; }
+        .social-icon:hover { transform: translateY(-4px) scale(1.1); }
+        .footer-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .footer-contact-item .icon { color: #e85d04; font-size: 15px; margin-top: 2px; flex-shrink: 0; }
+        .footer-contact-item p { font-size: 13px; color: rgba(255,255,255,0.5); margin: 0; line-height: 1.5; }
+        .footer-bottom { background: rgba(0,0,0,0.3); padding: 18px 0; margin-top: 50px; }
+        .footer-bottom p { font-size: 13px; color: rgba(255,255,255,0.4); margin: 0; }
+        .footer-bottom a { color: #ffd60a; text-decoration: none; }
+
+        .floating-wa { position: fixed; bottom: 25px; right: 25px; z-index: 9999; width: 55px; height: 55px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; text-decoration: none; box-shadow: 0 6px 20px rgba(37,211,102,0.5); animation: pulseWA 2s infinite; }
+        @keyframes pulseWA { 0% { box-shadow: 0 0 0 0 rgba(37,211,102,0.4); } 70% { box-shadow: 0 0 0 15px rgba(37,211,102,0); } 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
+
+        .floating-ig { position: fixed; bottom: 90px; right: 25px; z-index: 9999; width: 55px; height: 55px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; text-decoration: none; box-shadow: 0 6px 20px rgba(220, 39, 67, 0.4); animation: pulseIG 2s infinite; }
+        @keyframes pulseIG { 0% { box-shadow: 0 0 0 0 rgba(220, 39, 67, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(220, 39, 67, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 39, 67, 0); } }
+
+        /* ===== HAMBURGER + MOBILE DRAWER ===== */
+        .ham-btn { 
+            width: 42px; 
+            height: 42px; 
+            background: rgba(255,255,255,0.08); 
+            border: 1.5px solid rgba(255,255,255,0.18); 
+            border-radius: 10px; 
+            cursor: pointer; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px; 
+            padding: 0; 
+            transition: background .3s, border-color .3s; 
+            flex-shrink: 0; 
+        }
+        .ham-btn:hover { background: rgba(232,93,4,.3); border-color: #e85d04; }
+        .ham-btn span { 
+            display: block !important; 
+            width: 22px !important; 
+            height: 2.5px !important; 
+            background: #ffd60a !important; 
+            border-radius: 3px !important; 
+            transition: all .35s cubic-bezier(.4,0,.2,1); 
+            transform-origin: center; 
+        }
+        .ham-btn.is-open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+        .ham-btn.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .ham-btn.is-open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+        /* OVERLAY */
+        .mob-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(2px); z-index: 9990; opacity: 0; transition: opacity .35s; }
+        .mob-overlay.visible { opacity: 1; }
+
+        /* DRAWER */
+        .mob-drawer { position: fixed; top: 0; left: 0; width: 285px; height: 100vh; background: linear-gradient(160deg,#1a1a2e 0%,#0f3460 100%); z-index: 9995; transform: translateX(-100%); transition: transform .38s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow-y: auto; box-shadow: 8px 0 40px rgba(0,0,0,.45); }
+        .mob-drawer.is-open { transform: translateX(0); }
+        .mob-draw-head { background: rgba(0,0,0,.25); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+        .mob-draw-logo { font-family:'Playfair Display',serif; font-size:20px; font-weight:800; color:#ffd60a; }
+        .mob-draw-close { width: 32px; height: 32px; background: rgba(255,255,255,.08); border: none; border-radius: 8px; color: rgba(255,255,255,.7); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; }
+        .mob-draw-close:hover { background: rgba(232,93,4,.4); color: #fff; }
+        .mob-draw-search { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+        .mob-draw-search form { display: flex; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.15); border-radius: 10px; overflow: hidden; }
+        .mob-draw-search input { flex: 1; background: transparent; border: none; color: #fff; padding: 9px 13px; font-size: 13px; font-family:'Poppins',sans-serif; outline: none; }
+        .mob-draw-search input::placeholder { color: rgba(255,255,255,.35); }
+        .mob-draw-search button { background: linear-gradient(135deg,#e85d04,#f48c06); border: none; padding: 9px 14px; color: #fff; cursor: pointer; font-size: 13px; }
+        .mob-draw-body { flex: 1; padding: 6px 0; }
+        .mob-sec-lbl { font-size: 9px; font-weight: 800; color: rgba(255,255,255,.25); text-transform: uppercase; letter-spacing: 2px; padding: 12px 18px 4px; }
+        .mob-nav-link { display: flex; align-items: center; gap: 11px; padding: 11px 18px; color: rgba(255,255,255,.72); text-decoration: none; font-size: 13px; font-weight: 600; border-left: 3px solid transparent; transition: all .2s; }
+        .mob-nav-link:hover, .mob-nav-link.on { background: rgba(232,93,4,.12); color: #ffd60a; border-left-color: #e85d04; }
+        .mob-nav-link .mico { font-size: 17px; width: 22px; text-align: center; }
+        .mob-nav-link .mbadge { margin-left: auto; background: #e85d04; color: #fff; border-radius: 50px; padding: 1px 7px; font-size: 10px; font-weight: 800; }
+        .mob-quick { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 8px; }
+        .mob-qa { flex: 1; text-decoration: none; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.1); border-radius: 10px; padding: 10px 4px; color: rgba(255,255,255,.65); font-size: 11px; font-weight: 700; font-family: 'Poppins',sans-serif; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: .2s; cursor: pointer; position: relative; }
+        .mob-qa i { font-size: 15px; }
+        .mob-qa:hover { background: rgba(232,93,4,.2); border-color: #e85d04; color: #ffd60a; }
+        .mob-qa .qbadge { position: absolute; top: 5px; right: 10px; background: #e85d04; color: #fff; border-radius: 50%; width: 15px; height: 15px; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+        .mob-wa { margin: 0 14px 14px; background: linear-gradient(135deg,#25d366,#128c7e); color: #fff; border: none; border-radius: 12px; padding: 13px; font-size: 13px; font-weight: 700; font-family: 'Poppins',sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: .2s; }
+        .mob-wa:hover { opacity: .9; color: #fff; }
+
+        /* ===== RESPONSIVE MOBILE FIXES ===== */
+        @media (max-width: 991px) {
+            .ham-btn { 
+                display: flex !important; 
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin-right: 15px !important; /* Prevents overlap with logo */
+                z-index: 1050 !important;
+            }
+            .nav-links-bar { display: none !important; }
+            
+            .nav-icons { 
+                gap: 5px !important; /* Reduces space so icons fit on screen */
+                width: auto !important; 
+            }
+            
+            .nav-icons a {
+                padding: 4px 6px !important; /* Tighter padding for icons */
+            }
+            
+            .nav-icons a span:not(.cart-badge) { 
+                display: none !important; 
+            }
+            
+            .cart-badge { 
+                right: -4px !important; 
+                top: -6px !important; 
+            }
+        }
+
+        /* Fix for very small screens (iPhone SE, etc) to ensure no overlap */
+        @media (max-width: 380px) {
+            .navbar-brand-logo .brand-text h1 { font-size: 18px; }
+            .logo-icon { width: 40px; height: 40px; font-size: 20px; margin-right: 6px; }
+            .ham-btn { width: 36px; height: 36px; margin-right: 8px !important; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 30px; }
+            .floating-jar { font-size: 80px; }
+            .hero-section { padding: 40px 0; min-height: auto; }
+            .hero-btns { flex-direction: column; }
+            .btn-hero-primary, .btn-hero-secondary { text-align: center; justify-content: center; }
+            .nav-search-bar { max-width: 100%; margin-top: 10px; }
+            .section-title { font-size: 26px; }
+            .potw-price { font-size: 26px; }
+            .hero-jar-display { margin-top: 30px; }
+            .brand-chip { padding: 8px 16px; font-size: 12px; }
+        }
+        @media (max-width: 576px) {
+            .hero-stats { justify-content: center; }
+            .features-strip .col-6 { margin-bottom: 15px; }
+            .top-bar { text-align: center; }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-12">
+                <div style="overflow:hidden; width:100%;">
+                    <span class="marquee-text">
+                        🎉 FREE DELIVERY on orders above ₹499 &nbsp;&nbsp;|&nbsp;&nbsp; 🔥 "Pickle of the Week" – Andhra Garlic Pickle @ ₹199 &nbsp;&nbsp;|&nbsp;&nbsp; 📦 24-Hour Delivery in Nagpur
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-6 d-none d-md-flex justify-content-end gap-3">
+                <span><i class="fa fa-phone"></i> <a href="tel:+919876543210">+91-98765 43210</a></span>
+                <span>|</span>
+                <span><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919876543210">WhatsApp Order</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<header>
+    <nav class="navbar-main" aria-label="Main Navigation">
+        <div class="container">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3 col-6">
+                    <a href="/" class="navbar-brand-logo" aria-label="PickleHub Nagpur Home">
+                        <div class="logo-icon" aria-hidden="true">🥒</div>
+                        <div class="brand-text">
+                            <h1>PickleHub</h1>
+                            <span>Nagpur</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-5 col-12 order-md-2 order-3">
+                    <form role="search" action="/products/" method="GET">
+                        <label for="searchInput" class="visually-hidden">Search pickles</label>
+                        <div class="nav-search-bar">
+                            <input type="search" id="searchInput" name="q" placeholder="Search pickles, brands, categories...">
+                            <button type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-4 col-6 order-md-3 order-2">
+                    <div class="nav-icons d-flex justify-content-end align-items-center gap-1">
+                        <button class="ham-btn" id="hamBtn" aria-label="Open menu" onclick="openDrawer()">
+                            <span></span><span></span><span></span>
+                        </button>
+
+                        {% if user_obj %}
+
+                            <div class="dropdown">
+                                <a href="#" class="dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #ffffff; font-weight: 600; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                    <i class="fa fa-user-circle" style="color: #e85d04; font-size: 18px;"></i>
+                                    <span>Welcome, {{user_obj.user_name}}</span>
+                                </a>
+            
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" style="border-radius: 12px; font-size: 13px; min-width: 180px;">
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url "User_Profile" %}" style="color: #1a1a2e;">
+                                            <i class="fa fa-id-badge me-2 text-muted"></i> My Profile
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 text-danger fw-bold" style="cursor: pointer;" onclick="User_Logout()">
+                                        <i class="fa fa-sign-out-alt me-2"></i> Logout
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        {% else %}
+
+                            <a href="{% url "login" %}" aria-label="My Account">
+                                <i class="fa fa-user"></i>
+                                <span>Account</span>
+                            </a>
+
+                        {% endif %}
+
+                        
+                        <a href="/wishlist/" aria-label="Wishlist">
+                            <i class="fa fa-heart"></i>
+                            <span>Wishlist</span>
+                        </a>
+                        <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
+                            <i class="fa fa-shopping-cart"></i>
+                            <span class="cart-badge" aria-label="3 items in cart">3</span>
+                            <span>Cart</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="nav-links-bar" aria-label="Category Navigation">
+        <div class="container">
+            <ul class="nav justify-content-center flex-wrap" role="list">
+                <li role="listitem"><a class="nav-link" href="/">🏠 Home</a></li>
+                  <a class="mob-nav-link on" href="{% url 'dashboard' %}"><span class="mico">🏠</span> Admin Home</a>
+             <li role="listitem">
+    <a class="nav-link" href="{% url "All_products" %}">
+        🛒 All Pickles
+    </a>
+</li>
+                <li role="listitem"><a class="nav-link" href="/category/mango/">🥭 Mango Pickle</a></li>
+                <li role="listitem"><a class="nav-link" href="/category/garlic/">🧄 Garlic Pickle</a></li>
+                <li role="listitem"><a class="nav-link" href="/category/andhra/">🌶️ Andhra Style</a></li>
+                <li role="listitem"><a class="nav-link" href="/category/regional/">🗺️ Regional</a></li>
+                <li role="listitem"><a class="nav-link" href="/brands/">🏷️ Brands</a></li>
+                <li role="listitem"><a class="nav-link" href="/offers/">🔥 Offers</a></li>
+                <li role="listitem"><a class="nav-link" href="{% url "contact" %}">📞 Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+
+<nav class="mob-drawer" id="mobDrawer" aria-label="Mobile Navigation">
+
+    <div class="mob-draw-head">
+        <div class="mob-draw-logo">🥒 PickleHub</div>
+        <button class="mob-draw-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    </div>
+
+    <div class="mob-draw-search">
+        <form action="/products/" method="GET">
+            <input type="search" name="q" placeholder="Search pickles, brands...">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </div>
+
+    <div class="mob-draw-body">
+        <div class="mob-sec-lbl">Menu</div>
+        <a class="mob-nav-link on" href="/"><span class="mico">🏠</span> Home</a>
+           <a class="mob-nav-link on" href="{% url 'dashboard' %}"><span class="mico">🏠</span> Admin Home</a>
+        <a class="mob-nav-link" href="{% url "All_products" %}"><span class="mico">🛒</span> All Pickles</a>
+        <a class="mob-nav-link" href="/offers/"><span class="mico">🔥</span> Offers <span class="mbadge">Hot</span></a>
+        <a class="mob-nav-link" href="/brands/"><span class="mico">🏷️</span> Brands</a>
+
+        <div class="mob-sec-lbl">Categories</div>
+        <a class="mob-nav-link" href="/category/mango/"><span class="mico">🥭</span> Mango Pickle</a>
+        <a class="mob-nav-link" href="/category/garlic/"><span class="mico">🧄</span> Garlic Pickle</a>
+        <a class="mob-nav-link" href="/category/andhra/"><span class="mico">🌶️</span> Andhra Style</a>
+        <a class="mob-nav-link" href="/category/lemon/"><span class="mico">🍋</span> Lemon Pickle</a>
+        <a class="mob-nav-link" href="/category/regional/"><span class="mico">🗺️</span> Regional Specials</a>
+        <a class="mob-nav-link" href="/category/mixed/"><span class="mico">🥣</span> Mixed Pickle</a>
+
+        <div class="mob-sec-lbl">My Account</div>
+        <a class="mob-nav-link" href="{% url 'login' %}"><span class="mico">👤</span> Login / Register</a>
+        <a class="mob-nav-link" href="/orders/"><span class="mico">📦</span> My Orders</a>
+        <a class="mob-nav-link" href="/wishlist/"><span class="mico">❤️</span> Wishlist</a>
+        <a class="mob-nav-link" href="{% url 'cart' %}"><span class="mico">🛒</span> Cart <span class="mbadge">3</span></a>
+
+        <div class="mob-sec-lbl">Help</div>
+        <a class="mob-nav-link" href="/track/"><span class="mico">📍</span> Track My Order</a>
+        <a class="mob-nav-link" href="{% url "contact" %}"><span class="mico">📞</span> Contact Us</a>
+        <a class="mob-nav-link" href="/faq/"><span class="mico">❓</span> FAQ</a>
+    </div>
+
+    <div class="mob-quick">
+        <a class="mob-qa" href="{% url 'login' %}"><i class="fa fa-user"></i>Account</a>
+        <a class="mob-qa" href="/wishlist/"><i class="fa fa-heart"></i>Wishlist</a>
+        <a class="mob-qa" href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i>Cart<span class="qbadge">3</span></a>
+        <a class="mob-qa" href="/offers/"><i class="fa fa-tag"></i>Offers</a>
+    </div>
+
+    <a class="mob-wa" href="https://wa.me/919876543210?text=Hi PickleHub! I want to order pickles." target="_blank">
+        <i class="fab fa-whatsapp"></i> WhatsApp Order Now
+    </a>
+</nav>
+
+</header>
+
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer role="contentinfo">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-md-4">
+                <div class="footer-logo">🥒 PickleHub</div>
+                <p class="footer-desc">
+                    Nagpur's exclusive pickle distribution platform. Discover rare and regional pickle brands not available in local stores. 24-hour delivery across Nagpur.
+                </p>
+                <div class="social-icons" aria-label="Follow us on social media">
+                    <a href="https://facebook.com/picklehub" class="social-icon facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://instagram.com/picklehub" class="social-icon instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919876543210" class="social-icon whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://youtube.com/picklehub" class="social-icon youtube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <h3 class="footer-title">Quick Links</h3>
+                <ul class="footer-links" aria-label="Quick navigation links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="{% url "All_products" %}">All Pickles</a></li>
+                    <li><a href="/brands/">Brands</a></li>
+                    <li><a href="/offers/">Offers</a></li>
+                    <li><a href="/about/">About Us</a></li>
+                    <li><a href="{% url "contact" %}">Contact</a></li>
+                    <li><a href="/faq/">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2">
+                <h3 class="footer-title">Categories</h3>
+                <ul class="footer-links" aria-label="Product categories">
+                    <li><a href="/category/mango/">Mango Pickle</a></li>
+                    <li><a href="/category/garlic/">Garlic Pickle</a></li>
+                    <li><a href="/category/lemon/">Lemon Pickle</a></li>
+                    <li><a href="/category/chilli/">Chilli Pickle</a></li>
+                    <li><a href="/category/mixed/">Mixed Pickle</a></li>
+                    <li><a href="/category/regional/">Regional</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2">
+                <h3 class="footer-title">My Account</h3>
+                <ul class="footer-links" aria-label="Account links">
+                    <li><a href="{% url "login" %}">Login</a></li>
+                    <li><a href="/profile/">My Profile</a></li>
+                    <li><a href="/orders/">My Orders</a></li>
+                    <li><a href="/wishlist/">Wishlist</a></li>
+                    <li><a href="{% url "cart" %}">My Cart</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2">
+                <h3 class="footer-title">Contact Us</h3>
+                <div class="footer-contact-item">
+                    <i class="fa fa-map-marker-alt icon" aria-hidden="true"></i>
+                    <p>Nagpur, Maharashtra, India – 440001</p>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-phone icon" aria-hidden="true"></i>
+                    <p><a href="tel:+919876543210" style="color:inherit;">+91-98765 43210</a></p>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fab fa-whatsapp icon" aria-hidden="true"></i>
+                    <p><a href="https://wa.me/919876543210" style="color:inherit;">WhatsApp Orders</a></p>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-envelope icon" aria-hidden="true"></i>
+                    <p><a href="mailto:hello@picklehub.in" style="color:inherit;">hello@picklehub.in</a></p>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-clock icon" aria-hidden="true"></i>
+                    <p>Mon–Sun: 9:00 AM – 9:00 PM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>© 2026 <a href="/">PickleHub Nagpur</a>. All Rights Reserved. | Developed by <a href="#">Callisto IT Solutions</a></p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>
+                        <a href="/privacy-policy/" style="color:rgba(255,255,255,0.4);">Privacy Policy</a> |
+                        <a href="/terms-conditions/" style="color:rgba(255,255,255,0.4);">Terms &amp; Conditions</a> |
+                        <a href="/sitemap.xml" style="color:rgba(255,255,255,0.4);">Sitemap</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% if request.session.show_complete_profile %}
+<div id="completeProfileOverlay" style="
+    position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; font-family:'Poppins',sans-serif;">
+
+    <div style="background:#fff; border-radius:20px; padding:36px;
+                width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+
+        <div style="text-align:center; margin-bottom:20px;">
+            <div style="font-size:42px;">📋</div>
+            <h2 style="font-size:20px; font-weight:700; color:#1a1a2e; margin:8px 0 4px;">
+                Complete Your Profile
+            </h2>
+            <p style="font-size:13px; color:#aaa;">
+                Just a few more details to complete your PickleHub account
+            </p>
+        </div>
+
+        <div id="profileMsg"></div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">
+                Mobile Number *
+            </label>
+            <input type="tel" id="cp_phone" maxlength="10" placeholder="10-digit mobile number"
+                style="width:100%; border:1.5px solid #e0e0e0; border-radius:10px;
+                       padding:11px 14px; font-size:14px; font-family:'Poppins',sans-serif;
+                       outline:none;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">
+                City *
+            </label>
+            <input type="text" id="cp_city" placeholder="e.g. Nagpur"
+                style="width:100%; border:1.5px solid #e0e0e0; border-radius:10px;
+                       padding:11px 14px; font-size:14px; font-family:'Poppins',sans-serif;
+                       outline:none;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">
+                Pincode *
+            </label>
+            <input type="text" id="cp_pincode" maxlength="6" placeholder="e.g. 440001"
+                style="width:100%; border:1.5px solid #e0e0e0; border-radius:10px;
+                       padding:11px 14px; font-size:14px; font-family:'Poppins',sans-serif;
+                       outline:none;">
+        </div>
+
+        <button onclick="submitCompleteProfile(this)"
+            style="width:100%; padding:13px;
+                   background:linear-gradient(135deg,#e85d04,#f48c06);
+                   color:#fff; border:none; border-radius:50px;
+                   font-size:15px; font-weight:800; cursor:pointer;
+                   font-family:'Poppins',sans-serif;">
+            <i class="fa fa-check me-2"></i> Save & Continue
+        </button>
+    </div>
+</div>
+
+
+<script>
+function submitCompleteProfile(_this) {
+    var phone   = document.getElementById('cp_phone').value.trim();
+    var city    = document.getElementById('cp_city').value.trim();
+    var pincode = document.getElementById('cp_pincode').value.trim();
+
+    if (!phone || phone.length !== 10) {
+        document.getElementById('profileMsg').innerHTML =
+            '<div style="background:#f8d7da;color:#721c24;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;">Please enter a valid 10-digit phone number</div>';
+        return;
+    }
+    if (!city) {
+        document.getElementById('profileMsg').innerHTML =
+            '<div style="background:#f8d7da;color:#721c24;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;">Please enter your city</div>';
+        return;
+    }
+    if (!pincode || pincode.length !== 6) {
+        document.getElementById('profileMsg').innerHTML =
+            '<div style="background:#f8d7da;color:#721c24;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;">Please enter a valid 6-digit pincode</div>';
+        return;
+    }
+
+    _this.disabled = true;
+    _this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+    $.ajax({
+        method  : 'POST',
+        url     : "{% url 'complete_profile' %}",
+        data    : JSON.stringify({
+            user_phone   : phone,
+            user_city    : city,
+            user_pincode : pincode
+        }),
+        contentType : 'application/json',
+        success : function(response) {
+            if (response.status === '1') {
+                document.getElementById('completeProfileOverlay').style.display = 'none';
+                swal({ title: 'Profile Completed!', icon: 'success' });
+            } else {
+                _this.disabled = false;
+                _this.innerHTML = '<i class="fa fa-check me-2"></i> Save & Continue';
+                document.getElementById('profileMsg').innerHTML =
+                    '<div style="background:#f8d7da;color:#721c24;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;">' + response.msg + '</div>';
+            }
+        }
+    });
+}
+</script>
+{% endif %}
+
+<a href="https://wa.me/919876543210?text=Hi PickleHub! I want to order pickles." class="floating-wa" aria-label="Chat with us on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+</a>
+<a href="https://ig.me/m/picklehub" target="_blank" class="floating-ig" aria-label="Message us on Instagram">
+    <i class="fab fa-instagram" aria-hidden="true"></i>
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Add to Cart click animation
+    document.querySelectorAll('.btn-add-cart').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var original = this.innerHTML;
+            this.innerHTML = '<i class="fa fa-check"></i> Added!';
+            this.style.background = 'linear-gradient(135deg, #2d6a4f, #52b788)';
+            var self = this;
+            setTimeout(function() {
+                self.innerHTML = original;
+                self.style.background = '';
+            }, 1500);
+        });
+    });
+
+    // Wishlist toggle
+    document.querySelectorAll('.product-wishlist').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var icon = this.querySelector('i');
+            if (icon.style.color === 'rgb(232, 93, 4)') {
+                icon.style.color = '#ccc';
+                this.setAttribute('aria-label', this.getAttribute('aria-label').replace('Remove from', 'Add'));
+            } else {
+                icon.style.color = '#e85d04';
+            }
+        });
+    });
+</script>
+
+
+<script>
+function openDrawer(){
+    var d=document.getElementById('mobDrawer');
+    var o=document.getElementById('mobOverlay');
+    var b=document.getElementById('hamBtn');
+    o.style.display='block';
+    document.body.style.overflow='hidden';
+    setTimeout(function(){o.classList.add('visible');},10);
+    d.classList.add('is-open');
+    b.classList.add('is-open');
+}
+function closeDrawer(){
+    var d=document.getElementById('mobDrawer');
+    var o=document.getElementById('mobOverlay');
+    var b=document.getElementById('hamBtn');
+    d.classList.remove('is-open');
+    o.classList.remove('visible');
+    b.classList.remove('is-open');
+    document.body.style.overflow='';
+    setTimeout(function(){o.style.display='none';},360);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+// swipe left to close
+(function(){
+    var sx=0;
+    var dr=document.getElementById('mobDrawer');
+    dr.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+    dr.addEventListener('touchend',function(e){if(sx-e.changedTouches[0].clientX>55)closeDrawer();},{passive:true});
+})();
+</script>
+
+<script>
+    function User_Logout() {
+        swal({
+            title: "LOGOUT",
+            text: "Are you sure you want to logout?",
+            icon: "warning",
+            buttons: ["No", "Yes"], 
+            closeOnClickOutside: false,
+            dangerMode: true,
+        })
+        .then((willLogout) => {
+            if (willLogout) {   
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'User_Logout' %}", // Added the URL name here
+                    data: {
+                        'user_id': '{{ user_obj.id }}',
+                        'csrfmiddlewaretoken': '{{ csrf_token }}' // This line fixes the Forbidden error
+                    },
+                    success: function (response) {
+                        if (response.status == '1') {
+                            swal(response.msg, { 
+                                icon: "success",
+                                button: "Ok",
+                                closeOnClickOutside: false,
+                            }).then(() => {
+                                // Redirect to the public home page
+                                window.location.href = "{% url 'index' %}"; 
+                            });
+                        } else {
+                            swal(response.msg, {
+                                icon: "info",
+                                button: "Ok",
+                                closeOnClickOutside: false,
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Logout Error: ", error);
+                        swal("Something went wrong. Please try again.", {
+                            icon: "error",
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

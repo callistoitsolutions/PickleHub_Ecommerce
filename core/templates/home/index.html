@@ -1,0 +1,1013 @@
+{% extends 'home/base.html' %}
+
+{% block title %}PickleHub Nagpur | Home - Exclusive Pickle Brands{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════════════════════════
+     PickleHub — Home Page  (home/index.html)
+     Context variables expected from views.py:
+       hero, features, category, banner_pairs,
+       products, categories, brands, reviews, newsletter,
+       ticker_messages, dotd, offer_strip, coupon_wall, todays_offers
+     ════════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ═══ GLOBAL TOKENS ═══════════════════════════════════════════════ */
+:root {
+  --ph-orange:   #e85d04;
+  --ph-orange-d: #c8470a;
+  --ph-yellow:   #ffd60a;
+  --ph-dark:     #1a1a2e;
+  --ph-navy:     #0f3460;
+  --ph-green:    #2d7a2f;
+  --ph-green-hl: #e6f4e6;
+  --ph-blue:     #1a5fa8;
+  --ph-purple:   #7c3aed;
+  --ph-bg:       #f8f9fa;
+  --ph-surface:  #ffffff;
+  --ph-border:   #e8ddd0;
+  --ph-text:     #1a1a2e;
+  --ph-muted:    #7a6a58;
+  --ph-faint:    #b5a898;
+  --font-display:'Playfair Display', Georgia, serif;
+  --font-body:   'Poppins', sans-serif;
+  --radius-sm:   .375rem;
+  --radius-md:   .5rem;
+  --radius-lg:   .75rem;
+  --radius-xl:   1rem;
+  --radius-full: 9999px;
+  --shadow-sm:   0 1px 4px rgba(28,18,8,.07);
+  --shadow-md:   0 4px 16px rgba(28,18,8,.10);
+  --shadow-lg:   0 12px 36px rgba(28,18,8,.13);
+  --trans:       180ms cubic-bezier(.16,1,.3,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--ph-bg); color: var(--ph-text); }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ═══ SECTION HEADER (reusable) ═══════════════════════════════════ */
+.ph-sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; gap: 1rem; }
+.ph-sec-title { font-family: var(--font-display); font-size: clamp(20px,3vw,26px); font-weight: 800; color: var(--ph-text); }
+.ph-sec-badge { background: var(--ph-orange); color: #fff; font-size: 11px; font-weight: 900; padding: 3px 12px; border-radius: var(--radius-full); }
+.ph-see-all { color: var(--ph-orange); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: gap var(--trans); }
+.ph-see-all:hover { gap: 8px; }
+.section-title { font-family: var(--font-display); font-size: clamp(22px,3vw,30px); font-weight: 800; }
+.section-title span { color: var(--ph-orange); }
+.section-divider { width: 60px; height: 4px; background: linear-gradient(90deg, var(--ph-orange), var(--ph-yellow)); border-radius: 2px; margin-top: .75rem; }
+
+/* ═══ 1. TICKER ════════════════════════════════════════════════════ */
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.ph-ticker { background: var(--ph-orange); overflow: hidden; height: 36px; display: flex; align-items: center; }
+.ph-ticker-inner { display: flex; white-space: nowrap; animation: ticker 32s linear infinite; }
+.ph-ticker-item { color: #fff; font-size: 13px; font-weight: 600; padding: 0 2rem; letter-spacing: .3px; }
+.ph-ticker-sep { color: rgba(255,255,255,.4); padding: 0 .5rem; }
+
+/* ═══ 2. HERO ══════════════════════════════════════════════════════ */
+.hero-section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 40%, #16213e 100%);
+  padding: 80px 0 60px; position: relative; overflow: hidden;
+}
+.hero-section::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(232,93,4,.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,214,10,.05) 0%, transparent 40%);
+}
+.hero-badge {
+  display: inline-block; background: linear-gradient(135deg,#e85d04,#ffd60a);
+  color: #1a1a2e; font-weight: 800; font-size: 13px; padding: 6px 18px;
+  border-radius: 50px; margin-bottom: 20px; letter-spacing: .5px;
+}
+.hero-title { font-family: var(--font-display); font-size: clamp(32px,5vw,52px); font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 20px; }
+.hero-title span { color: var(--ph-yellow); }
+.hero-subtitle { font-size: 15px; color: rgba(255,255,255,.72); line-height: 1.75; margin-bottom: 32px; max-width: 520px; }
+.hero-subtitle strong { color: var(--ph-yellow); }
+.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg,#e85d04,#f48c06); color: #fff;
+  font-weight: 700; font-size: 14px; padding: 14px 28px;
+  border-radius: 50px; transition: all .25s;
+  box-shadow: 0 4px 20px rgba(232,93,4,.35);
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,93,4,.5); color: #fff; }
+.btn-hero-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 2px solid var(--ph-yellow); color: var(--ph-yellow);
+  font-weight: 700; font-size: 14px; padding: 13px 26px;
+  border-radius: 50px; transition: all .25s;
+}
+.btn-hero-secondary:hover { background: var(--ph-yellow); color: #1a1a2e; }
+.btn-hero-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 2px solid rgba(255,255,255,.5); color: #fff;
+  font-weight: 700; font-size: 14px; padding: 13px 26px;
+  border-radius: 50px; transition: all .25s;
+}
+.btn-hero-outline:hover { background: rgba(255,255,255,.1); }
+.hero-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+.hero-stat .number { display: block; font-size: 26px; font-weight: 800; color: var(--ph-yellow); line-height: 1; }
+.hero-stat .label { font-size: 11px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.hero-jar-display { position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; min-height: 260px; }
+.hero-uploaded-img { max-width: 100%; max-height: 320px; object-fit: contain; border-radius: 20px; filter: drop-shadow(0 20px 40px rgba(0,0,0,.4)); animation: float 3s ease-in-out infinite; }
+.floating-jar { font-size: clamp(80px,15vw,140px); display: block; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 20px 40px rgba(0,0,0,.4)); }
+@keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-15px)} }
+.badge-float { position: absolute; background: rgba(255,255,255,.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.2); color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 50px; white-space: nowrap; }
+.badge-float.b1{top:15%;left:5%;animation:badgeFloat 4s ease-in-out infinite;}
+.badge-float.b2{top:45%;right:0%;animation:badgeFloat 4s ease-in-out infinite 1.3s;}
+.badge-float.b3{bottom:20%;left:10%;animation:badgeFloat 4s ease-in-out infinite 2.6s;}
+.badge-float.b4{top:70%;right:5%;animation:badgeFloat 4s ease-in-out infinite 1s;}
+.badge-float.b5{top:25%;right:10%;animation:badgeFloat 4s ease-in-out infinite 2s;}
+@keyframes badgeFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@media(max-width:768px){ .hero-section{padding:50px 0 40px;} .hero-jar-display{margin-top:32px;} .hero-stats{gap:20px;} }
+
+/* ═══ 3. FEATURES STRIP ════════════════════════════════════════════ */
+.features-strip { background: var(--ph-surface); border-top: 1px solid var(--ph-border); border-bottom: 1px solid var(--ph-border); padding: 1.25rem 0; }
+.feature-item { display: flex; align-items: center; gap: 12px; padding: .75rem; border-radius: var(--radius-lg); transition: background var(--trans); }
+.feature-item:hover { background: #fff3e0; }
+.icon-wrap { font-size: 28px; flex-shrink: 0; }
+.feature-item h6 { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.feature-item p { font-size: 11px; color: var(--ph-muted); margin: 0; }
+
+/* ═══ 4. CATEGORIES ════════════════════════════════════════════════ */
+.category-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; background: var(--ph-surface); border: 1.5px solid var(--ph-border); border-radius: var(--radius-xl); text-align: center; transition: all var(--trans); }
+.category-card:hover { border-color: var(--ph-orange); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.cat-icon { width: 56px; height: 56px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.cat-name { font-weight: 700; font-size: 13px; color: var(--ph-text); }
+.cat-count { font-size: 11px; color: var(--ph-muted); }
+
+/* ═══ 5. DEAL OF THE DAY ═══════════════════════════════════════════ */
+@keyframes badge-pop { 0%{transform:scale(.7);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+.deal-hero {
+  background: linear-gradient(135deg,#1c0a02 0%,#3d1208 45%,#6a1f08 100%);
+  border-radius: var(--radius-xl); overflow: hidden; padding: 2.5rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  align-items: center; position: relative;
+}
+.deal-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 80% 50%, rgba(232,93,4,.2), transparent 60%);
+}
+.dh-badge {
+  background: #ff3d1f; color: #fff; font-size: 12px; font-weight: 900;
+  padding: 4px 14px; border-radius: var(--radius-full);
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 1rem; animation: badge-pop .5s ease both;
+}
+.dh-title { font-family: var(--font-display); font-size: clamp(24px,4vw,40px); color: #fff; font-weight: 800; line-height: 1.15; margin-bottom: .75rem; }
+.dh-title span { color: var(--ph-yellow); }
+.dh-desc { font-size: 14px; color: rgba(255,255,255,.65); margin-bottom: 1.25rem; line-height: 1.7; }
+.dh-countdown-row { display: flex; gap: .75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.dh-cd-block { background: rgba(255,255,255,.1); border-radius: var(--radius-lg); padding: .75rem 1rem; text-align: center; min-width: 64px; border: 1px solid rgba(255,255,255,.15); }
+.dh-cd-num { font-family: var(--font-display); font-size: 28px; color: #fff; font-weight: 800; display: block; font-variant-numeric: tabular-nums; }
+.dh-cd-lbl { font-size: 10px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; display: block; }
+.dh-prices { display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.dh-price-new { font-family: var(--font-display); font-size: 32px; color: #fff; font-weight: 800; }
+.dh-price-old { font-size: 18px; color: rgba(255,255,255,.4); text-decoration: line-through; }
+.dh-disc { background: var(--ph-yellow); color: #1c0a02; font-size: 12px; font-weight: 900; padding: 3px 10px; border-radius: var(--radius-full); }
+.dh-cta {
+  background: var(--ph-orange); color: #fff; padding: .75rem 2rem;
+  border-radius: var(--radius-full); font-weight: 800; font-size: 14px;
+  display: inline-flex; align-items: center; gap: .5rem;
+  transition: all var(--trans); box-shadow: 0 4px 20px rgba(200,71,10,.4);
+}
+.dh-cta:hover { background: var(--ph-orange-d); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,71,10,.5); color: #fff; }
+.dh-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+.dh-emoji { font-size: clamp(80px,12vw,140px); filter: drop-shadow(0 8px 24px rgba(0,0,0,.4)); }
+.dh-float { position: absolute; background: rgba(255,255,255,.92); border-radius: var(--radius-full); padding: 6px 14px; font-size: 12px; font-weight: 800; color: #1c0a02; box-shadow: var(--shadow-md); }
+.dh-float-1 { top: 10%; right: 0; }
+.dh-float-2 { bottom: 15%; left: 0; }
+@media(max-width:768px) { .deal-hero{grid-template-columns:1fr;} .dh-visual{display:none;} }
+
+/* ═══ 6. OFFER STRIP ═══════════════════════════════════════════════ */
+.offer-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+.offer-card { border-radius: var(--radius-xl); padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; border: 1.5px solid transparent; transition: all var(--trans); cursor: pointer; }
+.offer-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.offer-card.bogo  { background: linear-gradient(135deg,#e8f4ff,#d0e8ff); border-color: var(--ph-blue); }
+.offer-card.flat  { background: linear-gradient(135deg,#e6f8ed,#c8f0d8); border-color: var(--ph-green); }
+.offer-card.coupon{ background: linear-gradient(135deg,#f5eeff,#e8d8ff); border-color: var(--ph-purple); }
+.offer-card.free_del{ background: linear-gradient(135deg,#fff8e0,#ffedaa); border-color: var(--ph-yellow); }
+.oc-icon  { font-size: 28px; }
+.oc-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; }
+.oc-desc  { font-size: 12px; color: var(--ph-muted); line-height: 1.7; }
+.oc-code  { background: rgba(255,255,255,.75); border: 1.5px dashed var(--ph-border); border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; font-weight: 900; letter-spacing: 2px; display: flex; align-items: center; justify-content: space-between; }
+.oc-copy  { font-size: 12px; color: var(--ph-orange); font-weight: 700; cursor: pointer; padding: 0; border: none; background: none; }
+.oc-exp   { font-size: 11px; color: var(--ph-faint); }
+@media(max-width:700px){ .offer-strip{grid-template-columns:1fr;} }
+
+/* ═══ 7. EXISTING OFFER BANNER (banner_pairs) ══════════════════════ */
+.offer-banner {
+  background: linear-gradient(135deg,#1a1a2e,#0f3460);
+  border-radius: var(--radius-xl); padding: 2rem 2.5rem; color: #fff;
+  position: relative; overflow: hidden;
+}
+.offer-banner::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 70% 50%, rgba(232,93,4,.15), transparent 60%);
+}
+.offer-badge {
+  display: inline-block; background: var(--ph-orange); color: #fff;
+  font-size: 12px; font-weight: 800; padding: 4px 14px;
+  border-radius: var(--radius-full); margin-bottom: 1rem;
+}
+.potw-card {
+  background: linear-gradient(135deg,#1c0a02,#3d1208);
+  border-radius: var(--radius-xl); padding: 1.5rem; color: #fff; text-align: center;
+}
+.potw-badge { background: rgba(255,214,10,.2); color: var(--ph-yellow); font-size: 12px; font-weight: 800; padding: 4px 14px; border-radius: var(--radius-full); display: inline-block; margin-bottom: .75rem; }
+.potw-price { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--ph-yellow); }
+.potw-old-price { font-size: 16px; color: rgba(255,255,255,.4); text-decoration: line-through; margin-left: .5rem; }
+.countdown { display: flex; justify-content: center; gap: .5rem; margin: 1rem 0; }
+.countdown-item { background: rgba(255,255,255,.1); border-radius: var(--radius-md); padding: .5rem .75rem; text-align: center; min-width: 52px; }
+.countdown-item .num { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.countdown-item .lbl { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: 1px; }
+.btn-add-cart {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--ph-orange); color: #fff; font-weight: 700; font-size: 13px;
+  padding: 10px 20px; border-radius: var(--radius-full); border: none; cursor: pointer;
+  transition: all var(--trans); width: 100%;
+}
+.btn-add-cart:hover { background: var(--ph-orange-d); color: #fff; }
+
+/* ═══ 8. NEW ARRIVALS BANNER ═══════════════════════════════════════ */
+.arrivals-banner {
+  background: linear-gradient(90deg,#2d7a2f,#1a6b35,#2d7a2f);
+  border-radius: var(--radius-xl); padding: 1.25rem 2rem;
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+}
+.ab-badge { background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3); color: #fff; font-size: 12px; font-weight: 900; padding: 4px 14px; border-radius: var(--radius-full); white-space: nowrap; }
+.ab-text { font-family: var(--font-display); font-size: clamp(15px,2vw,20px); color: #fff; font-weight: 800; flex: 1; }
+.ab-btn { background: #fff; color: var(--ph-green); padding: 8px 20px; border-radius: var(--radius-full); font-size: 14px; font-weight: 800; transition: opacity var(--trans); white-space: nowrap; }
+.ab-btn:hover { opacity: .9; }
+
+/* ═══ 9. TODAY'S OFFERS GRID ═══════════════════════════════════════ */
+.to-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(200px,100%),1fr)); gap: 1rem; }
+.to-card { background: var(--ph-surface); border-radius: var(--radius-xl); border: 1.5px solid var(--ph-border); overflow: hidden; display: flex; flex-direction: column; transition: all var(--trans); }
+.to-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--ph-orange); }
+.to-img { aspect-ratio: 1; background: #f5ede0; display: flex; align-items: center; justify-content: center; font-size: 52px; position: relative; }
+.to-badge { position: absolute; top: 8px; left: 8px; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: var(--radius-full); color: #fff; }
+.to-badge.deal,.to-badge.hot { background: var(--ph-orange); }
+.to-badge.new  { background: var(--ph-green); }
+.to-badge.bogo { background: var(--ph-blue); }
+.to-badge.disc { background: var(--ph-purple); }
+.to-body { padding: .75rem 1rem; flex: 1; }
+.to-brand { font-size: 10px; color: var(--ph-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.to-name  { font-size: 13px; font-weight: 700; line-height: 1.3; margin: 3px 0; }
+.to-wt    { font-size: 11px; color: var(--ph-faint); }
+.to-price-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.to-price { font-size: 18px; font-weight: 800; color: var(--ph-orange); }
+.to-old   { font-size: 12px; color: var(--ph-faint); text-decoration: line-through; }
+.to-disc  { font-size: 10px; font-weight: 900; color: var(--ph-green); background: var(--ph-green-hl); padding: 2px 6px; border-radius: var(--radius-sm); }
+.to-footer { padding: .5rem 1rem .75rem; border-top: 1px solid var(--ph-border); }
+.to-wa-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: #25d366; color: #fff; font-weight: 800; font-size: 12px;
+  padding: 8px; border-radius: var(--radius-full); transition: opacity var(--trans);
+}
+.to-wa-btn:hover { opacity: .9; color: #fff; }
+
+/* ═══ 10. COUPON WALL ══════════════════════════════════════════════ */
+.cw-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(280px,100%),1fr)); gap: 1rem; }
+.cw-item { background: var(--ph-surface); border: 2px dashed var(--ph-border); border-radius: var(--radius-xl); padding: 1.25rem; display: flex; gap: 1rem; align-items: center; position: relative; transition: all var(--trans); overflow: hidden; }
+.cw-item:hover { border-color: var(--ph-orange); box-shadow: var(--shadow-md); }
+.cw-item::before,.cw-item::after { content: ''; position: absolute; width: 20px; height: 20px; background: var(--ph-bg); border-radius: 50%; top: 50%; transform: translateY(-50%); }
+.cw-item::before { left: -10px; }
+.cw-item::after  { right: -10px; }
+.cw-icon { width: 56px; height: 56px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.cw-body { flex: 1; min-width: 0; }
+.cw-val  { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--ph-orange); line-height: 1; }
+.cw-desc { font-size: 12px; color: var(--ph-muted); margin: 3px 0 6px; }
+.cw-code-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.cw-code { background: #f5ede0; border: 1.5px dashed var(--ph-border); border-radius: var(--radius-md); padding: 3px 10px; font-size: 12px; font-weight: 900; letter-spacing: 2px; }
+.cw-copy { font-size: 11px; font-weight: 800; color: var(--ph-orange); cursor: pointer; padding: 3px 10px; border: 1.5px solid var(--ph-orange); border-radius: var(--radius-md); background: none; transition: all var(--trans); }
+.cw-copy:hover { background: var(--ph-orange); color: #fff; }
+.cw-exp { font-size: 10px; color: var(--ph-faint); margin-top: 4px; }
+
+/* ═══ 11. PRODUCT CARDS ════════════════════════════════════════════ */
+.product-card { background: var(--ph-surface); border-radius: var(--radius-xl); border: 1.5px solid var(--ph-border); overflow: hidden; display: flex; flex-direction: column; transition: all var(--trans); height: 100%; }
+.product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--ph-orange); }
+.product-img { aspect-ratio: 1; background: #f5ede0; display: flex; align-items: center; justify-content: center; font-size: 52px; position: relative; overflow: hidden; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-badge { position: absolute; top: 8px; left: 8px; font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: var(--radius-full); color: #fff; }
+.product-wishlist { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: var(--ph-surface); border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: var(--shadow-sm); transition: transform var(--trans); }
+.product-wishlist:hover { transform: scale(1.15); }
+.product-body { padding: .75rem 1rem; flex: 1; display: flex; flex-direction: column; gap: .25rem; }
+.product-brand { font-size: 10px; color: var(--ph-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.product-name  { font-size: 13px; font-weight: 700; line-height: 1.3; color: var(--ph-text); }
+.product-weight{ font-size: 11px; color: var(--ph-faint); }
+.product-stars { color: var(--ph-yellow); font-size: 13px; }
+.product-reviews { font-size: 11px; color: var(--ph-muted); }
+.product-price { font-size: 18px; font-weight: 800; color: var(--ph-orange); }
+.product-price-old { font-size: 12px; color: var(--ph-faint); text-decoration: line-through; }
+.product-discount { font-size: 10px; font-weight: 900; color: var(--ph-green); background: var(--ph-green-hl); padding: 2px 6px; border-radius: var(--radius-sm); }
+.btn-whatsapp {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: #25d366; color: #fff; font-weight: 700; font-size: 12px;
+  padding: 8px; border-radius: var(--radius-full); margin-top: 6px;
+  transition: opacity var(--trans);
+}
+.btn-whatsapp:hover { opacity: .9; color: #fff; }
+
+/* ═══ 12. BRAND CHIPS ══════════════════════════════════════════════ */
+.brand-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ph-surface); border: 1.5px solid var(--ph-border);
+  border-radius: var(--radius-full); padding: .5rem 1.25rem;
+  font-size: 13px; font-weight: 700; transition: all var(--trans);
+}
+.brand-chip:hover { border-color: var(--ph-orange); background: #fff3e0; color: var(--ph-orange); }
+
+/* ═══ 13. REVIEWS ══════════════════════════════════════════════════ */
+.testimonial-card { background: var(--ph-surface); border-radius: var(--radius-xl); padding: 1.5rem; border: 1.5px solid var(--ph-border); transition: all var(--trans); }
+.testimonial-card:hover { box-shadow: var(--shadow-md); border-color: var(--ph-orange); }
+.reviewer-avatar { width: 44px; height: 44px; border-radius: 50%; background: #fff3e0; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+/* ═══ 14. NEWSLETTER ═══════════════════════════════════════════════ */
+.newsletter-section { background: linear-gradient(135deg,#1a1a2e,#0f3460); padding: 3rem 0; }
+.newsletter-input-wrap { display: flex; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); border-radius: var(--radius-full); overflow: hidden; max-width: 480px; }
+.newsletter-input-wrap input { flex: 1; background: transparent; border: none; padding: .75rem 1.25rem; color: #fff; font-size: 14px; outline: none; }
+.newsletter-input-wrap input::placeholder { color: rgba(255,255,255,.45); }
+.newsletter-input-wrap button { background: var(--ph-orange); color: #fff; border: none; padding: .75rem 1.5rem; font-weight: 800; font-size: 13px; cursor: pointer; transition: background var(--trans); white-space: nowrap; }
+.newsletter-input-wrap button:hover { background: var(--ph-orange-d); }
+
+/* ═══ TOAST ════════════════════════════════════════════════════════ */
+#ph-toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.ph-toast { background: #1c1208; color: #fff; padding: 12px 20px; border-radius: var(--radius-lg); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); transform: translateX(120%); opacity: 0; transition: .35s cubic-bezier(.16,1,.3,1); max-width: 280px; }
+.ph-toast.show { transform: translateX(0); opacity: 1; }
+</style>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ① TICKER BAR
+     ════════════════════════════════════════════════════════════════ -->
+{% if ticker_messages %}
+<div class="ph-ticker" aria-label="Offer announcements" role="marquee">
+  <div class="ph-ticker-inner">
+    {% for msg in ticker_messages %}
+      <span class="ph-ticker-item">{{ msg.text }}</span><span class="ph-ticker-sep">|</span>
+    {% endfor %}
+    {# Duplicate for seamless loop #}
+    {% for msg in ticker_messages %}
+      <span class="ph-ticker-item">{{ msg.text }}</span><span class="ph-ticker-sep">|</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ② HERO SECTION
+     ════════════════════════════════════════════════════════════════ -->
+{% if hero.is_visible %}
+<section class="hero-section" aria-label="Hero Banner">
+  <div class="container">
+    <div class="row align-items-center">
+
+      <div class="col-lg-6 col-md-7">
+        <div class="hero-badge">{{ hero.badge_text }}</div>
+        <h1 class="hero-title">
+          {{ hero.title_line1 }}
+          <span>{{ hero.title_highlight }}</span><br>
+          {{ hero.title_line2 }}
+        </h1>
+        <p class="hero-subtitle">{{ hero.subtitle|safe }}</p>
+
+        {% if hero.buttons_json %}
+        <div class="hero-btns">
+          {% for btn in hero.buttons_json %}
+            {% if btn.type == "primary" %}
+              <a href="{{ btn.url }}" class="btn-hero-primary" aria-label="{{ btn.text }}"
+                 {% if btn.url|slice:":4" == "http" %}target="_blank" rel="noopener"{% endif %}>
+                {% if "whatsapp" in btn.icon or "facebook" in btn.icon or "twitter" in btn.icon or "instagram" in btn.icon %}
+                  <i class="fab {{ btn.icon }}"></i>
+                {% else %}
+                  <i class="fa {{ btn.icon }}"></i>
+                {% endif %}
+                {{ btn.text }}
+              </a>
+            {% elif btn.type == "secondary" %}
+              <a href="{{ btn.url }}" class="btn-hero-secondary" aria-label="{{ btn.text }}"
+                 {% if btn.url|slice:":4" == "http" %}target="_blank" rel="noopener"{% endif %}>
+                {% if "whatsapp" in btn.icon or "facebook" in btn.icon or "twitter" in btn.icon or "instagram" in btn.icon %}
+                  <i class="fab {{ btn.icon }}"></i>
+                {% else %}
+                  <i class="fa {{ btn.icon }}"></i>
+                {% endif %}
+                {{ btn.text }}
+              </a>
+            {% else %}
+              <a href="{{ btn.url }}" class="btn-hero-outline" aria-label="{{ btn.text }}"
+                 {% if btn.url|slice:":4" == "http" %}target="_blank" rel="noopener"{% endif %}>
+                {% if "whatsapp" in btn.icon or "facebook" in btn.icon or "twitter" in btn.icon or "instagram" in btn.icon %}
+                  <i class="fab {{ btn.icon }}"></i>
+                {% else %}
+                  <i class="fa {{ btn.icon }}"></i>
+                {% endif %}
+                {{ btn.text }}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if hero.stats_json %}
+        <div class="hero-stats">
+          {% for stat in hero.stats_json %}
+          <div class="hero-stat">
+            <span class="number">{{ stat.num }}</span>
+            <span class="label">{{ stat.lbl }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-6 col-md-5">
+        <div class="hero-jar-display">
+          {% if hero.hero_image_url %}
+            <img src="{{ hero.hero_image_url }}" alt="Hero Image" class="hero-uploaded-img">
+          {% else %}
+            <span class="floating-jar" aria-hidden="true">{{ hero.jar_emoji }}</span>
+          {% endif %}
+          {% for badge in hero.float_badges_json %}
+          <div class="badge-float b{{ forloop.counter }}">{{ badge }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ③ FEATURES STRIP
+     ════════════════════════════════════════════════════════════════ -->
+{% if features.is_visible and features.items_json %}
+<section class="features-strip" aria-label="Key Features">
+  <div class="container">
+    <div class="row g-3">
+      {% for feat in features.items_json %}
+      <div class="col-6 col-md-3">
+        <div class="feature-item">
+          <div class="icon-wrap" aria-hidden="true">{{ feat.ico }}</div>
+          <div>
+            <h6>{{ feat.title }}</h6>
+            <p>{{ feat.sub }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ④ CATEGORIES
+     ════════════════════════════════════════════════════════════════ -->
+{% if category.is_visible %}
+<section class="py-5" aria-labelledby="categories-heading">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="section-title" id="categories-heading">{{ category.section_title }}</h2>
+      <p class="text-muted mt-2">{{ category.section_subtitle }}</p>
+      <div class="section-divider mx-auto"></div>
+    </div>
+    <div class="row g-3">
+      {% for cat in category.items_json %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{{ cat.url }}" class="category-card" aria-label="{{ cat.name }}">
+          <div class="cat-icon" style="background:{{ cat.bg_gradient }};" aria-hidden="true">{{ cat.emoji }}</div>
+          <div class="cat-name">{{ cat.name }}</div>
+          <div class="cat-count">{{ cat.count }}</div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑤ DEAL OF THE DAY  (new module)
+     ════════════════════════════════════════════════════════════════ -->
+{% if dotd %}
+<section class="py-4" aria-label="Deal of the Day">
+  <div class="container">
+    <div class="deal-hero">
+      <div>
+        <div class="dh-badge">{{ dotd.badge_text }}</div>
+        <h2 class="dh-title"><span>{{ dotd.title }}</span></h2>
+        <p class="dh-desc">{{ dotd.subtitle }}</p>
+
+        <div class="dh-countdown-row" aria-label="Time remaining for this deal">
+          <div class="dh-cd-block"><span class="dh-cd-num" id="dotd-h">00</span><span class="dh-cd-lbl">Hours</span></div>
+          <div class="dh-cd-block"><span class="dh-cd-num" id="dotd-m">00</span><span class="dh-cd-lbl">Mins</span></div>
+          <div class="dh-cd-block"><span class="dh-cd-num" id="dotd-s">00</span><span class="dh-cd-lbl">Secs</span></div>
+        </div>
+
+        <div class="dh-prices">
+          <span class="dh-price-new">₹{{ dotd.price }}</span>
+          <span class="dh-price-old">₹{{ dotd.old_price }}</span>
+          <span class="dh-disc">{{ dotd.discount_pct }}% OFF</span>
+        </div>
+
+        <a href="{{ dotd.url }}" class="dh-cta">
+          <i class="fa fa-shopping-cart"></i> Grab This Deal
+        </a>
+      </div>
+
+      <div class="dh-visual" aria-hidden="true">
+        <div class="dh-emoji">{{ dotd.emoji }}</div>
+        <div class="dh-float dh-float-1">{{ dotd.float_badge1 }}</div>
+        <div class="dh-float dh-float-2">{{ dotd.float_badge2 }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var end = new Date("{{ dotd.end_time|date:'c' }}").getTime();
+  function tick(){
+    var rem = Math.max(0, Math.floor((end - Date.now()) / 1000));
+    document.getElementById('dotd-h').textContent = String(Math.floor(rem/3600)).padStart(2,'0');
+    document.getElementById('dotd-m').textContent = String(Math.floor((rem%3600)/60)).padStart(2,'0');
+    document.getElementById('dotd-s').textContent = String(rem%60).padStart(2,'0');
+  }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑥ OFFER STRIP — BOGO / Flat / Coupon  (new module)
+     ════════════════════════════════════════════════════════════════ -->
+{% if offer_strip %}
+<section class="py-3" aria-label="Top Offers">
+  <div class="container">
+    <div class="ph-sec-hdr mb-3">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <h2 class="ph-sec-title">Top Offers</h2>
+        <span class="ph-sec-badge">Live Now</span>
+      </div>
+    </div>
+    <div class="offer-strip" role="list">
+      {% for coupon in offer_strip %}
+      <div class="offer-card {{ coupon.coupon_type }}" role="listitem" tabindex="0">
+        <div class="oc-icon">{{ coupon.icon }}</div>
+        <div class="oc-title">{{ coupon.discount_val }}</div>
+        <p class="oc-desc">{{ coupon.description }}</p>
+        <div class="oc-code">
+          <span>{{ coupon.code }}</span>
+          <button class="oc-copy" onclick="phCopyCoupon('{{ coupon.code }}')">Copy</button>
+        </div>
+        <div class="oc-exp">⏰ {{ coupon.expiry_note }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑦ EXISTING OFFER BANNERS (banner_pairs — OfferBanner model)
+     ════════════════════════════════════════════════════════════════ -->
+{% if banner_pairs %}
+  {% for pair in banner_pairs %}
+  <section class="py-3" aria-label="Special Offers">
+    <div class="container">
+      <div class="row g-4">
+
+        {% if pair.main %}
+        <div class="col-md-8">
+          <div class="offer-banner">
+            <div class="offer-badge">{{ pair.main.badge|default:"🔥 LIMITED STOCK" }}</div>
+            <h3 style="font-size:24px;font-weight:800;color:#fff;">{{ pair.main.name|linebreaksbr }}</h3>
+            <p style="font-size:13px;opacity:.8;margin:8px 0;color:#fff;">{{ pair.main.description }}</p>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span style="font-size:32px;font-weight:800;color:#ffd60a;">₹{{ pair.main.price }}</span>
+              {% if pair.main.old_price %}
+              <span style="text-decoration:line-through;opacity:.5;font-size:18px;color:#fff;">₹{{ pair.main.old_price }}</span>
+              {% endif %}
+              {% if pair.main.discount_label %}
+              <span style="background:#ffd60a;color:#1a1a2e;padding:4px 12px;border-radius:50px;font-weight:700;font-size:13px;">{{ pair.main.discount_label }}</span>
+              {% endif %}
+            </div>
+            {% if pair.main.url %}
+            <a href="{{ pair.main.url }}" class="btn-hero-primary d-inline-flex mt-3" style="font-size:14px;padding:10px 24px;">
+              Buy Now <i class="fa fa-arrow-right ms-2"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if pair.potw %}
+        <div class="col-md-4">
+          <div class="potw-card h-100">
+            <div class="potw-badge">⭐ Pickle of the Week</div>
+            <div style="font-size:50px;margin-bottom:10px;" aria-hidden="true">{{ pair.potw.emoji|default:"🧄" }}</div>
+            <h4 style="font-weight:800;color:#fff;">{{ pair.potw.name }}</h4>
+            <p style="font-size:12px;opacity:.8;color:#fff;">{{ pair.potw.weight_type }}</p>
+            <div class="d-flex align-items-center gap-2 mt-2">
+              <span class="potw-price">₹{{ pair.potw.price }}</span>
+              {% if pair.potw.old_price %}
+              <span class="potw-old-price">₹{{ pair.potw.old_price }}</span>
+              {% endif %}
+            </div>
+            <div class="countdown" aria-label="Deal countdown timer">
+              <div class="countdown-item"><span class="num" id="hours_{{ forloop.counter }}">08</span><span class="lbl">Hours</span></div>
+              <div class="countdown-item"><span class="num" id="mins_{{ forloop.counter }}">42</span><span class="lbl">Mins</span></div>
+              <div class="countdown-item"><span class="num" id="secs_{{ forloop.counter }}">30</span><span class="lbl">Secs</span></div>
+            </div>
+            {% if pair.potw.url %}
+            <a href="{{ pair.potw.url }}" class="btn-add-cart mt-3" style="text-decoration:none;">
+              <i class="fa fa-cart-plus"></i> Add to Cart
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑧ NEW ARRIVALS BANNER  (new module)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="py-3" aria-label="New Arrivals">
+  <div class="container">
+    <div class="arrivals-banner">
+      <span class="ab-badge">🆕 Just In</span>
+      <div class="ab-text">New Varieties Added This Week — Including Kashmiri Walnut &amp; Goan Fish Pickle</div>
+      <a href="{% url 'All_products' %}" class="ab-btn">Explore New Arrivals →</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑨ TODAY'S OFFERS GRID  (new module)
+     ════════════════════════════════════════════════════════════════ -->
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑩ COUPON WALL  (new module)
+     ════════════════════════════════════════════════════════════════ -->
+{% if coupon_wall %}
+<section class="py-4" style="background:#fff8f0;" aria-labelledby="coupon-wall-hd">
+  <div class="container">
+    <div class="ph-sec-hdr mb-3">
+      <h2 class="ph-sec-title" id="coupon-wall-hd">🎫 All Coupons</h2>
+    </div>
+    <div class="cw-grid" role="list">
+      {% for c in coupon_wall %}
+      <div class="cw-item" role="listitem">
+        <div class="cw-icon" style="background:{{ c.color_bg }};">{{ c.icon }}</div>
+        <div class="cw-body">
+          <div class="cw-val">{{ c.discount_val }}</div>
+          <div class="cw-desc">{{ c.description }}</div>
+          <div class="cw-code-row">
+            <span class="cw-code">{{ c.code }}</span>
+            <button class="cw-copy" onclick="phCopyCoupon('{{ c.code }}')">Copy Code</button>
+          </div>
+          <div class="cw-exp">⏰ {{ c.expiry_note }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑪ BEST SELLING PICKLES
+     ════════════════════════════════════════════════════════════════ -->
+
+
+<!-- ⑪ BEST SELLING PICKLES -->
+<section class="py-5 bg-light" aria-labelledby="featured-heading">
+  <div class="container">
+
+    <div class="text-center mb-4">
+      <h2 class="section-title" id="featured-heading">🔥 Best Selling <span>Pickles</span></h2>
+      <p class="text-muted">Most loved by our Nagpur customers</p>
+      <div class="section-divider mx-auto"></div>
+    </div>
+
+    <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+      <button class="btn btn-sm btn-warning fw-bold px-4 rounded-pill filter-btn active" data-filter="All">All</button>
+      {% for cat in categories %}
+      <button class="btn btn-sm btn-outline-warning fw-bold px-4 rounded-pill filter-btn" data-filter="{{ cat }}">{{ cat }}</button>
+      {% endfor %}
+    </div>
+
+    {# ✅ Swiper for ALL view #}
+    <div class="swiper mySwiper" id="swiperWrap">
+      <div class="swiper-wrapper">
+        {% for p in products %}
+        {% if not p.is_out_of_stock %}
+        <div class="swiper-slide product-item" data-category="{{ p.category.section_title|default:'All' }}">
+          <article class="product-card">
+            <div class="product-img" style="background:{{ p.card_bg }}">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" class="img-fluid">
+              {% else %}
+                <span>{{ p.emoji }}</span>
+              {% endif %}
+              {% if p.active_offer %}
+                <span class="product-badge" style="background:#e85d04">{{ p.active_offer.badge_label }}</span>
+              {% elif p.badge %}
+                <span class="product-badge" style="background:{{ p.badge_color }}">{{ p.badge }}</span>
+              {% endif %}
+              <button class="product-wishlist" aria-label="Add to wishlist">
+                <i class="fa fa-heart"></i>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-brand">{{ p.brand.name }}</div>
+              <h3 class="product-name">{{ p.name }}</h3>
+              <div class="product-weight">{{ p.weight }} | {{ p.oil_type }}</div>
+              <div class="d-flex align-items-center gap-1 mt-1">
+                <div class="product-stars">{{ p.stars_html }}</div>
+                <span class="product-reviews">({{ p.review_count }})</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <span class="product-price">₹{{ p.price }}</span>
+                {% if p.old_price %}<span class="product-price-old">₹{{ p.old_price }}</span>{% endif %}
+                {% if p.discount_label %}<span class="product-discount">{{ p.discount_label }}</span>{% endif %}
+              </div>
+              <button class="btn-add-cart mt-2">
+                <i class="fa fa-cart-plus"></i> Add to Cart
+              </button>
+              <a href="https://wa.me/{{ p.whatsapp_number }}?text=I want {{ p.name }} {{ p.weight }}" class="btn-whatsapp">
+                <i class="fab fa-whatsapp"></i> Order
+              </a>
+            </div>
+          </article>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ✅ Grid shown ONLY when filtering (hidden by default) #}
+    <div id="filteredGrid" style="display:none;
+         grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;">
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'All_products' %}" class="btn btn-warning btn-lg rounded-pill fw-bold px-5">
+        View All Products <i class="fa fa-arrow-right ms-2"></i>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑫ FEATURED BRANDS
+     ════════════════════════════════════════════════════════════════ -->
+{% if brands %}
+<section class="py-5" aria-labelledby="brands-heading">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="section-title" id="brands-heading">
+        {{ brand_settings.title|default:"Featured Brands" }}
+      </h2>
+      <p class="text-muted">{{ brand_settings.subtitle|default:"Discover our premium selection of authentic pickles" }}</p>
+      <div class="section-divider mx-auto"></div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-center gap-3" role="list">
+      {% for brand in brands %}
+      <a href="{{ brand.url|default:'#' }}" class="brand-chip" role="listitem" aria-label="{{ brand.name }} brand">
+        {{ brand.emoji }} {{ brand.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑬ CUSTOMER REVIEWS
+     ════════════════════════════════════════════════════════════════ -->
+{% if reviews %}
+<section class="py-5" style="background:#fff3e0;" aria-labelledby="reviews-heading">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="section-title" id="reviews-heading">What Our <span>Customers Say</span></h2>
+      <p class="text-muted">Trusted by 5000+ pickle lovers in Nagpur</p>
+      <div class="section-divider mx-auto"></div>
+    </div>
+    <div class="row g-4">
+      {% for review in reviews %}
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="reviewer-avatar" aria-hidden="true">{{ review.avatar|default:"👤" }}</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;">{{ review.name }}</div>
+              <div style="font-size:12px;color:#888;">{{ review.city }}</div>
+              <div style="color:#ffd60a;font-size:13px;" aria-label="Rating: {{ review.rating }} stars">
+                {% if review.rating == 5 %}★★★★★
+                {% elif review.rating == 4 %}★★★★☆
+                {% elif review.rating == 3 %}★★★☆☆
+                {% elif review.rating == 2 %}★★☆☆☆
+                {% elif review.rating == 1 %}★☆☆☆☆
+                {% else %}★★★★★
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#555;font-style:italic;">"{{ review.text }}"</p>
+          <div style="font-size:12px;color:#e85d04;margin-top:8px;">Verified Purchase ✓</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     ⑭ NEWSLETTER
+     ════════════════════════════════════════════════════════════════ -->
+<section class="newsletter-section" aria-labelledby="newsletter-heading">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-md-6 text-white mb-3 mb-md-0">
+        <h2 id="newsletter-heading" style="font-family:var(--font-display);font-size:28px;font-weight:800;color:#fff;">
+          {{ newsletter.heading|default:'🎁 Get 15% OFF Your First Order!' }}
+        </h2>
+        <p style="opacity:.85;margin-top:8px;color:rgba(255,255,255,.85);">
+          {{ newsletter.description|default:'Subscribe to receive exclusive deals, new pickle arrivals & Nagpur-only offers straight to your inbox.' }}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <form action="{{ newsletter.url|default:'/newsletter/subscribe/' }}" method="POST" aria-label="Newsletter subscription form">
+          {% csrf_token %}
+          <label for="newsletterEmail" class="visually-hidden">Email address for newsletter</label>
+          <div class="newsletter-input-wrap mx-auto">
+            <input type="email" id="newsletterEmail" name="email"
+                   placeholder="{{ newsletter.placeholder|default:'Enter your email address...' }}"
+                   required aria-required="true">
+            <button type="submit">{{ newsletter.btn_text|default:'Subscribe 🎉' }}</button>
+          </div>
+          <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:8px;text-align:center;">
+            {{ newsletter.privacy_note|default:'No spam. Unsubscribe anytime. 🔒 Privacy protected.' }}
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Toast container -->
+<div id="ph-toast-wrap" aria-live="polite"></div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+
+<script>
+/* ── SWIPER ─────────────────────────────────────────────────────── */
+var SWIPER_CONFIG = {
+  spaceBetween: 20,
+  loop: false,
+  breakpoints: {
+    320: { slidesPerView: 1 },
+    576: { slidesPerView: 2 },
+    768: { slidesPerView: 3 },
+    992: { slidesPerView: 4 }
+  }
+};
+var swiper = new Swiper(".mySwiper", SWIPER_CONFIG);
+
+/* ── FILTER ─────────────────────────────────────────────────────── */
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+
+    /* 1. Active button */
+    document.querySelectorAll('.filter-btn').forEach(function(b) {
+      b.classList.remove('btn-warning', 'active');
+      b.classList.add('btn-outline-warning');
+    });
+    this.classList.remove('btn-outline-warning');
+    this.classList.add('btn-warning', 'active');
+
+    var filter = this.getAttribute('data-filter');
+    var swiperWrap  = document.getElementById('swiperWrap');
+    var filteredGrid = document.getElementById('filteredGrid');
+
+    if (filter === 'All') {
+      /* ✅ Show swiper, hide grid */
+      swiperWrap.style.display = '';
+      filteredGrid.style.display = 'none';
+      filteredGrid.innerHTML = '';
+
+      /* Reinit swiper */
+      swiper.destroy(true, true);
+      swiper = new Swiper(".mySwiper", SWIPER_CONFIG);
+
+    } else {
+      /* ✅ Hide swiper, show filtered grid */
+      swiperWrap.style.display = 'none';
+      filteredGrid.style.display = 'grid';
+      filteredGrid.innerHTML = '';
+
+      /* Copy matching slides into grid */
+      document.querySelectorAll('.product-item').forEach(function(item) {
+        if (item.dataset.category === filter) {
+          var clone = item.cloneNode(true);
+          /* Remove swiper-slide class so card renders normally */
+          clone.classList.remove('swiper-slide');
+          filteredGrid.appendChild(clone);
+        }
+      });
+
+      /* Show empty message if nothing found */
+      if (filteredGrid.children.length === 0) {
+        filteredGrid.innerHTML =
+          '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#b5a898;">' +
+          '<div style="font-size:48px;margin-bottom:12px;">🫙</div>' +
+          '<div style="font-weight:700;font-size:16px;">No products in this category</div>' +
+          '</div>';
+      }
+    }
+  });
+});
+
+/* ── POTW COUNTDOWN ─────────────────────────────────────────────── */
+{% if banner_pairs %}
+(function(){
+  var counters = document.querySelectorAll('.countdown-item .num[id^="hours_"]');
+  counters.forEach(function(el){
+    var idx = el.id.split('_')[1];
+    var hEl = document.getElementById('hours_' + idx);
+    var mEl = document.getElementById('mins_'  + idx);
+    var sEl = document.getElementById('secs_'  + idx);
+    if (!hEl || !mEl || !sEl) return;
+    setInterval(function(){
+      var h = parseInt(hEl.textContent);
+      var m = parseInt(mEl.textContent);
+      var s = parseInt(sEl.textContent) - 1;
+      if (s < 0){ s = 59; m--; }
+      if (m < 0){ m = 59; h--; }
+      if (h < 0){ h = 23; m = 59; s = 59; }
+      hEl.textContent = String(h).padStart(2,'0');
+      mEl.textContent = String(m).padStart(2,'0');
+      sEl.textContent = String(s).padStart(2,'0');
+    }, 1000);
+  });
+})();
+{% endif %}
+
+/* ── COPY COUPON ─────────────────────────────────────────────────── */
+function phCopyCoupon(code) {
+  navigator.clipboard.writeText(code).then(function(){
+    phToast('📋 Code "' + code + '" copied to clipboard!');
+  }).catch(function(){
+    phToast('📋 Copy: ' + code);
+  });
+}
+
+/* ── TOAST ───────────────────────────────────────────────────────── */
+function phToast(msg) {
+  var wrap = document.getElementById('ph-toast-wrap');
+  var t = document.createElement('div');
+  t.className = 'ph-toast';
+  t.textContent = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+  });
+  setTimeout(function(){
+    t.classList.remove('show');
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 400);
+  }, 3000);
+}
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,1295 @@
+{% extends "Admin_pages/admin_base.html" %}
+
+{% block extra_css %}
+<style>
+/* =========================================
+   PAGE SPECIFIC CSS 
+   (Layout rules removed to prevent conflicts with Base CSS)
+========================================= */
+
+/* BUTTONS */
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+
+/* CARDS & PANELS */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}
+.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}
+.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+
+/* FORM INPUTS */
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.lbl-hint{font-size:10px;color:#aaa;font-weight:400;margin-left:5px;}
+.req{color:#e85d04;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+textarea.inp{resize:vertical;min-height:65px;}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.inp-w60{width:60px;}.inp-w80{width:80px;}.inp-w100{width:100px;}.inp-w120{width:120px;}.inp-w140{width:140px;}.inp-flex{flex:1;}
+
+/* TOGGLES & PILLS */
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+
+/* DYNAMIC ROWS */
+.stat-row,.feat-row,.cat-row,.brand-row,.review-row,.btn-row{background:#f8f9fa;border-radius:11px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:9px;border:1.5px solid #f0f0f0;transition:.2s;flex-wrap:wrap;}
+.stat-row:hover,.feat-row:hover,.cat-row:hover,.brand-row:hover,.review-row:hover,.btn-row:hover{border-color:#e85d04;}
+.si{font-size:14px;color:#ccc;cursor:grab;}
+
+/* SECTION TABS */
+.sec-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:0 26px;margin-bottom:0;background:#fff;border-bottom:1px solid #f0f0f0;}
+.sec-tab{padding:10px 16px;font-size:12px;font-weight:700;color:#888;cursor:pointer;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap;}
+.sec-tab.on{color:#e85d04;border-bottom-color:#e85d04;}
+.sec-panel{display:none;}
+.sec-panel.on{display:block;}
+.page{padding:22px 26px;}
+
+/* LIVE PREVIEW BOX */
+.preview-wrap{position:sticky;top:130px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;font-size:11px;}
+
+/* PREVIEW COMPONENTS */
+.pv-hero{background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 40%,#16213e 100%);padding:18px;color:#fff;}
+.pv-badge{background:linear-gradient(135deg,#e85d04,#ffd60a);color:#1a1a2e;font-weight:800;font-size:9px;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px;}
+.pv-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px;}
+.pv-title span{color:#ffd60a;}
+.pv-sub{font-size:10px;color:rgba(255,255,255,.65);margin-bottom:10px;line-height:1.6;}
+.pv-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.pv-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+.pv-stat .num{font-size:14px;font-weight:800;color:#ffd60a;display:block;}
+.pv-stat .lbl-s{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;}
+.pv-hero-img-wrap{text-align:center;padding:10px 0 4px;position:relative;}
+.pv-hero-img{width:80px;height:80px;object-fit:contain;border-radius:12px;display:block;margin:0 auto;}
+.pv-hero-emoji{font-size:52px;display:block;text-align:center;animation:pvFloat 3s ease-in-out infinite;}
+@keyframes pvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pv-float-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.pv-float-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:50px;font-size:9px;font-weight:700;}
+.pv-btn-primary{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;padding:6px 14px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.pv-btn-secondary{border:1.5px solid #ffd60a;color:#ffd60a;padding:5px 13px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.pv-btn-outline{border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:5px 13px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.pv-feats{background:#1a1a2e;padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;}
+.pv-feat{display:flex;align-items:center;gap:7px;color:#fff;}
+.pv-feat-ico{width:28px;height:28px;background:linear-gradient(135deg,#e85d04,#ffd60a);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.pv-feat h6{font-size:10px;font-weight:700;color:#ffd60a;margin:0;}
+.pv-feat p{font-size:9px;color:rgba(255,255,255,.5);margin:0;}
+.pv-cats{background:#fff;padding:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.pv-cat{background:#fff3e0;border-radius:10px;padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:#1a1a2e;min-width:60px;}
+.pv-cat-ico{font-size:18px;display:block;margin-bottom:3px;}
+.pv-offer{background:linear-gradient(135deg,#2d6a4f,#52b788);padding:12px;color:#fff;}
+.pv-o-badge{background:#ffd60a;color:#1a1a2e;font-size:9px;font-weight:800;padding:2px 8px;border-radius:50px;display:inline-block;margin-bottom:5px;}
+.pv-o-name{font-size:13px;font-weight:800;margin-bottom:3px;}
+.pv-o-price{font-size:18px;font-weight:800;color:#ffd60a;}
+.pv-potw{background:linear-gradient(135deg,#9d0208,#e85d04);padding:12px;color:#fff;}
+.pv-potw-badge{background:#ffd60a;color:#1a1a2e;font-size:9px;font-weight:800;padding:2px 8px;border-radius:50px;display:inline-block;margin-bottom:5px;}
+.pv-brands{background:#fff;padding:10px;display:flex;gap:6px;flex-wrap:wrap;}
+.pv-brand{background:#f5f5f5;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;color:#1a1a2e;}
+.pv-news{background:linear-gradient(135deg,#e85d04,#9d0208);padding:12px 16px;color:#fff;text-align:center;}
+.pv-news h4{font-size:12px;font-weight:800;margin-bottom:4px;}
+.pv-news p{font-size:9px;opacity:.8;margin-bottom:8px;}
+.pv-news-inp{background:rgba(255,255,255,.15);border:none;border-radius:50px;padding:6px 14px;font-size:10px;color:#fff;width:60%;font-family:'Poppins',sans-serif;}
+
+/* TOASTS & EXTRAS */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.img-upload-box{border:2px dashed #e0e0e0;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa;position:relative;}
+.img-upload-box:hover{border-color:#e85d04;background:#fff8f5;}
+.img-upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-upload-box .upload-icon{font-size:24px;margin-bottom:6px;}
+.img-upload-box .upload-text{font-size:11px;font-weight:700;color:#888;}
+.img-preview-thumb{width:80px;height:80px;object-fit:contain;border-radius:10px;border:2px solid #e0e0e0;margin-top:8px;}
+.btn-type-select{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;cursor:pointer;}
+.btn-type-select:focus{border-color:#e85d04;}
+.section-divider{background:#f8f9fa;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:11px;font-weight:800;color:#e85d04;border-left:3px solid #e85d04;}
+</style>
+{% endblock %}
+
+<!-- ════ MAIN ════ -->
+
+
+{% block content %}
+
+<div style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 24px; overflow: hidden;">
+            
+    <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 style="font-size: 18px; font-weight: 800; color: #1a1a2e; margin: 0; display: flex; align-items: center; gap: 8px;">
+            🏠 Home Page Settings
+          </h2>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">
+              All 8 sections — changes reflect instantly in live preview &rarr;
+          </div>
+        </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+            <button class="btn-s" onclick="resetAll()"><i class="fa fa-undo"></i> Reset</button>
+            <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+          </div>
+        </div>
+
+            
+    </div>
+
+
+
+<div class="page">
+<div class="row g-4">
+
+<!-- ══ LEFT FORMS ══ -->
+<div class="col-lg-7">
+
+<!-- ──────── PANEL 0: HERO ──────── -->
+
+<div class="sec-panel on" id="panel-0">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">💬</span><span class="ch-title">Customer Reviews</span><span class="ch-sub">— testimonials section</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-reviews" onclick="togSwitch(this,'tog-reviews')"></div><span class="tog-lbl" id="tog-reviews-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-6"><label class="lbl">Section Title</label><input class="inp" id="reviewsTitle" value="What Our Customers Say" oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Subtitle <span class="lbl-hint">(e.g. trusted by 5000+)</span></label><input class="inp" id="reviewsSubtitle" value="Trusted by 5000+ pickle lovers in Nagpur" oninput="updatePreview()"></div>
+      </div>
+      <div id="reviewsList"></div>
+      <button class="btn-add" onclick="addReview()"><i class="fa fa-plus"></i> Add Review</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ──────── PANEL 1: FEATURES ──────── -->
+{% comment %} <div class="sec-panel" id="panel-1">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">⭐</span><span class="ch-title">Features Strip</span><span class="ch-sub">— dark strip below hero</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-feats" onclick="togSwitch(this,'tog-feats')"></div><span class="tog-lbl" id="tog-feats-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div id="featsList"></div>
+      <button class="btn-add" onclick="addFeat()"><i class="fa fa-plus"></i> Add Feature</button>
+    </div>
+  </div>
+</div> {% endcomment %}
+
+<!-- ──────── PANEL 2: CATEGORIES ──────── -->
+{% comment %} <div class="sec-panel" id="panel-2">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">📂</span><span class="ch-title">Shop by Category</span><span class="ch-sub">— category cards grid</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-cats" onclick="togSwitch(this,'tog-cats')"></div><span class="tog-lbl" id="tog-cats-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-6"><label class="lbl">Section Title</label><input class="inp" id="catTitle" value="Shop by Category" oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Section Subtitle</label><input class="inp" id="catSubtitle" value="Browse our wide range of authentic pickle varieties" oninput="updatePreview()"></div>
+      </div>
+      <div id="catsList"></div>
+      <button class="btn-add" onclick="addCat()"><i class="fa fa-plus"></i> Add Category</button>
+    </div>
+  </div>
+</div> {% endcomment %}
+
+<!-- ──────── PANEL 3: OFFER BANNER ──────── -->
+{% comment %} <div class="sec-panel" id="panel-3">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">🏷️</span><span class="ch-title">Offer Banner</span><span class="ch-sub">— green offer + Pickle of the Week</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-offer" onclick="togSwitch(this,'tog-offer')"></div><span class="tog-lbl" id="tog-offer-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div style="background:#e8f5e9;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:800;color:#2d6a4f;margin-bottom:10px;">🟢 Main Offer Banner (Left)</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="lbl">Badge Text</label><input class="inp" id="offerBadge" value="🔥 LIMITED STOCK" oninput="updatePreview()"></div>
+          <div class="col-md-6"><label class="lbl">Product Name</label><input class="inp" id="offerName" value="Andhra Avakaya Mango Pickle" oninput="updatePreview()"></div>
+          <div class="col-12"><label class="lbl">Description</label><input class="inp" id="offerDesc" value="Traditional spicy recipe with mustard oil &amp; red chillies" oninput="updatePreview()"></div>
+          <div class="col-md-4"><label class="lbl">Sale Price (₹)</label><input class="inp" id="offerPrice" value="299" oninput="updatePreview()"></div>
+          <div class="col-md-4"><label class="lbl">Original Price (₹)</label><input class="inp" id="offerOldPrice" value="450" oninput="updatePreview()"></div>
+          <div class="col-md-4"><label class="lbl">Discount Label</label><input class="inp" id="offerDiscount" value="33% OFF" oninput="updatePreview()"></div>
+          <div class="col-md-6"><label class="lbl">Buy Now URL</label><input class="inp" id="offerUrl" value="/product/andhra-avakaya-mango-pickle/"></div>
+        </div>
+      </div>
+      <div style="background:#fdecea;border-radius:10px;padding:12px 16px;">
+        <div style="font-size:12px;font-weight:800;color:#c62828;margin-bottom:10px;">🔴 Pickle of the Week (Right)</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="lbl">Product Emoji</label><input class="inp" id="potwEmoji" value="🧄" maxlength="4" oninput="updatePreview()" style="font-size:20px;text-align:center;"></div>
+          <div class="col-md-6"><label class="lbl">Product Name</label><input class="inp" id="potwName" value="Rajasthani Garlic Pickle" oninput="updatePreview()"></div>
+          <div class="col-md-6"><label class="lbl">Weight / Type</label><input class="inp" id="potwWeight" value="500g | Traditional Recipe" oninput="updatePreview()"></div>
+          <div class="col-md-3"><label class="lbl">Sale Price (₹)</label><input class="inp" id="potwPrice" value="199" oninput="updatePreview()"></div>
+          <div class="col-md-3"><label class="lbl">Old Price (₹)</label><input class="inp" id="potwOldPrice" value="350" oninput="updatePreview()"></div>
+          <div class="col-md-6"><label class="lbl">Product URL</label><input class="inp" id="potwUrl" value="/product/rajasthani-garlic-pickle/"></div>
+          <div class="col-md-6">
+            <label class="lbl">Countdown Timer</label>
+            <div class="tog-row" style="margin-top:8px;"><div class="tog on" id="tog-countdown" onclick="togSwitch(this,'tog-countdown')"></div><span class="tog-lbl" id="tog-countdown-lbl">Show Timer</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> {% endcomment %}
+
+<!-- ──────── PANEL 4: BEST SELLERS ──────── -->
+<div class="sec-panel" id="panel-4">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">🔥</span><span class="ch-title">Best Selling Products</span><span class="ch-sub">— 4-product grid</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-bs" onclick="togSwitch(this,'tog-bs')"></div><span class="tog-lbl" id="tog-bs-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-6"><label class="lbl">Section Title</label><input class="inp" id="bsTitle" value="🔥 Best Selling Pickles" oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Section Subtitle</label><input class="inp" id="bsSubtitle" value="Most loved by our Nagpur customers" oninput="updatePreview()"></div>
+      </div>
+      <div style="background:#fff8f5;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#e85d04;font-weight:600;">
+        💡 Edit the 4 featured products shown on home page. Full product management is in Products section.
+      </div>
+      <div id="bsProductsList"></div>
+      <button class="btn-add" onclick="addBsProduct()"><i class="fa fa-plus"></i> Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──────── PANEL 5: BRANDS ──────── -->
+<div class="sec-panel" id="panel-5">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">🏷</span><span class="ch-title">Pickle Brands</span><span class="ch-sub">— brand chips row</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-brands" onclick="togSwitch(this,'tog-brands')"></div><span class="tog-lbl" id="tog-brands-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-6"><label class="lbl">Section Title</label><input class="inp" id="brandsTitle" value="Our Pickle Brands" oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Section Subtitle</label><input class="inp" id="brandsSubtitle" value="Handpicked exclusive brands from across India" oninput="updatePreview()"></div>
+      </div>
+      <div id="brandsList"></div>
+      <button class="btn-add" onclick="addBrand()"><i class="fa fa-plus"></i> Add Brand</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──────── PANEL 6: REVIEWS ──────── -->
+<div class="sec-panel" id="panel-6">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">💬</span><span class="ch-title">Customer Reviews</span><span class="ch-sub">— testimonials section</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-reviews" onclick="togSwitch(this,'tog-reviews')"></div><span class="tog-lbl" id="tog-reviews-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-2" style="margin-bottom: 20px;">
+        <div class="col-md-6">
+            <label class="lbl">Section Title</label>
+            <input class="inp" id="reviewsTitle" value="Customer Love" oninput="updatePreview(); markUnsaved();">
+        </div>
+        <div class="col-md-6">
+            <label class="lbl">Section Subtitle</label>
+            <input class="inp" id="reviewsSubtitle" value="What people are saying about our pickles" oninput="updatePreview(); markUnsaved();">
+        </div>
+    </div>
+      <div id="reviewsList"></div>
+      <button class="btn-add" onclick="addReview()"><i class="fa fa-plus"></i> Add Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──────── PANEL 7: NEWSLETTER ──────── -->
+<div class="sec-panel" id="panel-7">
+  <div class="card">
+    <div class="card-head"><span class="ch-ico">📧</span><span class="ch-title">Newsletter Section</span><span class="ch-sub">— email subscription banner</span>
+      <div class="ch-right"><div class="tog-row"><div class="tog on" id="tog-news" onclick="togSwitch(this,'tog-news')"></div><span class="tog-lbl" id="tog-news-lbl">Visible</span></div></div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12"><label class="lbl">Main Heading</label><input class="inp" id="newsHeading" value="🎁 Get 15% OFF Your First Order!" oninput="updatePreview()"></div>
+        <div class="col-12"><label class="lbl">Subtext / Description</label><textarea class="inp" id="newsDesc" oninput="updatePreview()">Subscribe to receive exclusive deals, new pickle arrivals &amp; Nagpur-only offers straight to your inbox.</textarea></div>
+        <div class="col-md-6"><label class="lbl">Email Placeholder</label><input class="inp" id="newsPlaceholder" value="Enter your email address..." oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Subscribe Button Text</label><input class="inp" id="newsBtnText" value="Subscribe 🎉" oninput="updatePreview()"></div>
+        <div class="col-12"><label class="lbl">Privacy Note</label><input class="inp" id="newsPrivacy" value="No spam. Unsubscribe anytime. 🔒 Privacy protected." oninput="updatePreview()"></div>
+        <div class="col-md-6"><label class="lbl">Form Action URL</label><input class="inp" id="newsUrl" value="/newsletter/subscribe/"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /col-left -->
+
+<!-- ══ RIGHT PREVIEW ══ -->
+<div class="col-lg-5">
+  <div class="preview-wrap">
+    <div class="prev-lbl">👁️ Live Home Page Preview</div>
+    <div class="pv-box">
+
+      {% comment %} <div class="pv-hero" id="pv-hero">
+        </div> {% endcomment %}
+
+      <div class="pv-feats" id="pv-feats"></div>
+
+      <div class="pv-cats" id="pv-cats"></div>
+
+      <div id="right-offer-preview-box"></div>
+
+      <div class="pv-brands" id="pv-brands"></div>
+
+      <div class="pv-reviews" id="pv-reviews"></div>
+
+      {% comment %} <div class="pv-news" id="pv-news">
+        </div> {% endcomment %}
+
+    </div>
+    
+    <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-top:14px;border:1.5px solid #f0f0f0;">
+      <div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:6px;">📋 How it works</div>
+      <div style="font-size:11px;color:#888;line-height:2;">
+        ① Switch tabs to edit each section<br>
+        ② All changes preview <strong>instantly</strong> on right<br>
+        ③ <strong>Save & Publish</strong> → saves to Django DB<br>
+        ④ Django template reads <code>{{ home.hero_title }}</code>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div></div></div></div>```
+
+
+</div><!-- /row -->
+</div><!-- /page -->
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+{{ reviews_list|json_script:"initial-reviews-data" }}
+
+<script>
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function getCookie(name) {
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : '';
+}
+
+var unsaved = false;
+
+function markUnsaved() {
+    unsaved = true;
+    var el = document.getElementById('saveStatus');
+    if (el) {
+        el.textContent = '⚠️ Unsaved Changes';
+        el.className = 's-pill sp-yellow';
+    }
+}
+
+function markSaved() {
+    unsaved = false;
+    var el = document.getElementById('saveStatus');
+    if (el) {
+        el.textContent = '✅ All Changes Saved';
+        el.className = 's-pill sp-green';
+    }
+}
+
+function toast(msg, type) {
+    var wrap = document.getElementById('toastWrap');
+    if (!wrap) return;
+    var t = document.createElement('div');
+    t.className = 't-item' + (type === 'err' ? ' err' : '');
+    t.textContent = msg;
+    wrap.appendChild(t);
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() { t.classList.add('show'); });
+    });
+    setTimeout(function() {
+        t.classList.remove('show');
+        setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 400);
+    }, 3000);
+}
+
+/* ═══════════════════════════════════════
+   STATE — Initialize reviews from Django
+═══════════════════════════════════════ */
+window.STATE = window.STATE || {};
+
+var reviewsDataElement = document.getElementById('initial-reviews-data');
+if (reviewsDataElement) {
+    window.STATE.reviews = JSON.parse(reviewsDataElement.textContent);
+} else {
+    window.STATE.reviews = [];
+}
+
+/* ═══════════════════════════════════════
+   RENDER: REVIEWS (Left Panel)
+═══════════════════════════════════════ */
+function renderReviews() {
+    var el = document.getElementById('reviewsList');
+    if (!el) return;
+    el.innerHTML = '';
+
+    window.STATE.reviews.forEach(function(r, i) {
+        var d = document.createElement('div');
+        d.style.cssText = 'background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid #f0f0f0;';
+
+        d.innerHTML =
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+                '<span style="font-size:11px;font-weight:800;color:#e85d04;">Review ' + (i + 1) + '</span>' +
+                '<button class="btn-danger" onclick="window.STATE.reviews.splice(' + i + ',1); renderReviews(); updatePreview(); markUnsaved();"><i class="fa fa-trash"></i></button>' +
+            '</div>' +
+
+            // ✅ Hidden id field — critical for Django UPDATE vs CREATE
+            '<input type="hidden" value="' + (r.id || '') + '">' +
+
+            '<div class="row g-2">' +
+                '<div class="col-md-1">' +
+                    '<label class="lbl">Avatar</label>' +
+                    '<input class="inp" value="' + esc(r.avatar) + '" maxlength="4" style="font-size:20px;text-align:center;" oninput="window.STATE.reviews[' + i + '].avatar=this.value; updatePreview(); markUnsaved();">' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<label class="lbl">Reviewer Name</label>' +
+                    '<input class="inp" value="' + esc(r.name) + '" oninput="window.STATE.reviews[' + i + '].name=this.value; updatePreview(); markUnsaved();">' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<label class="lbl">City / Location</label>' +
+                    '<input class="inp" value="' + esc(r.city) + '" oninput="window.STATE.reviews[' + i + '].city=this.value; updatePreview(); markUnsaved();">' +
+                '</div>' +
+                '<div class="col-md-3">' +
+                    '<label class="lbl">Rating (1-5)</label>' +
+                    '<input class="inp" type="number" min="1" max="5" value="' + esc(r.rating) + '" oninput="window.STATE.reviews[' + i + '].rating=this.value; updatePreview(); markUnsaved();">' +
+                '</div>' +
+                '<div class="col-12">' +
+                    '<label class="lbl">Review Text</label>' +
+                    '<textarea class="inp" oninput="window.STATE.reviews[' + i + '].text=this.value; updatePreview(); markUnsaved();">' + esc(r.text) + '</textarea>' +
+                '</div>' +
+            '</div>';
+
+        el.appendChild(d);
+    });
+}
+
+/* ═══════════════════════════════════════
+   ADD REVIEW
+═══════════════════════════════════════ */
+function addReview() {
+    // ✅ id: null so Django does CREATE, not UPDATE
+    window.STATE.reviews.push({
+        id: null,
+        avatar: '👤',
+        name: 'Customer Name',
+        city: 'Nagpur',
+        rating: '5',
+        text: 'Great product!'
+    });
+    renderReviews();
+    if (typeof updatePreview === 'function') updatePreview();
+    markUnsaved();
+    if (typeof toast === 'function') toast('✅ Review added', 'ok');
+}
+
+/* ═══════════════════════════════════════
+   LIVE PREVIEW: REVIEWS (Right Panel)
+═══════════════════════════════════════ */
+function updateReviewsPreview() {
+    var previewEl = document.getElementById('pv-reviews');
+    if (!previewEl) return;
+
+    previewEl.style.display = 'block';
+    previewEl.innerHTML = '';
+
+    var titleText    = (document.getElementById('reviewsTitle')    || {}).value || 'Customer Love';
+    var subtitleText = (document.getElementById('reviewsSubtitle') || {}).value || 'What people are saying';
+
+    var htmlStr =
+        '<div style="text-align:center; padding:20px 16px 12px;">' +
+            '<h3 style="font-size:16px;font-weight:800;color:#1a1a2e;margin:0 0 4px;">' + esc(titleText) + '</h3>' +
+            '<p style="font-size:11px;color:#888;margin:0;">' + esc(subtitleText) + '</p>' +
+        '</div>' +
+        '<div style="padding:0 12px 16px;">';
+
+    if (window.STATE.reviews.length === 0) {
+        htmlStr += '<div style="font-size:11px;color:#999;border:1px dashed #ccc;padding:10px 16px;border-radius:12px;text-align:center;">No reviews yet. Click "+ Add Review".</div>';
+    } else {
+        window.STATE.reviews.forEach(function(r) {
+            var stars = '⭐'.repeat(Math.min(parseInt(r.rating) || 5, 5));
+            htmlStr +=
+                '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:8px;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+                        '<span style="font-size:28px;line-height:1;">' + (esc(r.avatar) || '👤') + '</span>' +
+                        '<div style="flex:1;">' +
+                            '<div style="font-size:12px;font-weight:800;color:#1a1a2e;">' + (esc(r.name) || 'Customer') + '</div>' +
+                            '<div style="font-size:10px;color:#888;">📍 ' + (esc(r.city) || 'City') + '</div>' +
+                        '</div>' +
+                        '<div style="font-size:9px;">' + stars + '</div>' +
+                    '</div>' +
+                    '<div style="font-size:11px;color:#555;line-height:1.5;font-style:italic;">"' + (esc(r.text) || '') + '"</div>' +
+                '</div>';
+        });
+    }
+
+    htmlStr += '</div>';
+    previewEl.innerHTML = htmlStr;
+}
+
+/* ═══════════════════════════════════════
+   MASTER PREVIEW UPDATER
+═══════════════════════════════════════ */
+function updatePreview() {
+    if (typeof updateOfferPreview   === 'function') updateOfferPreview();
+    if (typeof updateBrandsPreview  === 'function') updateBrandsPreview();
+    if (typeof updateReviewsPreview === 'function') updateReviewsPreview();
+}
+
+/* ═══════════════════════════════════════
+   SAVE REVIEWS — sends to Django via AJAX
+═══════════════════════════════════════ */
+function saveReviews() {
+    // ✅ Always send id so Django knows UPDATE vs CREATE
+    var payload = window.STATE.reviews.map(function(r) {
+        return {
+            id:     r.id     || null,
+            avatar: r.avatar || '',
+            name:   r.name   || '',
+            city:   r.city   || '',
+            rating: r.rating || '5',
+            text:   r.text   || ''
+        };
+    });
+
+    fetch('{% url "Save_Review_Ajax" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')   // ✅ CSRF token
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.status === 'success') {
+            markSaved();
+            if (typeof toast === 'function') toast('✅ Reviews saved!', 'ok');
+
+            // ✅ Re-fetch page to get real DB ids for newly created reviews
+            return fetch(window.location.href);
+        } else {
+            if (typeof toast === 'function') toast('❌ Error: ' + data.message, 'err');
+            throw new Error(data.message);
+        }
+    })
+    .then(function(response) {
+        if (response) return response.text();
+    })
+    .then(function(html) {
+        if (!html) return;
+        // Parse fresh page and extract updated reviews with real DB ids
+        var parser  = new DOMParser();
+        var doc     = parser.parseFromString(html, 'text/html');
+        var freshEl = doc.getElementById('initial-reviews-data');
+        if (freshEl) {
+            window.STATE.reviews = JSON.parse(freshEl.textContent);
+            renderReviews();   // re-render with real ids now stored in STATE
+            updatePreview();
+        }
+    })
+    .catch(function(err) {
+        console.error('Save error:', err);
+        if (typeof toast === 'function') toast('❌ Network error. Try again.', 'err');
+    });
+}
+
+/* ═══════════════════════════════════════
+   SAVE ALL & RESET — wired to header buttons
+═══════════════════════════════════════ */
+function saveAll() {
+    saveReviews();
+    // Add saveBrands() here too if both sections are on the same page
+}
+
+function resetAll() {
+    if (!confirm('Reset all settings to last saved state?')) return;
+    location.reload();
+}
+
+function togSwitch(el, id) {
+    el.classList.toggle('on');
+    var on = el.classList.contains('on');
+    var lbl = document.getElementById(id + '-lbl');
+    if (lbl) lbl.textContent = on ? 'Visible' : 'Hidden';
+    updatePreview();
+    markUnsaved();
+}
+
+/* ═══════════════════════════════════════
+   PAGE INIT
+═══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+    renderReviews();
+    updatePreview();
+    markSaved();
+});
+</script>
+
+{% endblock %}
+
+
+{% comment %} <script>
+  window.HERO_DATA     = {{ hero_json|safe }};
+  window.FEATURES_DATA = {{ features_json|safe }};
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+var STATE = {
+  heroBtns: [
+    {icon:'fa-shopping-bag', text:'Shop Now',          url:'/products/',                          type:'primary'},
+    {icon:'fa-whatsapp',     text:'Order on WhatsApp', url:'https://wa.me/919876543210',          type:'secondary'},
+  ],
+  heroStats: [
+    {num:'50+',   lbl:'Pickle Brands'},
+    {num:'200+',  lbl:'Products'},
+    {num:'5000+', lbl:'Happy Customers'},
+    {num:'24Hr',  lbl:'Delivery'},
+  ],
+  heroFloatBadges: ['🌶️ Extra Spicy','✅ 100% Natural','🚚 Free Delivery'],
+  heroImageUrl: '',
+
+  feats: [
+    {ico:'🚚', title:'Free Delivery', sub:'Orders above ₹499'},
+    {ico:'🌿', title:'100% Natural', sub:'No preservatives'},
+    {ico:'🔄', title:'Easy Returns', sub:'7-day return policy'},
+    {ico:'🔒', title:'Secure Payment', sub:'UPI / Razorpay / COD'},
+  ],
+  cats: [
+    {emoji:'🥭', name:'Mango Pickle',     count:'32 products', url:'/category/mango/'},
+    {emoji:'🧄', name:'Garlic Pickle',    count:'18 products', url:'/category/garlic/'},
+    {emoji:'🍋', name:'Lemon Pickle',     count:'24 products', url:'/category/lemon/'},
+    {emoji:'🌶️', name:'Chilli Pickle',   count:'15 products', url:'/category/chilli/'},
+    {emoji:'🫙', name:'Mixed Pickle',     count:'20 products', url:'/category/mixed/'},
+    {emoji:'🗺️', name:'Regional Specials',count:'40 products', url:'/category/regional/'},
+  ],
+  bsProducts: [
+    {emoji:'🥭', badge:'Bestseller', brand:'Rajasthani Brand',  name:'Rajasthani Mango Pickle',     weight:'500g | Mustard Oil',  price:'320', oldPrice:'450', discount:'29% off', rating:'4.8', reviews:'128'},
+    {emoji:'🧄', badge:'New',        brand:'Andhra Heritage',   name:'Andhra Spicy Garlic Pickle',  weight:'250g | Sesame Oil',   price:'199', oldPrice:'280', discount:'29% off', rating:'4.7', reviews:'94'},
+    {emoji:'🍋', badge:'Premium',    brand:'Punjabi Tadka',     name:'Punjabi Sweet Lemon Pickle',  weight:'500g | Sun-dried',    price:'280', oldPrice:'380', discount:'26% off', rating:'4.6', reviews:'67'},
+    {emoji:'🌶️', badge:'Hot 🔥',   brand:'Gujarat Flavours',  name:'Gujarati Mixed Achaar',       weight:'400g | Sesame Oil',   price:'249', oldPrice:'320', discount:'22% off', rating:'4.9', reviews:'203'},
+  ],
+  brands: [
+    {emoji:'🏜️', name:'Rajasthani Pickles', url:'/brand/rajasthani-pickles/'},
+    {emoji:'🌶️', name:'Andhra Heritage',    url:'/brand/andhra-heritage/'},
+    {emoji:'🌾', name:'Punjabi Tadka',       url:'/brand/punjabi-tadka/'},
+    {emoji:'🫙', name:'Gujarat Flavours',    url:'/brand/gujarat-flavours/'},
+    {emoji:'🌴', name:'Kerala Spice',        url:'/brand/kerala-spice/'},
+    {emoji:'🍊', name:'Nagpur Specials',     url:'/brand/nagpur-specials/'},
+    {emoji:'🐟', name:'Bengal Achar',        url:'/brand/bengal-achar/'},
+    {emoji:'❄️', name:'Kashmiri Delight',   url:'/brand/kashmiri-delight/'},
+  ],
+  reviews: [
+    {avatar:'👩', name:'Priya Deshmukh', city:'Nagpur, Maharashtra', rating:'5', text:"Best mango pickle I've ever had! The Rajasthani recipe is authentic and the delivery was super fast."},
+    {avatar:'👨', name:'Rahul Sharma',   city:'Civil Lines, Nagpur', rating:'5', text:"The Andhra garlic pickle is mind-blowing! Can't find this quality anywhere in local stores."},
+    {avatar:'👩', name:'Sunita Patel',   city:'Sitabuldi, Nagpur',   rating:'4', text:'Ordered Gujarati mixed achaar — the taste is exactly like what my grandma used to make!'},
+  ],
+};
+
+/* ═══════════════════════════════════════
+   IMAGE UPLOAD
+═══════════════════════════════════════ */
+function handleImageUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    STATE.heroImageUrl = e.target.result;
+    // Show thumb in form
+    document.getElementById('imgThumb').src = e.target.result;
+    document.getElementById('imgPreviewWrap').style.display = 'flex';
+    document.getElementById('uploadBox').style.display = 'none';
+    updatePreview();
+    markUnsaved();
+    toast('✅ Image uploaded!', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  STATE.heroImageUrl = '';
+  document.getElementById('imgThumb').src = '';
+  document.getElementById('imgPreviewWrap').style.display = 'none';
+  document.getElementById('uploadBox').style.display = 'block';
+  updatePreview();
+  markUnsaved();
+  toast('🗑️ Image removed', 'ok');
+}
+
+/* ═══════════════════════════════════════
+   RENDER: HERO BUTTONS LIST
+═══════════════════════════════════════ */
+function renderHeroBtns() {
+  var el = document.getElementById('heroBtnsList');
+  el.innerHTML = '';
+  STATE.heroBtns.forEach(function(b, i) {
+    var d = document.createElement('div');
+    d.className = 'btn-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+
+      // Icon input
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">ICON</span>' +
+        '<input class="inp-sm inp-w100" value="' + esc(b.icon) + '" placeholder="fa-shopping-bag"' +
+          ' title="FontAwesome icon class e.g. fa-shopping-bag fa-whatsapp"' +
+          ' oninput="STATE.heroBtns[' + i + '].icon=this.value;updatePreview()">' +
+      '</div>' +
+
+      // Text input
+      '<div style="display:flex;flex-direction:column;gap:3px;flex:1;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">BUTTON TEXT</span>' +
+        '<input class="inp-sm inp-flex" value="' + esc(b.text) + '" placeholder="Shop Now"' +
+          ' oninput="STATE.heroBtns[' + i + '].text=this.value;updatePreview()">' +
+      '</div>' +
+
+      // URL input
+      '<div style="display:flex;flex-direction:column;gap:3px;flex:1;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">URL / LINK</span>' +
+        '<input class="inp-sm inp-flex" value="' + esc(b.url) + '" placeholder="/products/"' +
+          ' oninput="STATE.heroBtns[' + i + '].url=this.value">' +
+      '</div>' +
+
+      // Type select
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">STYLE</span>' +
+        '<select class="btn-type-select" onchange="STATE.heroBtns[' + i + '].type=this.value;updatePreview()">' +
+          '<option value="primary"'   + (b.type==='primary'   ?' selected':'') + '>🟠 Primary</option>' +
+          '<option value="secondary"' + (b.type==='secondary' ?' selected':'') + '>🟡 Secondary</option>' +
+          '<option value="outline"'   + (b.type==='outline'   ?' selected':'') + '>⬜ Outline</option>' +
+        '</select>' +
+      '</div>' +
+
+      // Delete
+      '<button class="btn-danger" onclick="removeHeroBtn(' + i + ')" title="Remove button">' +
+        '<i class="fa fa-trash"></i>' +
+      '</button>';
+    el.appendChild(d);
+  });
+}
+
+function addHeroBtn() {
+  STATE.heroBtns.push({icon:'fa-star', text:'New Button', url:'/', type:'outline'});
+  renderHeroBtns();
+  updatePreview();
+  markUnsaved();
+  toast('✅ Button added — edit text, icon & URL above', 'ok');
+}
+
+function removeHeroBtn(i) {
+  STATE.heroBtns.splice(i, 1);
+  renderHeroBtns();
+  updatePreview();
+  markUnsaved();
+}
+
+/* ═══════════════════════════════════════
+   RENDER: STATS
+═══════════════════════════════════════ */
+function renderHeroStats() {
+  var el = document.getElementById('heroStatsList');
+  el.innerHTML = '';
+  STATE.heroStats.forEach(function(s, i) {
+    var d = document.createElement('div'); d.className = 'stat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(s.num) + '" placeholder="50+"' +
+        ' oninput="STATE.heroStats[' + i + '].num=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(s.lbl) + '" placeholder="Label"' +
+        ' oninput="STATE.heroStats[' + i + '].lbl=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.heroStats.splice(' + i + ',1);renderHeroStats();updatePreview()">' +
+        '<i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addHeroStat() {
+  STATE.heroStats.push({num:'0+', lbl:'New Stat'});
+  renderHeroStats(); updatePreview(); markUnsaved();
+  toast('✅ Stat added', 'ok');
+}
+
+/* ═══════════════════════════════════════
+   RENDER: FLOAT BADGES
+═══════════════════════════════════════ */
+function renderHeroBadges() {
+  var el = document.getElementById('heroBadgesList');
+  el.innerHTML = '';
+  STATE.heroFloatBadges.forEach(function(b, i) {
+    var d = document.createElement('div'); d.className = 'stat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-flex" value="' + esc(b) + '" placeholder="🌶️ Badge text"' +
+        ' oninput="STATE.heroFloatBadges[' + i + ']=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.heroFloatBadges.splice(' + i + ',1);renderHeroBadges();updatePreview()">' +
+        '<i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addFloatBadge() {
+  STATE.heroFloatBadges.push('✨ New Badge');
+  renderHeroBadges(); updatePreview(); markUnsaved();
+  toast('✅ Badge added', 'ok');
+}
+
+/* ═══════════════════════════════════════
+   RENDER: FEATURES
+═══════════════════════════════════════ */
+function renderFeats() {
+  var el = document.getElementById('featsList'); el.innerHTML = '';
+  STATE.feats.forEach(function(f, i) {
+    var d = document.createElement('div'); d.className = 'feat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(f.ico) + '" maxlength="4" style="font-size:18px;text-align:center;" oninput="STATE.feats[' + i + '].ico=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-w120" value="' + esc(f.title) + '" placeholder="Feature name" oninput="STATE.feats[' + i + '].title=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(f.sub) + '" placeholder="Subtitle" oninput="STATE.feats[' + i + '].sub=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.feats.splice(' + i + ',1);renderFeats();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addFeat() { STATE.feats.push({ico:'✨',title:'New Feature',sub:'Description'}); renderFeats(); updatePreview(); toast('✅ Feature added','ok'); }
+
+/* ═══════════════════════════════════════
+   RENDER: CATEGORIES
+═══════════════════════════════════════ */
+function renderCats() {
+  var el = document.getElementById('catsList'); el.innerHTML = '';
+  STATE.cats.forEach(function(c, i) {
+    var d = document.createElement('div'); d.className = 'cat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(c.emoji) + '" maxlength="4" style="font-size:18px;text-align:center;" oninput="STATE.cats[' + i + '].emoji=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-w120" value="' + esc(c.name) + '" placeholder="Category name" oninput="STATE.cats[' + i + '].name=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-w80" value="' + esc(c.count) + '" placeholder="32 products" oninput="STATE.cats[' + i + '].count=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(c.url) + '" placeholder="/url/" oninput="STATE.cats[' + i + '].url=this.value">' +
+      '<button class="btn-danger" onclick="STATE.cats.splice(' + i + ',1);renderCats();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addCat() { STATE.cats.push({emoji:'🫙',name:'New Category',count:'0 products',url:'/category/new/'}); renderCats(); updatePreview(); toast('✅ Category added','ok'); }
+
+/* ═══════════════════════════════════════
+   RENDER: BEST SELLERS
+═══════════════════════════════════════ */
+function renderBsProducts() {
+  var el = document.getElementById('bsProductsList'); el.innerHTML = '';
+  STATE.bsProducts.forEach(function(p, i) {
+    var d = document.createElement('div');
+    d.style = 'background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid #f0f0f0;';
+    d.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<span style="font-size:11px;font-weight:800;color:#e85d04;">Product ' + (i+1) + '</span>' +
+      '<button class="btn-danger" onclick="STATE.bsProducts.splice(' + i + ',1);renderBsProducts();updatePreview()"><i class="fa fa-trash"></i> Remove</button>' +
+      '</div>' +
+      '<div class="row g-2">' +
+      '<div class="col-md-2"><label class="lbl">Emoji</label><input class="inp" value="' + esc(p.emoji) + '" maxlength="4" style="font-size:20px;text-align:center;" oninput="STATE.bsProducts[' + i + '].emoji=this.value;updatePreview()"></div>' +
+      '<div class="col-md-4"><label class="lbl">Product Name</label><input class="inp" value="' + esc(p.name) + '" oninput="STATE.bsProducts[' + i + '].name=this.value;updatePreview()"></div>' +
+      '<div class="col-md-3"><label class="lbl">Brand</label><input class="inp" value="' + esc(p.brand) + '" oninput="STATE.bsProducts[' + i + '].brand=this.value;updatePreview()"></div>' +
+      '<div class="col-md-3"><label class="lbl">Badge</label><input class="inp" value="' + esc(p.badge) + '" oninput="STATE.bsProducts[' + i + '].badge=this.value"></div>' +
+      '<div class="col-md-3"><label class="lbl">Weight</label><input class="inp" value="' + esc(p.weight) + '" oninput="STATE.bsProducts[' + i + '].weight=this.value"></div>' +
+      '<div class="col-md-3"><label class="lbl">Price (₹)</label><input class="inp" value="' + esc(p.price) + '" oninput="STATE.bsProducts[' + i + '].price=this.value;updatePreview()"></div>' +
+      '<div class="col-md-3"><label class="lbl">Old Price (₹)</label><input class="inp" value="' + esc(p.oldPrice) + '" oninput="STATE.bsProducts[' + i + '].oldPrice=this.value"></div>' +
+      '<div class="col-md-3"><label class="lbl">Discount</label><input class="inp" value="' + esc(p.discount) + '" oninput="STATE.bsProducts[' + i + '].discount=this.value"></div>' +
+      '<div class="col-md-3"><label class="lbl">Rating</label><input class="inp" value="' + esc(p.rating) + '" oninput="STATE.bsProducts[' + i + '].rating=this.value"></div>' +
+      '<div class="col-md-3"><label class="lbl">Reviews</label><input class="inp" value="' + esc(p.reviews) + '" oninput="STATE.bsProducts[' + i + '].reviews=this.value"></div>' +
+      '</div>';
+    el.appendChild(d);
+  });
+}
+function addBsProduct() { STATE.bsProducts.push({emoji:'🫙',badge:'New',brand:'Brand Name',name:'New Product',weight:'500g',price:'199',oldPrice:'299',discount:'30% off',rating:'4.5',reviews:'10'}); renderBsProducts(); updatePreview(); toast('✅ Product added','ok'); }
+
+/* ═══════════════════════════════════════
+   RENDER: BRANDS
+═══════════════════════════════════════ */
+function renderBrands() {
+  var el = document.getElementById('brandsList'); el.innerHTML = '';
+  STATE.brands.forEach(function(b, i) {
+    var d = document.createElement('div'); d.className = 'brand-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(b.emoji) + '" maxlength="4" style="font-size:18px;text-align:center;" oninput="STATE.brands[' + i + '].emoji=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-w140" value="' + esc(b.name) + '" placeholder="Brand name" oninput="STATE.brands[' + i + '].name=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(b.url) + '" placeholder="/brand/url/" oninput="STATE.brands[' + i + '].url=this.value">' +
+      '<button class="btn-danger" onclick="STATE.brands.splice(' + i + ',1);renderBrands();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addBrand() { STATE.brands.push({emoji:'🏷️',name:'New Brand',url:'/brand/new/'}); renderBrands(); updatePreview(); toast('✅ Brand added','ok'); }
+
+/* ═══════════════════════════════════════
+   RENDER: REVIEWS
+═══════════════════════════════════════ */
+function renderReviews() {
+  var el = document.getElementById('reviewsList'); el.innerHTML = '';
+  STATE.reviews.forEach(function(r, i) {
+    var d = document.createElement('div');
+    d.style = 'background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid #f0f0f0;';
+    d.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<span style="font-size:11px;font-weight:800;color:#e85d04;">Review ' + (i+1) + '</span>' +
+      '<button class="btn-danger" onclick="STATE.reviews.splice(' + i + ',1);renderReviews();updatePreview()"><i class="fa fa-trash"></i></button>' +
+      '</div>' +
+      '<div class="row g-2">' +
+      '<div class="col-md-1"><label class="lbl">Avatar</label><input class="inp" value="' + esc(r.avatar) + '" maxlength="4" style="font-size:20px;text-align:center;" oninput="STATE.reviews[' + i + '].avatar=this.value;updatePreview()"></div>' +
+      '<div class="col-md-4"><label class="lbl">Reviewer Name</label><input class="inp" value="' + esc(r.name) + '" oninput="STATE.reviews[' + i + '].name=this.value;updatePreview()"></div>' +
+      '<div class="col-md-4"><label class="lbl">City / Location</label><input class="inp" value="' + esc(r.city) + '" oninput="STATE.reviews[' + i + '].city=this.value;updatePreview()"></div>' +
+      '<div class="col-md-3"><label class="lbl">Rating (1-5)</label><input class="inp" type="number" min="1" max="5" value="' + esc(r.rating) + '" oninput="STATE.reviews[' + i + '].rating=this.value;updatePreview()"></div>' +
+      '<div class="col-12"><label class="lbl">Review Text</label><textarea class="inp" oninput="STATE.reviews[' + i + '].text=this.value;updatePreview()">' + esc(r.text) + '</textarea></div>' +
+      '</div>';
+    el.appendChild(d);
+  });
+}
+function addReview() { STATE.reviews.push({avatar:'👤',name:'Customer Name',city:'Nagpur',rating:'5',text:'Great product!'}); renderReviews(); updatePreview(); toast('✅ Review added','ok'); }
+
+/* ═══════════════════════════════════════
+   TOGGLE
+═══════════════════════════════════════ */
+function togSwitch(el, id) {
+  el.classList.toggle('on');
+  var on = el.classList.contains('on');
+  var l = document.getElementById(id + '-lbl');
+  if (l) l.textContent = on ? 'Visible' : 'Hidden';
+  updatePreview();
+  markUnsaved();
+}
+
+/* ═══════════════════════════════════════
+   TABS
+═══════════════════════════════════════ */
+function switchTab(idx) {
+  document.querySelectorAll('.sec-tab').forEach(function(t,i){ t.classList.toggle('on', i===idx); });
+  document.querySelectorAll('.sec-panel').forEach(function(p,i){ p.classList.toggle('on', i===idx); });
+}
+
+/* ═══════════════════════════════════════
+   LIVE PREVIEW
+═══════════════════════════════════════ */
+function updatePreview() {
+  markUnsaved();
+
+  // ── HERO ──
+  var hv = document.getElementById('tog-hero').classList.contains('on');
+  document.getElementById('pv-hero').style.display = hv ? 'block' : 'none';
+
+  document.getElementById('pv-heroBadge').textContent = document.getElementById('heroBadge').value;
+  var t1 = document.getElementById('heroTitle1').value;
+  var hl = document.getElementById('heroTitleHighlight').value;
+  var t2 = document.getElementById('heroTitle2').value;
+  document.getElementById('pv-heroTitle').innerHTML = t1 + ' <span style="color:#ffd60a;">' + hl + '</span><br>' + t2;
+  var sub = document.getElementById('heroSubtitle').value;
+  document.getElementById('pv-heroSub').textContent = sub.length > 90 ? sub.substring(0,90)+'…' : sub;
+
+  // BUTTONS PREVIEW — render each button with correct style
+  var btnsEl = document.getElementById('pv-heroBtns');
+  btnsEl.innerHTML = STATE.heroBtns.map(function(b) {
+    var iconClass = (b.icon || 'fa-star');
+    // FontAwesome: whatsapp needs fab, others use fa
+    var faPrefix = (iconClass.indexOf('whatsapp') !== -1 || iconClass.indexOf('twitter') !== -1 || iconClass.indexOf('facebook') !== -1 || iconClass.indexOf('instagram') !== -1) ? 'fab' : 'fa';
+    var iconHtml = '<i class="' + faPrefix + ' ' + iconClass + '"></i>';
+    var cls = b.type === 'primary' ? 'pv-btn-primary' : (b.type === 'secondary' ? 'pv-btn-secondary' : 'pv-btn-outline');
+    return '<div class="' + cls + '">' + iconHtml + ' ' + esc(b.text) + '</div>';
+  }).join('');
+
+  // STATS PREVIEW
+  var statsEl = document.getElementById('pv-heroStats');
+  statsEl.innerHTML = STATE.heroStats.map(function(s) {
+    return '<div class="pv-stat"><span class="num">' + esc(s.num) + '</span><span class="lbl-s">' + esc(s.lbl) + '</span></div>';
+  }).join('');
+
+  // IMAGE or EMOJI
+  var imgEl   = document.getElementById('pv-heroImg');
+  var emojiEl = document.getElementById('pv-heroEmoji');
+  if (STATE.heroImageUrl) {
+    imgEl.src = STATE.heroImageUrl;
+    imgEl.style.display = 'block';
+    emojiEl.style.display = 'none';
+  } else {
+    imgEl.style.display = 'none';
+    emojiEl.style.display = 'block';
+    emojiEl.textContent = document.getElementById('heroJar').value || '🫙';
+  }
+
+  // FLOATING BADGES PREVIEW
+  var fbEl = document.getElementById('pv-floatBadges');
+  fbEl.innerHTML = STATE.heroFloatBadges.map(function(b) {
+    return '<span class="pv-float-badge">' + esc(b) + '</span>';
+  }).join('');
+
+  // ── FEATURES ──
+  var fv = document.getElementById('tog-feats').classList.contains('on');
+  var fe = document.getElementById('pv-feats');
+  fe.style.display = fv ? 'flex' : 'none';
+  fe.innerHTML = STATE.feats.map(function(f) {
+    return '<div class="pv-feat"><div class="pv-feat-ico">' + f.ico + '</div><div><h6>' + esc(f.title) + '</h6><p>' + esc(f.sub) + '</p></div></div>';
+  }).join('');
+
+  // ── CATEGORIES ──
+  var cv = document.getElementById('tog-cats').classList.contains('on');
+  var ce = document.getElementById('pv-cats');
+  ce.style.display = cv ? 'flex' : 'none';
+  ce.innerHTML = STATE.cats.map(function(c) {
+    return '<div class="pv-cat"><span class="pv-cat-ico">' + c.emoji + '</span>' + esc(c.name) + '<br><span style="font-size:9px;color:#888;">' + esc(c.count) + '</span></div>';
+  }).join('');
+
+  // ── OFFER ──
+  var ov = document.getElementById('tog-offer').classList.contains('on');
+  document.getElementById('pv-offer').style.display = ov ? 'block' : 'none';
+  document.getElementById('pv-potw').style.display  = ov ? 'block' : 'none';
+  document.getElementById('pv-offerBadge').textContent   = document.getElementById('offerBadge').value;
+  document.getElementById('pv-offerName').textContent    = document.getElementById('offerName').value;
+  document.getElementById('pv-offerDesc').textContent    = document.getElementById('offerDesc').value;
+  document.getElementById('pv-offerPrice').textContent   = '₹' + document.getElementById('offerPrice').value;
+  document.getElementById('pv-offerOldPrice').textContent= '₹' + document.getElementById('offerOldPrice').value;
+  document.getElementById('pv-offerDiscount').textContent= document.getElementById('offerDiscount').value;
+  document.getElementById('pv-potwEmoji').textContent    = document.getElementById('potwEmoji').value;
+  document.getElementById('pv-potwName').textContent     = document.getElementById('potwName').value;
+  document.getElementById('pv-potwWeight').textContent   = document.getElementById('potwWeight').value;
+  document.getElementById('pv-potwPrice').textContent    = '₹' + document.getElementById('potwPrice').value;
+  document.getElementById('pv-potwOldPrice').textContent = '₹' + document.getElementById('potwOldPrice').value;
+
+  // ── BRANDS ──
+  var bv  = document.getElementById('tog-brands').classList.contains('on');
+  var bel = document.getElementById('pv-brands');
+  bel.style.display = bv ? 'flex' : 'none';
+  bel.innerHTML = STATE.brands.map(function(b) {
+    return '<div class="pv-brand">' + b.emoji + ' ' + esc(b.name) + '</div>';
+  }).join('');
+
+  // ── NEWSLETTER ──
+  var nv = document.getElementById('tog-news').classList.contains('on');
+  document.getElementById('pv-news').style.display = nv ? 'block' : 'none';
+  document.getElementById('pv-newsHeading').textContent = document.getElementById('newsHeading').value;
+  var nd = document.getElementById('newsDesc').value;
+  document.getElementById('pv-newsDesc').textContent = nd.length > 60 ? nd.substring(0,60)+'…' : nd;
+}
+
+/* ═══════════════════════════════════════
+   SAVE / LOAD / RESET
+═══════════════════════════════════════ */
+var unsaved = false;
+function markUnsaved() {
+  if (unsaved) return; // avoid repeated DOM writes
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⏳ Unsaved changes';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+}
+
+function saveAll() {
+  var data = {
+    hero: {
+      badge_text: document.getElementById('heroBadge').value,
+      title_line1: document.getElementById('heroTitle1').value,
+      title_highlight: document.getElementById('heroTitleHighlight').value,
+      title_line2: document.getElementById('heroTitle2').value,
+      subtitle: document.getElementById('heroSubtitle').value,
+      jar_emoji: document.getElementById('heroJar').value,
+      hero_image_url: STATE.heroImageUrl || '',
+      imageUrl: STATE.heroImageUrl,
+      buttons_json: STATE.heroBtns,
+      stats_json: STATE.heroStats,
+      float_badges_json: STATE.heroFloatBadges,
+      visible: document.getElementById('tog-hero').classList.contains('on')
+    },
+    feats:    {items_json: STATE.feats, is_visible: document.getElementById('tog-feats').classList.contains('on')},
+    cats:     {title: document.getElementById('catTitle').value, subtitle: document.getElementById('catSubtitle').value, items: STATE.cats, visible: document.getElementById('tog-cats').classList.contains('on')},
+    offer:    {badge: document.getElementById('offerBadge').value, name: document.getElementById('offerName').value, desc: document.getElementById('offerDesc').value, price: document.getElementById('offerPrice').value, oldPrice: document.getElementById('offerOldPrice').value, discount: document.getElementById('offerDiscount').value, url: document.getElementById('offerUrl').value, potwEmoji: document.getElementById('potwEmoji').value, potwName: document.getElementById('potwName').value, potwWeight: document.getElementById('potwWeight').value, potwPrice: document.getElementById('potwPrice').value, potwOldPrice: document.getElementById('potwOldPrice').value, potwUrl: document.getElementById('potwUrl').value, countdown: document.getElementById('tog-countdown').classList.contains('on'), visible: document.getElementById('tog-offer').classList.contains('on')},
+    bsProducts:{title: document.getElementById('bsTitle').value, subtitle: document.getElementById('bsSubtitle').value, items: STATE.bsProducts, visible: document.getElementById('tog-bs').classList.contains('on')},
+    brands:   {title: document.getElementById('brandsTitle').value, subtitle: document.getElementById('brandsSubtitle').value, items: STATE.brands, visible: document.getElementById('tog-brands').classList.contains('on')},
+    reviews:  {title: document.getElementById('reviewsTitle').value, subtitle: document.getElementById('reviewsSubtitle').value, items: STATE.reviews, visible: document.getElementById('tog-reviews').classList.contains('on')},
+    newsletter:{heading: document.getElementById('newsHeading').value, desc: document.getElementById('newsDesc').value, placeholder: document.getElementById('newsPlaceholder').value, btn: document.getElementById('newsBtnText').value, privacy: document.getElementById('newsPrivacy').value, url: document.getElementById('newsUrl').value, visible: document.getElementById('tog-news').classList.contains('on')},
+  };
+  // Save to localStorage as backup
+  localStorage.setItem('picklehub_homepage_settings', JSON.stringify(data));
+
+  toast('💾 Saving...', 'ok');
+  document.getElementById('saveStatus').textContent = '⏳ Saving…';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+
+  // POST hero to Django
+  var heroPromise = fetch('/api/hero/save/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify(data.hero),
+  }).then(function(r){ return r.json(); });
+
+  // POST features to Django
+  var featuresPromise = fetch('/api/features/save/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify(data.feats),
+  }).then(function(r){ return r.json(); });
+
+  Promise.all([heroPromise, featuresPromise])
+  .then(function(results) {
+    var allOk = results.every(function(r){ return r.ok; });
+    if (allOk) {
+      unsaved = false;
+      document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+      document.getElementById('saveStatus').className   = 's-pill sp-green';
+      toast('✅ All sections saved & published!', 'ok');
+    } else {
+      toast('❌ One or more sections failed to save', 'err');
+      document.getElementById('saveStatus').textContent = '❌ Save failed';
+    }
+  })
+  .catch(function(err) {
+    toast('❌ Network error — saved locally only', 'err');
+    unsaved = false;
+    document.getElementById('saveStatus').textContent = '✅ Saved locally';
+    document.getElementById('saveStatus').className   = 's-pill sp-green';
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset all home page settings?')) return;
+  localStorage.removeItem('picklehub_homepage_settings');
+  location.reload();
+}
+
+function loadSaved() {
+  var saved = localStorage.getItem('picklehub_homepage_settings');
+  if (!saved) return;
+  try {
+    var d = JSON.parse(saved);
+    if (d.hero) {
+      var map = {heroBadge:'badge',heroTitle1:'title1',heroTitleHighlight:'highlight',heroTitle2:'title2',heroSubtitle:'subtitle',heroJar:'jar'};
+      Object.keys(map).forEach(function(id) { if (d.hero[map[id]] !== undefined) document.getElementById(id).value = d.hero[map[id]]; });
+      if (d.hero.buttons_json) STATE.heroBtns = d.hero.buttons_json;
+      if (d.hero.stats_json) STATE.heroStats = d.hero.stats_json;
+      if (d.hero.float_badges_json) STATE.heroFloatBadges = d.hero.float_badges_json;
+      if (d.hero.imageUrl && d.hero.imageUrl) {
+        STATE.heroImageUrl = d.hero.imageUrl;
+        document.getElementById('imgThumb').src = d.hero.imageUrl;
+        document.getElementById('imgPreviewWrap').style.display = 'flex';
+        document.getElementById('uploadBox').style.display = 'none';
+      }
+    }
+    if (d.feats && d.feats.items_json)    STATE.feats       = d.feats.items_json;
+    if (d.cats)  { if (d.cats.items)      STATE.cats        = d.cats.items; if (d.cats.title) document.getElementById('catTitle').value=d.cats.title; if (d.cats.subtitle) document.getElementById('catSubtitle').value=d.cats.subtitle; }
+    if (d.offer) { ['offerBadge','offerName','offerDesc','offerPrice','offerOldPrice','offerDiscount','offerUrl','potwEmoji','potwName','potwWeight','potwPrice','potwOldPrice','potwUrl'].forEach(function(f,i){var ks=['badge','name','desc','price','oldPrice','discount','url','potwEmoji','potwName','potwWeight','potwPrice','potwOldPrice','potwUrl'];if(d.offer[ks[i]]!==undefined)document.getElementById(f).value=d.offer[ks[i]];}); }
+    if (d.bsProducts && d.bsProducts.items) STATE.bsProducts = d.bsProducts.items;
+    if (d.brands && d.brands.items)       STATE.brands      = d.brands.items;
+    if (d.reviews && d.reviews.items)     STATE.reviews     = d.reviews.items;
+    if (d.newsletter) { ['newsHeading','newsDesc','newsPlaceholder','newsBtnText','newsPrivacy','newsUrl'].forEach(function(f,i){var ks=['heading','desc','placeholder','btn','privacy','url'];if(d.newsletter[ks[i]]!==undefined)document.getElementById(f).value=d.newsletter[ks[i]];}); }
+  } catch(e) { console.warn('Could not load saved settings', e); }
+}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+function toast(msg, type) {
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 't-item' + (type === 'err' ? ' err' : '');
+  t.textContent = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(function() { requestAnimationFrame(function() { t.classList.add('show'); }); });
+  setTimeout(function() { t.classList.remove('show'); setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 400); }, 3000);
+}
+
+/* ═══════════════════════════════════════
+   HELPER: CSRF cookie
+═══════════════════════════════════════ */
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+
+/* ═══════════════════════════════════════
+   HELPER: escape HTML
+═══════════════════════════════════════ */
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+loadSaved();
+
+// ── Pre-fill from Django-injected data ──
+(function initFromDjango() {
+  // Hero
+  var hd = window.HERO_DATA || {};
+  if (hd.buttons_json)      STATE.heroBtns        = hd.buttons_json;
+  if (hd.stats_json)        STATE.heroStats        = hd.stats_json;
+  if (hd.float_badges_json) STATE.heroFloatBadges  = hd.float_badges_json;
+  if (hd.hero_image_url) {
+    STATE.heroImageUrl = hd.hero_image_url;
+    var thumb = document.getElementById('imgThumb');
+    var wrap  = document.getElementById('imgPreviewWrap');
+    var box   = document.getElementById('uploadBox');
+    if (thumb) thumb.src = hd.hero_image_url;
+    if (wrap)  wrap.style.display = 'flex';
+    if (box)   box.style.display  = 'none';
+  }
+  // Text fields
+  var fieldMap = {
+    heroBadge:'badge_text', heroTitle1:'title_line1', heroTitleHighlight:'title_highlight',
+    heroTitle2:'title_line2', heroSubtitle:'subtitle', heroJar:'jar_emoji'
+  };
+  Object.keys(fieldMap).forEach(function(id) {
+    var val = hd[fieldMap[id]];
+    var el  = document.getElementById(id);
+    if (val !== undefined && el) el.value = val;
+  });
+  if (hd.is_visible === false) {
+    var t = document.getElementById('tog-hero');
+    var l = document.getElementById('tog-hero-lbl');
+    if (t) t.classList.remove('on');
+    if (l) l.textContent = 'Hidden';
+  }
+
+  // Features
+  var fd = window.FEATURES_DATA || {};
+  if (fd.items_json) STATE.feats = fd.items_json;
+  if (fd.is_visible === false) {
+    var tf = document.getElementById('tog-feats');
+    var lf = document.getElementById('tog-feats-lbl');
+    if (tf) tf.classList.remove('on');
+    if (lf) lf.textContent = 'Hidden';
+  }
+})();
+
+renderHeroBtns();
+renderHeroStats();
+renderHeroBadges();
+renderFeats();
+renderCats();
+renderBsProducts();
+renderBrands();
+renderReviews();
+updatePreview();
+unsaved = false; // reset after init
+document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+document.getElementById('saveStatus').className   = 's-pill sp-green';
+</script> {% endcomment %}
+</body>
+</html>

@@ -1,0 +1,507 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Today's Offers | PickleHub Admin{% endblock %}
+{% block page_title %}🌅 Today's Offers{% endblock %}
+{% block nav_deals_main %}active{% endblock %}
+{% block nav_deals_show %}show{% endblock %}
+{% block nav_deal_today %}active{% endblock %}
+
+{% block topbar_actions %}
+<button onclick="openModal()" 
+        style="background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+    <i class="fa fa-plus"></i> Add Offer
+</button>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── grid ── */
+.to-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:32px; }
+.to-card { background:#fff; border-radius:16px; border:1.5px solid #e8ddd0; overflow:hidden; display:flex; flex-direction:column; transition:all .2s; position:relative; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+.to-card:hover { transform:translateY(-4px); box-shadow:0 12px 36px rgba(28,18,8,.13); border-color:#c8470a; }
+.to-card.hidden-card { opacity:.5; }
+
+/* ── image area ── */
+.to-img { aspect-ratio:1; background:#f5ede0; display:flex; align-items:center; justify-content:center; font-size:52px; position:relative; }
+.to-badge { position:absolute; top:8px; left:8px; font-size:10px; font-weight:900; padding:2px 8px; border-radius:50px; color:#fff; }
+.to-badge.deal,.to-badge.hot { background:#e85d04; }
+.to-badge.new  { background:#0d9e60; }
+.to-badge.bogo { background:#1a5fa8; }
+.to-badge.disc { background:#7c3aed; }
+
+/* ── body ── */
+.to-body { padding:12px 16px; flex:1; }
+.to-brand { font-size:11px; color:#7a6a58; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.to-name  { font-size:14px; font-weight:700; line-height:1.3; margin:4px 0; color:#1a1a2e; }
+.to-price-row { display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.to-price { font-size:18px; font-weight:800; color:#c8470a; }
+.to-old   { font-size:13px; color:#b5a898; text-decoration:line-through; }
+.to-disc  { font-size:11px; font-weight:900; color:#2d7a2f; background:#e6f4e6; padding:2px 6px; border-radius:4px; }
+
+/* ── admin action footer ── */
+.to-footer { padding:8px 16px 12px; border-top:1px solid #ecdfd0; display:flex; gap:6px; }
+.act-btn { flex:1; border:none; border-radius:8px; padding:7px 0; font-size:11px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; transition:.2s; }
+.btn-edit-c   { background:#e3f2fd; color:#1565c0; }
+.btn-edit-c:hover { background:#1565c0; color:#fff; }
+.btn-toggle-v { background:#fff3e0; color:#e85d04; }
+.btn-toggle-v:hover { background:#e85d04; color:#fff; }
+.btn-del-c    { background:#fdecea; color:#c62828; }
+.btn-del-c:hover { background:#c62828; color:#fff; }
+
+/* ── empty state ── */
+.empty-state { text-align:center; padding:60px 20px; color:#aaa; }
+.empty-state .ei { font-size:52px; margin-bottom:12px; }
+
+/* ── modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay.show { display:flex; }
+.modal-box { background:#fff; border-radius:20px; width:100%; max-width:560px; max-height:92vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-head { background:linear-gradient(135deg,#1a1a2e,#0f3460); padding:18px 24px; border-radius:20px 20px 0 0; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:1; }
+.modal-title { font-size:16px; font-weight:700; color:#ffd60a; }
+.modal-close { background:rgba(255,255,255,.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; font-size:15px; cursor:pointer; }
+.modal-body { padding:22px; }
+
+/* ── form inputs ── */
+.lbl { font-size:12px; font-weight:700; color:#555; margin-bottom:4px; display:block; }
+.inp { width:100%; border-radius:10px; border:1.5px solid #e0e0e0; padding:10px 14px; font-size:13px; font-family:'Poppins',sans-serif; outline:none; transition:.2s; box-sizing:border-box; }
+.inp:focus { border-color:#e85d04; box-shadow:0 0 0 3px rgba(232,93,4,.08); }
+.inp-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.inp-full { margin-bottom:14px; }
+.err-msg { background:#fdecea; border-left:3px solid #e74c3c; border-radius:8px; padding:9px 13px; font-size:12px; color:#c62828; font-weight:600; margin-bottom:14px; display:none; }
+
+/* ── live preview inside modal ── */
+.pv-card { background:#f5ede0; border-radius:12px; padding:14px; display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.pv-emoji { font-size:36px; }
+.pv-name  { font-size:13px; font-weight:700; color:#1a1a2e; }
+.pv-price { font-size:16px; font-weight:800; color:#c8470a; }
+.pv-badge { font-size:10px; font-weight:900; padding:2px 8px; border-radius:50px; color:#fff; background:#e85d04; display:inline-block; margin-bottom:4px; }
+.pv-brand { font-size:11px; color:#7a6a58; font-weight:600; }
+
+/* ── save button ── */
+.btn-save-main { width:100%; background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; margin-top:8px; }
+.btn-save-main:hover { background:linear-gradient(135deg,#c8470a,#e85d04); }
+
+/* ── toast ── */
+.toast-bar { position:fixed; bottom:24px; right:24px; background:#1a1a2e; color:#fff; border-radius:12px; padding:14px 20px; font-size:13px; font-weight:600; z-index:9999; transform:translateY(80px); opacity:0; transition:.3s; pointer-events:none; }
+.toast-bar.show { transform:translateY(0); opacity:1; }
+.toast-bar.ok  { border-left:4px solid #52b788; }
+.toast-bar.err { border-left:4px solid #e85d04; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+
+<!-- stats row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card orange">
+            <div class="stat-icon orange">🌅</div>
+            <div class="stat-value">{{ offers.count }}</div>
+            <div class="stat-label">Total Offers</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card green">
+            <div class="stat-icon green">✅</div>
+            <div class="stat-value">{{ offers|length }}</div>
+            <div class="stat-label">Visible</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card blue">
+            <div class="stat-icon blue">🏷️</div>
+            <div class="stat-value">{{ offers.count }}</div>
+            <div class="stat-label">With Badges</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card purple">
+            <div class="stat-icon purple">👁️</div>
+            <div class="stat-value" id="visibleCount">—</div>
+            <div class="stat-label">Live on Site</div>
+        </div>
+    </div>
+</div>
+
+<!-- offers grid -->
+<div class="sec-card">
+    <div class="sec-head">
+        <h3>🌅 Today's Offer Cards</h3>
+        <button onclick="openModal()"
+                style="background:#e85d04;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;">
+            <i class="fa fa-plus"></i> Add Offer
+        </button>
+    </div>
+    <div class="sec-body">
+
+        {% if offers %}
+        <div class="to-grid" id="offersGrid">
+            {% for item in offers %}
+            <div class="to-card {% if not item.is_visible %}hidden-card{% endif %}"
+                 id="card-{{ item.id }}" data-id="{{ item.id }}">
+
+             <div class="to-img">
+  {% if item.product.image %}
+    <img src="{{ item.product.image.url }}"
+         alt="{{ item.product.name }}"
+         style="width:100%;height:100%;object-fit:cover;display:block;">
+  {% else %}
+    {{ item.product.emoji }}
+  {% endif %}
+  <span class="to-badge {{ item.badge }}">{{ item.badge_label }}</span>
+  {% if not item.is_visible %}
+    <span style="position:absolute;top:8px;right:8px;background:#1a1a2e;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:50px;">HIDDEN</span>
+  {% endif %}
+</div>
+
+                <div class="to-body">
+                    {# ✅ All product details come from Product model via FK #}
+                    <div class="to-brand">{{ item.product.brand.name }}</div>
+                    <div class="to-name">{{ item.product.name }}</div>
+                    <div style="font-size:11px;color:#b5a898;">{{ item.product.weight }}</div>
+                    <div class="to-price-row">
+                        <span class="to-price">₹{{ item.product.price }}</span>
+                        {% if item.product.old_price %}
+                            <span class="to-old">₹{{ item.product.old_price }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="to-footer">
+                    {# ✅ openEdit now only needs offer id, product id, badge, badge_label, is_visible #}
+                    <button class="act-btn btn-edit-c"
+                            onclick="openEdit(
+                                {{ item.id }},
+                                {{ item.product.id }},
+                                '{{ item.badge }}',
+                                '{{ item.badge_label|escapejs }}',
+                                {{ item.is_visible|yesno:'true,false' }}
+                            )">
+                        <i class="fa fa-pen"></i> Edit
+                    </button>
+                    <button class="act-btn btn-toggle-v" onclick="toggleVisible({{ item.id }})">
+                        <i class="fa fa-eye{% if not item.is_visible %}-slash{% endif %}"></i>
+                        {% if item.is_visible %}Hide{% else %}Show{% endif %}
+                    </button>
+                    <button class="act-btn btn-del-c" onclick="deleteOffer({{ item.id }}, '{{ item.product.name|escapejs }}')">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="ei">🌅</div>
+            <h4 style="color:#1a1a2e;font-weight:700;">No offers yet</h4>
+            <p style="font-size:13px;margin-top:6px;">Click "Add Offer" to create your first Today's Offer card.</p>
+            <button onclick="openModal()"
+                    style="margin-top:16px;background:#e85d04;color:#fff;border:none;border-radius:50px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;">
+                <i class="fa fa-plus"></i> Add First Offer
+            </button>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<!-- ══ ADD / EDIT MODAL ══ -->
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="modal-title" id="modalTitle">🌅 Add Today's Offer</span>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+
+            <!-- live preview — now auto-fills from selected product -->
+            <div class="pv-card" id="pvCard">
+                <div class="pv-emoji" id="pvEmoji">🥒</div>
+                <div>
+                    <div class="pv-badge" id="pvBadge">DEAL</div>
+                    <div class="pv-brand" id="pvBrand">Brand</div>
+                    <div class="pv-name"  id="pvName">Select a product</div>
+                    <div class="pv-price" id="pvPrice">₹—</div>
+                </div>
+            </div>
+
+            <div class="err-msg" id="errMsg"></div>
+
+            <input type="hidden" id="editId" value="">
+
+            <!-- ✅ ONLY CHANGE: product dropdown instead of manual name/brand/price fields -->
+            <div class="inp-full">
+                <label class="lbl">Select Product *</label>
+                <select class="inp" id="fProduct" onchange="updatePreview()">
+                    <option value="">— Choose a product —</option>
+                    {% for p in products %}
+                    <option value="{{ p.id }}"
+                            data-emoji="{{ p.emoji }}"
+                            data-name="{{ p.name }}"
+                            data-brand="{{ p.brand.name|default:'' }}"
+                            data-price="{{ p.price }}">
+                        {{ p.emoji }} {{ p.name }} — ₹{{ p.price }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Badge row — UNCHANGED from your original -->
+            <div class="inp-row">
+                <div>
+                    <label class="lbl">Badge Type *</label>
+                    <select class="inp" id="fBadge" onchange="updatePreview()">
+                        {% for val, label in badge_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="lbl">Badge Label *</label>
+                    <input class="inp" id="fBadgeLabel" placeholder="e.g. HOT DEAL" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <!-- Visible toggle — UNCHANGED from your original -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                <label style="position:relative;display:inline-block;width:44px;height:24px;">
+                    <input type="checkbox" id="fVisible" checked style="opacity:0;width:0;height:0;">
+                    <span id="toggleSlider"
+                          onclick="document.getElementById('fVisible').click()"
+                          style="position:absolute;inset:0;background:#2d6a4f;border-radius:50px;cursor:pointer;transition:.3s;">
+                        <span style="position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;display:block;" id="toggleThumb"></span>
+                    </span>
+                </label>
+                <span style="font-size:13px;font-weight:600;color:#555;">Visible on site</span>
+            </div>
+
+            <button class="btn-save-main" onclick="saveOffer()">
+                <i class="fa fa-save"></i> <span id="saveBtnText">Save Offer</span>
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast-bar" id="toastBar"></div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+var EDIT_ID = null;
+
+/* ── CSRF ── */
+function csrf() {
+    var name = 'csrftoken';
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith(name + '=')) return decodeURIComponent(c.substring(name.length + 1));
+    }
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+}
+
+/* ── toast ── */
+function toast(msg, type) {
+    var t = document.getElementById('toastBar');
+    t.textContent = msg;
+    t.className = 'toast-bar ' + (type || 'ok') + ' show';
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+/* ── modal open (Add new) ── */
+function openModal() {
+    EDIT_ID = null;
+    document.getElementById('modalTitle').textContent = '🌅 Add Today\'s Offer';
+    document.getElementById('saveBtnText').textContent = 'Save Offer';
+    document.getElementById('editId').value = '';
+    document.getElementById('errMsg').style.display = 'none';
+
+    /* ✅ Reset only the fields that exist now */
+    document.getElementById('fProduct').value    = '';
+    document.getElementById('fBadge').value      = 'deal';
+    document.getElementById('fBadgeLabel').value = '';
+    document.getElementById('fVisible').checked  = true;
+
+    updatePreview();
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+/*
+    ✅ openEdit — SIMPLIFIED
+    OLD version had 12 arguments (name, brand, emoji, weight, price, old_price, badge, badge_label, wa, url, visible)
+    NEW version has only 5 arguments (offer_id, product_id, badge, badge_label, visible)
+    Product data is stored in the <option> data attributes, so we just select the right option.
+*/
+function openEdit(offer_id, product_id, badge, badge_label, visible) {
+    EDIT_ID = offer_id;
+    document.getElementById('modalTitle').textContent = '✏️ Edit Offer';
+    document.getElementById('saveBtnText').textContent = 'Update Offer';
+    document.getElementById('editId').value = offer_id;
+    document.getElementById('errMsg').style.display = 'none';
+
+    /* Select the correct product in dropdown */
+    document.getElementById('fProduct').value      = product_id;
+    document.getElementById('fBadge').value        = badge;
+    document.getElementById('fBadgeLabel').value   = badge_label;
+    document.getElementById('fVisible').checked    = visible;
+
+    updatePreview();
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+/*
+    ✅ updatePreview — reads product details from the selected <option>'s data attributes
+    OLD: read from fName, fEmoji, fPrice inputs
+    NEW: read from fProduct selected option's data-* attributes
+*/
+function updatePreview() {
+    var sel   = document.getElementById('fProduct');
+    var opt   = sel.options[sel.selectedIndex];
+    var badge = document.getElementById('fBadgeLabel').value || 'DEAL';
+    var type  = document.getElementById('fBadge').value || 'deal';
+
+    if (opt && opt.value) {
+        document.getElementById('pvEmoji').textContent = opt.getAttribute('data-emoji') || '🥒';
+        document.getElementById('pvName').textContent  = opt.getAttribute('data-name')  || 'Product Name';
+        document.getElementById('pvBrand').textContent = opt.getAttribute('data-brand') || '';
+        document.getElementById('pvPrice').textContent = '₹' + (opt.getAttribute('data-price') || '0');
+    } else {
+        document.getElementById('pvEmoji').textContent = '🥒';
+        document.getElementById('pvName').textContent  = 'Select a product';
+        document.getElementById('pvBrand').textContent = '';
+        document.getElementById('pvPrice').textContent = '₹—';
+    }
+
+    document.getElementById('pvBadge').textContent = badge;
+
+    var colors = { deal:'#e85d04', hot:'#e85d04', new:'#0d9e60', bogo:'#1a5fa8', disc:'#7c3aed' };
+    document.getElementById('pvBadge').style.background = colors[type] || '#e85d04';
+}
+
+/* ── validate ── */
+function showErr(msg) {
+    var el = document.getElementById('errMsg');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+}
+
+/*
+    ✅ saveOffer — SIMPLIFIED PAYLOAD
+    OLD: sent name, brand, emoji, weight, price, old_price, whatsapp_num, product_url, badge, badge_label, is_visible
+    NEW: sends only product_id, badge, badge_label, is_visible
+         Backend gets all other data from Product model via FK
+*/
+function saveOffer() {
+    var product_id = document.getElementById('fProduct').value;
+    var badge      = document.getElementById('fBadge').value;
+    var bl         = document.getElementById('fBadgeLabel').value.trim();
+
+    document.getElementById('errMsg').style.display = 'none';
+
+    if (!product_id) { showErr('Please select a product.'); return; }
+    if (!bl)         { showErr('Badge label is required.'); return; }
+
+    var payload = {
+        product_id:  parseInt(product_id),
+        badge:       badge,
+        badge_label: bl,
+        is_visible:  document.getElementById('fVisible').checked
+    };
+
+    var url = EDIT_ID
+        ? "{% url 'todays_offer_edit' offer_id=0 %}".replace('/0/', '/' + EDIT_ID + '/')
+        : "{% url 'todays_offer_add' %}";
+
+    var btn = document.querySelector('.btn-save-main');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+        body: JSON.stringify(payload)
+    })
+    .then(function(r) {
+        if (!r.ok) throw new Error('Server error ' + r.status);
+        return r.json();
+    })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> <span id="saveBtnText">' + (EDIT_ID ? 'Update Offer' : 'Save Offer') + '</span>';
+        if (data.ok) {
+            toast(data.message, 'ok');
+            closeModal();
+            setTimeout(function() { window.location.reload(); }, 800);
+        } else {
+            showErr(data.error || 'Something went wrong.');
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Save Offer';
+        showErr(err.message);
+    });
+}
+
+/* ── toggle visibility — UNCHANGED ── */
+function toggleVisible(id) {
+    fetch("{% url 'todays_offer_toggle' offer_id=0 %}".replace('/0/', '/' + id + '/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            toast(data.message, 'ok');
+            setTimeout(function() { window.location.reload(); }, 600);
+        } else {
+            toast('Error: ' + data.error, 'err');
+        }
+    });
+}
+
+/* ── delete — UNCHANGED ── */
+function deleteOffer(id, name) {
+    if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+    fetch("{% url 'todays_offer_delete' offer_id=0 %}".replace('/0/', '/' + id + '/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            toast(data.message, 'ok');
+            var card = document.getElementById('card-' + id);
+            if (card) card.remove();
+        } else {
+            toast('Error: ' + data.error, 'err');
+        }
+    });
+}
+
+/* ── count visible on load — UNCHANGED ── */
+(function() {
+    var visible = document.querySelectorAll('.to-card:not(.hidden-card)').length;
+    document.getElementById('visibleCount').textContent = visible;
+})();
+</script>
+{% endblock %}

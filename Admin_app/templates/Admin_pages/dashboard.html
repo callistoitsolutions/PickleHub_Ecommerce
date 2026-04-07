@@ -1,0 +1,317 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Admin Dashboard | PickleHub Nagpur{% endblock %}
+{% block page_title %}📊 Dashboard Overview{% endblock %}
+
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card orange">
+            <div class="stat-icon orange" aria-hidden="true">💰</div>
+            <div class="stat-value">₹48,320</div>
+            <div class="stat-label">Today's Revenue</div>
+            <div class="stat-change up">↑ 18% vs yesterday</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card green">
+            <div class="stat-icon green" aria-hidden="true">📦</div>
+            <div class="stat-value">37</div>
+            <div class="stat-label">Orders Today</div>
+            <div class="stat-change up">↑ 12 new in last hour</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card blue">
+            <div class="stat-icon blue" aria-hidden="true">👥</div>
+            <div class="stat-value">1,284</div>
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-change up">↑ 23 new this week</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card purple">
+            <div class="stat-icon purple" aria-hidden="true">🔍</div>
+            <div class="stat-value">5</div>
+            <div class="stat-label">Pending Payments</div>
+            <div class="stat-change down">⚠ Needs verification</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-left:4px solid #e85d04;">
+            <div style="font-size:11px;color:#aaa;font-weight:600;">THIS MONTH</div>
+            <div style="font-size:22px;font-weight:800;color:#e85d04;margin:4px 0;">₹3,84,290</div>
+            <div style="font-size:12px;color:#888;">Monthly Revenue</div>
+            <div class="stat-change up" style="font-size:11px;margin-top:6px;">↑ 32% vs last month</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-left:4px solid #2d6a4f;">
+            <div style="font-size:11px;color:#aaa;font-weight:600;">MONTH ORDERS</div>
+            <div style="font-size:22px;font-weight:800;color:#2d6a4f;margin:4px 0;">842</div>
+            <div style="font-size:12px;color:#888;">Orders This Month</div>
+            <div class="stat-change up" style="font-size:11px;margin-top:6px;">↑ 28% vs last month</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-left:4px solid #1565c0;">
+            <div style="font-size:11px;color:#aaa;font-weight:600;">AVG ORDER</div>
+            <div style="font-size:22px;font-weight:800;color:#1565c0;margin:4px 0;">₹456</div>
+            <div style="font-size:12px;color:#888;">Avg Order Value</div>
+            <div class="stat-change up" style="font-size:11px;margin-top:6px;">↑ ₹34 vs last month</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-left:4px solid #ffd60a;">
+            <div style="font-size:11px;color:#aaa;font-weight:600;">LOW STOCK</div>
+            <div style="font-size:22px;font-weight:800;color:#856404;margin:4px 0;">7</div>
+            <div style="font-size:12px;color:#888;">Products Low Stock</div>
+            <div class="stat-change down" style="font-size:11px;margin-top:6px;">⚠ Restock needed</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="sec-card">
+            <div class="sec-head">
+                <h3>📈 Revenue — Last 7 Days</h3>
+                <select style="border:1px solid #e0e0e0;border-radius:8px;padding:5px 10px;font-size:12px;outline:none;" id="chartPeriod" onchange="updateChart(this.value)" aria-label="Select period">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="12">Last 12 Months</option>
+                </select>
+            </div>
+            <div class="sec-body"><div class="chart-wrap"><canvas id="revenueChart" aria-label="Revenue chart"></canvas></div></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sec-card h-100">
+            <div class="sec-head"><h3>🥧 Payment Methods</h3></div>
+            <div class="sec-body"><div class="chart-wrap" style="height:200px;"><canvas id="payChart" aria-label="Payment methods chart"></canvas></div>
+            <div style="font-size:12px;margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>💵 COD</span><strong style="color:#e85d04;">52%</strong></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>📱 UPI</span><strong style="color:#1565c0;">35%</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>🏦 Bank</span><strong style="color:#2d6a4f;">13%</strong></div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-7">
+        <div class="sec-card">
+            <div class="sec-head">
+                <h3>🛒 Recent Orders</h3>
+                <a href="picklehub_orders_report.html" style="font-size:12px;color:#e85d04;text-decoration:none;font-weight:600;">View All →</a>
+            </div>
+            <div class="sec-body" style="padding:0;">
+                <table class="orders-table w-100" aria-label="Recent orders">
+                    <thead>
+                        <tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Payment</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>#PH-2026-00847</strong><br><small style="color:#aaa;font-size:10px;">2 mins ago</small></td><td>Priya D.<br><small style="color:#aaa;">Nagpur</small></td><td><strong style="color:#e85d04;">₹967</strong></td><td><span style="font-size:11px;">📱 UPI</span></td><td><span class="status-pill status-payment_review">Payment Review</span></td><td><button class="btn-verify" onclick="verifyPayment(this,'PH-2026-00847')">Verify</button><button class="btn-view-ss" onclick="viewScreenshot()">📸</button></td></tr>
+                        <tr><td><strong>#PH-2026-00846</strong><br><small style="color:#aaa;font-size:10px;">18 mins ago</small></td><td>Rahul S.<br><small style="color:#aaa;">Nagpur</small></td><td><strong style="color:#e85d04;">₹450</strong></td><td><span style="font-size:11px;">💵 COD</span></td><td><span class="status-pill status-confirmed">Confirmed</span></td><td><button style="background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Dispatch</button></td></tr>
+                        <tr><td><strong>#PH-2026-00845</strong><br><small style="color:#aaa;font-size:10px;">1 hr ago</small></td><td>Sunita K.<br><small style="color:#aaa;">Nagpur</small></td><td><strong style="color:#e85d04;">₹1,299</strong></td><td><span style="font-size:11px;">🏦 Bank</span></td><td><span class="status-pill status-dispatched">Dispatched</span></td><td><button style="background:linear-gradient(135deg,#2d6a4f,#52b788);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Delivered</button></td></tr>
+                        <tr><td><strong>#PH-2026-00844</strong><br><small style="color:#aaa;font-size:10px;">3 hrs ago</small></td><td>Amit P.<br><small style="color:#aaa;">Nagpur</small></td><td><strong style="color:#e85d04;">₹320</strong></td><td><span style="font-size:11px;">📱 UPI</span></td><td><span class="status-pill status-delivered">Delivered</span></td><td><span style="font-size:11px;color:#2d6a4f;">✅ Done</span></td></tr>
+                        <tr><td><strong>#PH-2026-00843</strong><br><small style="color:#aaa;font-size:10px;">5 hrs ago</small></td><td>Meera J.<br><small style="color:#aaa;">Nagpur</small></td><td><strong style="color:#e85d04;">₹780</strong></td><td><span style="font-size:11px;">💵 COD</span></td><td><span class="status-pill status-cancelled">Cancelled</span></td><td><span style="font-size:11px;color:#c62828;">❌ Refund</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="sec-card">
+            <div class="sec-head">
+                <h3>🔍 Payment Verification Queue</h3>
+                <span style="background:#e8e0ff;color:#4a0e8f;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;">5 pending</span>
+            </div>
+            <div class="sec-body">
+                <div class="pay-review-item">
+                    <div class="pay-thumb-placeholder" aria-hidden="true">📸</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;font-size:13px;">Priya Deshmukh</div>
+                        <div style="font-size:11px;color:#888;">Order #PH-2026-00847 · ₹967 · UPI</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <button class="btn-verify" onclick="verifyPayment(this,'00847')">✅ Verify</button>
+                        <button class="btn-view-ss" onclick="viewScreenshot()">📸 View</button>
+                    </div>
+                </div>
+                <div class="pay-review-item">
+                    <div class="pay-thumb-placeholder" aria-hidden="true">📸</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;font-size:13px;">Vishal Rao</div>
+                        <div style="font-size:11px;color:#888;">Order #PH-2026-00842 · ₹1,299 · Bank</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <button class="btn-verify" onclick="verifyPayment(this,'00842')">✅ Verify</button>
+                        <button class="btn-view-ss">📸 View</button>
+                    </div>
+                </div>
+                <div class="pay-review-item">
+                    <div class="pay-thumb-placeholder" aria-hidden="true">📸</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;font-size:13px;">Anjali Wagh</div>
+                        <div style="font-size:11px;color:#888;">Order #PH-2026-00839 · ₹450 · UPI</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <button class="btn-verify" onclick="verifyPayment(this,'00839')">✅ Verify</button>
+                        <button class="btn-view-ss">📸 View</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="sec-card">
+            <div class="sec-head"><h3>🏆 Top Selling Products</h3></div>
+            <div class="sec-body">
+                <div class="top-prod"><div class="prod-rank">1</div><div class="prod-icon">🥭</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Rajasthani Mango Pickle</div><div style="font-size:11px;color:#aaa;">203 sold · ₹64,960</div><div class="progress-bar-custom mt-1"><div class="progress-fill" style="width:95%"></div></div></div></div>
+                <div class="top-prod"><div class="prod-rank">2</div><div class="prod-icon">🧄</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Andhra Garlic Pickle</div><div style="font-size:11px;color:#aaa;">178 sold · ₹35,422</div><div class="progress-bar-custom mt-1"><div class="progress-fill" style="width:78%"></div></div></div></div>
+                <div class="top-prod"><div class="prod-rank">3</div><div class="prod-icon">🍋</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Punjabi Lemon Pickle</div><div style="font-size:11px;color:#aaa;">154 sold · ₹43,120</div><div class="progress-bar-custom mt-1"><div class="progress-fill" style="width:66%"></div></div></div></div>
+                <div class="top-prod"><div class="prod-rank">4</div><div class="prod-icon">🌶️</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Gujarati Mixed Achaar</div><div style="font-size:11px;color:#aaa;">132 sold · ₹32,868</div><div class="progress-bar-custom mt-1"><div class="progress-fill" style="width:55%"></div></div></div></div>
+                <div class="top-prod"><div class="prod-rank">5</div><div class="prod-icon">🫙</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kerala Coconut Pickle</div><div style="font-size:11px;color:#aaa;">98 sold · ₹21,560</div><div class="progress-bar-custom mt-1"><div class="progress-fill" style="width:42%"></div></div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="sec-card">
+            <div class="sec-head">
+                <h3>⚠️ Low Stock Alerts</h3>
+                <span style="background:#fff3cd;color:#856404;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;">7 items</span>
+            </div>
+            <div class="sec-body">
+                <div class="low-stock-item"><span>🥭 Mango Pickle 1Kg</span><span class="stock-num">3 left</span></div>
+                <div class="low-stock-item"><span>🧄 Garlic Pickle 500g</span><span class="stock-num">5 left</span></div>
+                <div class="low-stock-item"><span>🍋 Lemon Pickle 250g</span><span class="stock-num">2 left</span></div>
+                <div class="low-stock-item"><span>🌶️ Red Chilli Pickle</span><span class="stock-num">7 left</span></div>
+                <div class="low-stock-item"><span>🫚 Mixed Achaar 2Kg</span><span class="stock-num">1 left</span></div>
+                <div class="low-stock-item"><span>🥒 Karela Pickle 500g</span><span class="stock-num">4 left</span></div>
+                <div class="low-stock-item"><span>🧅 Onion Pickle 250g</span><span class="stock-num">6 left</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="sec-card">
+            <div class="sec-head"><h3>⚡ Quick Actions</h3></div>
+            <div class="sec-body" style="display:flex;flex-direction:column;gap:10px;">
+                <a href="#" class="quick-action" style="--c1:#e85d04;--c2:#f48c06;">
+                    <span class="qa-icon" aria-hidden="true">➕</span>
+                    <div><div class="qa-title">Add New Product</div><div class="qa-sub">Add to catalogue</div></div>
+                </a>
+                <a href="picklehub_orders_report.html" class="quick-action" style="--c1:#1565c0;--c2:#1976d2;">
+                    <span class="qa-icon" aria-hidden="true">📋</span>
+                    <div><div class="qa-title">View All Orders</div><div class="qa-sub">Manage & dispatch</div></div>
+                </a>
+                <a href="picklehub_reports.html" class="quick-action" style="--c1:#2d6a4f;--c2:#52b788;">
+                    <span class="qa-icon" aria-hidden="true">📊</span>
+                    <div><div class="qa-title">Sales Reports</div><div class="qa-sub">Revenue & analytics</div></div>
+                </a>
+                <a href="#" class="quick-action" style="--c1:#6a0dad;--c2:#9c27b0;">
+                    <span class="qa-icon" aria-hidden="true">🏷️</span>
+                    <div><div class="qa-title">Create Coupon</div><div class="qa-sub">Discounts & offers</div></div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ssModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;" onclick="this.style.display='none'" role="dialog" aria-modal="true" aria-label="Payment screenshot">
+    <div style="background:#fff;border-radius:20px;padding:24px;max-width:400px;width:90%;text-align:center;" onclick="event.stopPropagation()">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">📸 Payment Screenshot</h3>
+        <div style="background:#f8f9fa;border-radius:14px;padding:40px;font-size:50px;margin-bottom:14px;">🖼️<br><div style="font-size:13px;color:#aaa;margin-top:8px;">Screenshot uploaded by customer</div></div>
+        <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="document.getElementById('ssModal').style.display='none'" style="background:#e85d04;color:#fff;border:none;border-radius:50px;padding:10px 20px;font-weight:700;cursor:pointer;">Close</button>
+            <button style="background:#2d6a4f;color:#fff;border:none;border-radius:50px;padding:10px 20px;font-weight:700;cursor:pointer;">✅ Mark Verified</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Revenue chart
+    var ctx = document.getElementById('revenueChart').getContext('2d');
+    var revenueChart = new Chart(ctx, {
+        type:'bar',
+        data:{
+            labels:['11 Mar','12 Mar','13 Mar','14 Mar','15 Mar','16 Mar','17 Mar'],
+            datasets:[{
+                label:'Revenue (₹)',
+                data:[32400,41200,28900,55600,38400,49800,48320],
+                backgroundColor:'rgba(232,93,4,0.15)',
+                borderColor:'#e85d04',
+                borderWidth:2,
+                borderRadius:8,
+            },{
+                label:'Orders',
+                data:[28,34,22,45,31,42,37],
+                type:'line',
+                borderColor:'#2d6a4f',
+                backgroundColor:'transparent',
+                pointBackgroundColor:'#2d6a4f',
+                pointRadius:4,
+                yAxisID:'y1',
+                tension:0.4,
+            }]
+        },
+        options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+            scales:{
+                y:{ticks:{callback:v=>'₹'+v.toLocaleString('en-IN'), font:{size:10}}, grid:{color:'#f0f0f0'}},
+                y1:{position:'right', ticks:{font:{size:10}}, grid:{display:false}},
+                x:{ticks:{font:{size:10}}, grid:{display:false}}
+            }
+        }
+    });
+
+    // Payment pie chart
+    var ctx2 = document.getElementById('payChart').getContext('2d');
+    new Chart(ctx2,{
+        type:'doughnut',
+        data:{
+            labels:['COD','UPI','Bank Transfer'],
+            datasets:[{data:[52,35,13],backgroundColor:['#e85d04','#1565c0','#2d6a4f'],borderWidth:0}]
+        },
+        options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'65%'}
+    });
+
+    function updateChart(period){
+        var labels7=['11 Mar','12 Mar','13 Mar','14 Mar','15 Mar','16 Mar','17 Mar'];
+        var data7=[32400,41200,28900,55600,38400,49800,48320];
+        var orders7=[28,34,22,45,31,42,37];
+        revenueChart.data.labels=labels7;
+        revenueChart.data.datasets[0].data=data7;
+        revenueChart.data.datasets[1].data=orders7;
+        revenueChart.update();
+    }
+
+    function verifyPayment(btn, orderId){
+        btn.innerHTML='✅ Verified!';
+        btn.style.background='linear-gradient(135deg,#155724,#2d6a4f)';
+        btn.disabled=true;
+        alert('Order #'+orderId+' payment verified! Status updated to Confirmed.');
+    }
+
+    function viewScreenshot(){
+        document.getElementById('ssModal').style.display='flex';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,777 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Cart & Checkout | PickleHub Nagpur{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== STEPS ===== */
+    .steps-bar { background:#fff; padding:14px 0; border-bottom:1px solid #f0f0f0; }
+    .steps { display:flex; align-items:center; justify-content:center; }
+    .step { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:#bbb; }
+    .step .num { width:30px; height:30px; border-radius:50%; background:#e0e0e0; color:#aaa; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; transition:.3s; }
+    .step.active .num { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; }
+    .step.active { color:#e85d04; }
+    .step.done .num { background:#2d6a4f; color:#fff; }
+    .step.done { color:#2d6a4f; }
+    .step-line { width:50px; height:2px; background:#e0e0e0; margin:0 6px; transition:.3s; }
+    .step-line.done { background:#2d6a4f; }
+
+    /* ===== PAGE HEADER ===== */
+    .page-header { background:linear-gradient(135deg,#1a1a2e,#0f3460); padding:32px 0; color:#fff; }
+    .page-header h2 { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:#ffd60a; margin:0; }
+
+    /* ===== CART ITEMS ===== */
+    .white-card { background:#fff; border-radius:16px; box-shadow:0 4px 18px rgba(0,0,0,0.07); overflow:hidden; margin-bottom:18px; }
+    .card-head { background:linear-gradient(135deg,#1a1a2e,#0f3460); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; font-weight:700; font-size:14px; }
+    .cart-item { padding:16px 20px; border-bottom:1px solid #f8f8f8; display:flex; align-items:center; gap:14px; transition:.3s; }
+    .cart-item:last-child { border-bottom:none; }
+    .cart-item:hover { background:#fffaf7; }
+    .item-img { width:76px; height:76px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:36px; flex-shrink:0; }
+    .item-details { flex:1; min-width:0; }
+    .item-brand { font-size:10px; color:#e85d04; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+    .item-name { font-weight:700; font-size:14px; color:#1a1a2e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .item-meta { font-size:11px; color:#aaa; margin-top:2px; }
+    .qty-ctrl { display:flex; align-items:center; }
+    .qty-btn { width:30px; height:30px; border:1.5px solid #e0e0e0; background:#fff; cursor:pointer; font-size:16px; font-weight:700; transition:.3s; line-height:1; }
+    .qty-btn:hover { background:#fff3e0; border-color:#e85d04; color:#e85d04; }
+    .qty-btn:first-child { border-radius:8px 0 0 8px; }
+    .qty-btn:last-child { border-radius:0 8px 8px 0; }
+    .qty-inp { width:40px; height:30px; border:1.5px solid #e0e0e0; border-left:none; border-right:none; text-align:center; font-weight:700; font-size:13px; outline:none; }
+    .item-price { font-size:17px; font-weight:800; color:#e85d04; white-space:nowrap; }
+    .item-old { font-size:11px; color:#ccc; text-decoration:line-through; }
+    .remove-btn { background:none; border:none; color:#ddd; font-size:16px; cursor:pointer; padding:6px; border-radius:8px; transition:.3s; flex-shrink:0; }
+    .remove-btn:hover { color:#e85d04; background:#fff0ee; }
+
+    /* ===== COUPON ===== */
+    .coupon-row { display:flex; gap:10px; }
+    .coupon-inp { flex:1; border:2px dashed #e85d04; border-radius:50px; padding:10px 18px; outline:none; font-size:13px; background:#fffaf7; }
+    .coupon-inp::placeholder { color:#ccc; }
+    .coupon-btn { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:50px; padding:10px 22px; font-weight:700; font-size:13px; cursor:pointer; transition:.3s; white-space:nowrap; }
+    .coupon-btn:hover { background:linear-gradient(135deg,#9d0208,#e85d04); }
+
+    /* ===== ORDER SUMMARY SIDEBAR ===== */
+    .summary-sticky { position:sticky; top:76px; }
+    .summary-body { padding:18px; }
+    .sum-row { display:flex; justify-content:space-between; font-size:13px; color:#555; margin-bottom:9px; align-items:center; }
+    .sum-row.green { color:#2d6a4f; font-weight:600; }
+    .sum-divider { border:none; border-top:2px dashed #f0f0f0; margin:12px 0; }
+    .sum-total { display:flex; justify-content:space-between; font-size:19px; font-weight:800; color:#1a1a2e; }
+    .savings-pill { background:linear-gradient(135deg,#e8f5e9,#f0fff4); border:1px solid #a8e6cf; border-radius:10px; padding:9px 14px; font-size:13px; color:#2d6a4f; font-weight:600; text-align:center; margin:12px 0; }
+    .btn-proceed { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:50px; padding:14px; width:100%; font-weight:700; font-size:15px; cursor:pointer; transition:.3s; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 15px rgba(232,93,4,0.3); }
+    .btn-proceed:hover { background:linear-gradient(135deg,#9d0208,#e85d04); transform:translateY(-2px); box-shadow:0 8px 24px rgba(232,93,4,0.4); }
+    .btn-continue-shop { background:transparent; color:#e85d04; border:2px solid #e85d04; border-radius:50px; padding:10px; width:100%; font-weight:600; font-size:13px; cursor:pointer; margin-top:8px; transition:.3s; }
+    .btn-continue-shop:hover { background:#fff3e0; }
+
+    /* ===== CHECKOUT SECTION ===== */
+    .checkout-section { display:none; }
+    .section-card { background:#fff; border-radius:16px; box-shadow:0 4px 18px rgba(0,0,0,0.07); padding:22px; margin-bottom:18px; }
+    .section-title { font-size:15px; font-weight:700; color:#1a1a2e; border-bottom:2px solid #f0f0f0; padding-bottom:11px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .section-title .icon-circle { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .form-label { font-size:12px; font-weight:600; color:#666; margin-bottom:4px; }
+    .form-control, .form-select { border-radius:10px; border:1.5px solid #e0e0e0; padding:10px 14px; font-size:13px; transition:.3s; }
+    .form-control:focus, .form-select:focus { border-color:#e85d04; box-shadow:0 0 0 3px rgba(232,93,4,0.1); outline:none; }
+
+    /* ===== PAYMENT OPTIONS ===== */
+    .pay-option { border:2px solid #e8e8e8; border-radius:14px; padding:0; cursor:pointer; transition:.3s; margin-bottom:12px; overflow:hidden; }
+    .pay-option-header { display:flex; align-items:center; gap:12px; padding:14px 16px; }
+    .pay-option:hover { border-color:#f48c06; }
+    .pay-option.selected { border-color:#e85d04; background:#fffaf7; }
+    .pay-option input[type="radio"] { accent-color:#e85d04; width:17px; height:17px; flex-shrink:0; cursor:pointer; }
+    .pay-icon-box { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .pay-title { font-weight:700; font-size:14px; color:#1a1a2e; }
+    .pay-desc { font-size:12px; color:#888; margin-top:2px; }
+    .pay-badge { background:linear-gradient(135deg,#2d6a4f,#52b788); color:#fff; font-size:10px; font-weight:700; padding:2px 9px; border-radius:50px; margin-left:auto; white-space:nowrap; }
+    .pay-badge.orange { background:linear-gradient(135deg,#e85d04,#f48c06); }
+    .pay-detail-panel { display:none; padding:0 16px 16px; border-top:1px dashed #f0e0d0; margin-top:0; }
+    .pay-option.selected .pay-detail-panel { display:block; }
+
+    /* ===== QR CODE UPLOAD SECTION ===== */
+    .qr-upload-area { border:2px dashed #e85d04; border-radius:14px; padding:20px; text-align:center; background:#fffaf7; cursor:pointer; transition:.3s; position:relative; }
+    .qr-upload-area:hover { background:#fff3e0; border-color:#f48c06; }
+    .qr-preview { width:180px; height:180px; object-fit:cover; border-radius:12px; border:3px solid #e85d04; display:none; margin:0 auto; }
+    .qr-placeholder { font-size:50px; margin-bottom:8px; display:block; }
+    .qr-upload-label { font-size:13px; font-weight:600; color:#e85d04; cursor:pointer; }
+    .qr-hint { font-size:11px; color:#aaa; margin-top:4px; }
+
+    /* ===== UPI & BANK DETAILS BOX ===== */
+    .upi-detail-box { background:#fff3e0; border-radius:12px; padding:14px; margin-bottom:12px; }
+    .upi-id-row { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid #e85d04; border-radius:10px; padding:10px 14px; margin:8px 0; }
+    .upi-id-text { font-weight:700; font-size:14px; color:#e85d04; letter-spacing:0.5px; }
+    .copy-btn { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:.3s; }
+    .copy-btn:hover { background:linear-gradient(135deg,#9d0208,#e85d04); }
+    .copy-btn.copied { background:linear-gradient(135deg,#2d6a4f,#52b788); }
+    .bank-detail-table { width:100%; font-size:13px; }
+    .bank-detail-table td { padding:8px 10px; border-bottom:1px solid #f5f5f5; }
+    .bank-detail-table td:first-child { color:#888; font-weight:600; width:140px; }
+    .bank-detail-table td:last-child { color:#1a1a2e; font-weight:700; }
+    .bank-detail-table tr:last-child td { border-bottom:none; }
+
+    /* ===== SCREENSHOT UPLOAD ===== */
+    .screenshot-upload { border:2px dashed #ccc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:.3s; background:#f8f9fa; }
+    .screenshot-upload:hover { border-color:#e85d04; background:#fffaf7; }
+    .screenshot-upload input[type="file"] { display:none; }
+    .screenshot-preview { max-width:100%; max-height:150px; border-radius:10px; border:2px solid #e85d04; display:none; margin:8px auto; }
+
+    /* ===== COD SECTION ===== */
+    .cod-info-box { background:linear-gradient(135deg,#e8f5e9,#f0fff4); border:1.5px solid #a8e6cf; border-radius:14px; padding:16px; }
+    .cod-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; font-size:13px; color:#2d6a4f; }
+    .cod-row:last-child { margin-bottom:0; }
+    .cod-row .ico { font-size:18px; flex-shrink:0; margin-top:1px; }
+
+    /* ===== PLACE ORDER BTN ===== */
+    .btn-place-order { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:50px; padding:16px; width:100%; font-weight:800; font-size:16px; cursor:pointer; transition:.3s; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 20px rgba(232,93,4,0.3); }
+    .btn-place-order:hover { background:linear-gradient(135deg,#9d0208,#e85d04); transform:translateY(-2px); box-shadow:0 10px 30px rgba(232,93,4,0.4); }
+    .btn-back { background:transparent; color:#888; border:1.5px solid #e0e0e0; border-radius:50px; padding:11px; width:100%; font-weight:600; font-size:13px; cursor:pointer; margin-top:8px; transition:.3s; }
+    .btn-back:hover { background:#f8f9fa; color:#333; }
+
+    /* ===== SUCCESS SECTION ===== */
+    .success-section { display:none; }
+    .success-card { background:#fff; border-radius:24px; padding:40px 30px; box-shadow:0 10px 40px rgba(0,0,0,0.1); text-align:center; }
+    .success-icon { font-size:80px; display:block; animation:bounceIn .6s; }
+    @keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+    .order-id-pill { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; padding:8px 24px; border-radius:50px; font-weight:800; font-size:15px; display:inline-block; margin:12px 0; }
+    .detail-box { background:#f8f9fa; border-radius:14px; padding:14px; margin:16px 0; text-align:left; }
+    .detail-row { display:flex; justify-content:space-between; font-size:13px; color:#555; padding:6px 0; border-bottom:1px solid #f0f0f0; }
+    .detail-row:last-child { border-bottom:none; }
+    .btn-success-action { border:none; border-radius:50px; padding:12px 26px; font-weight:700; font-size:14px; cursor:pointer; transition:.3s; margin:4px; }
+    .btn-track-order { background:linear-gradient(135deg,#2d6a4f,#52b788); color:#fff; }
+    .btn-shop-more { background:linear-gradient(135deg,#e85d04,#f48c06); color:#fff; }
+    .btn-wa-confirm { background:#25D366; color:#fff; display:inline-flex; align-items:center; gap:8px; padding:13px 26px; border-radius:50px; font-weight:700; font-size:14px; text-decoration:none; margin-top:10px; transition:.3s; }
+    .btn-wa-confirm:hover { background:#128C7E; color:#fff; }
+
+    /* ===== RESPONSIVE ====== */
+    @media(max-width:768px) {
+        .step-line { width:28px; }
+        .step span { display:none; }
+        .summary-sticky { position:static; margin-top:10px; }
+        .cart-item { flex-wrap:wrap; }
+        .item-details { min-width:calc(100% - 90px); }
+    }
+    @media(max-width:480px) {
+        .cart-item { gap:10px; }
+        .item-img { width:60px; height:60px; font-size:28px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="steps-bar" aria-label="Checkout steps">
+    <div class="container">
+        <div class="steps">
+            <div class="step active" id="step1"><div class="num">1</div><span>Cart</span></div>
+            <div class="step-line" id="line1"></div>
+            <div class="step" id="step2"><div class="num">2</div><span>Address</span></div>
+            <div class="step-line" id="line2"></div>
+            <div class="step" id="step3"><div class="num">3</div><span>Payment</span></div>
+            <div class="step-line" id="line3"></div>
+            <div class="step" id="step4"><div class="num">4</div><span>Confirmed</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="page-header" aria-label="Page Header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2" style="font-size:12px;">
+                <li class="breadcrumb-item"><a href="/" style="color:#f48c06; text-decoration:none;">Home</a></li>
+                <li class="breadcrumb-item active" id="pageHeaderLabel" style="color:rgba(255,255,255,0.6);">Shopping Cart</li>
+            </ol>
+        </nav>
+        <h2 id="pageTitle">🛒 Shopping Cart</h2>
+        <p style="color:rgba(255,255,255,0.6); font-size:13px; margin-top:4px;" id="pageSubtitle">3 items in your cart</p>
+    </div>
+</div>
+
+<div class="container py-4">
+
+<div id="cartSection">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="white-card">
+                <div class="card-head">
+                    <span><i class="fa fa-shopping-basket me-2"></i>Your Cart Items</span>
+                    <span style="background:rgba(255,255,255,0.15); padding:3px 12px; border-radius:50px; font-size:12px;">3 items</span>
+                </div>
+                <div role="list" aria-label="Cart items">
+                    <div class="cart-item" role="listitem">
+                        <div class="item-img" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);" aria-hidden="true">🥭</div>
+                        <div class="item-details">
+                            <div class="item-brand">Rajasthani Pickles</div>
+                            <div class="item-name">Rajasthani Mango Pickle</div>
+                            <div class="item-meta">500g | Mustard Oil</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            <div class="qty-ctrl" aria-label="Quantity">
+                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
+                                <input class="qty-inp" type="number" value="1" min="1" max="10" aria-label="Qty">
+                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+                            </div>
+                            <div><span class="item-price">₹320</span>&nbsp;<span class="item-old">₹450</span></div>
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
+                    </div>
+                    <div class="cart-item" role="listitem">
+                        <div class="item-img" style="background:linear-gradient(135deg,#fce4ec,#f8bbd9);" aria-hidden="true">🧄</div>
+                        <div class="item-details">
+                            <div class="item-brand">Andhra Heritage</div>
+                            <div class="item-name">Andhra Spicy Garlic Pickle</div>
+                            <div class="item-meta">250g | Sesame Oil</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            <div class="qty-ctrl" aria-label="Quantity">
+                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
+                                <input class="qty-inp" type="number" value="2" min="1" max="10" aria-label="Qty">
+                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+                            </div>
+                            <div><span class="item-price">₹398</span>&nbsp;<span class="item-old">₹560</span></div>
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
+                    </div>
+                    <div class="cart-item" role="listitem">
+                        <div class="item-img" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);" aria-hidden="true">🌶️</div>
+                        <div class="item-details">
+                            <div class="item-brand">Gujarat Flavours</div>
+                            <div class="item-name">Gujarati Mixed Achaar</div>
+                            <div class="item-meta">400g | Sesame Oil</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                            <div class="qty-ctrl" aria-label="Quantity">
+                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
+                                <input class="qty-inp" type="number" value="1" min="1" max="10" aria-label="Qty">
+                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+                            </div>
+                            <div><span class="item-price">₹249</span>&nbsp;<span class="item-old">₹320</span></div>
+                        </div>
+                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="white-card" style="padding:18px 20px;">
+                <div style="font-size:14px; font-weight:700; color:#1a1a2e; margin-bottom:12px;"><i class="fa fa-tag me-2" style="color:#e85d04;"></i>Apply Coupon Code</div>
+                <div class="coupon-row">
+                    <input type="text" class="coupon-inp" id="couponInput" placeholder="Try: PICKLE20 or FIRSTORDER" aria-label="Coupon code">
+                    <button class="coupon-btn" onclick="applyCoupon()" aria-label="Apply coupon">Apply</button>
+                </div>
+                <p id="couponMsg" style="font-size:12px; margin-top:8px; display:none;"></p>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#e8f5e9,#f0fff4); border-radius:16px; padding:18px; border:2px solid #a8e6cf;">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <span style="font-size:36px;" aria-hidden="true">💬</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700; color:#2d6a4f; font-size:14px;">Prefer WhatsApp Ordering?</div>
+                        <div style="font-size:12px; color:#555; margin-top:3px;">Send your cart directly — we'll confirm &amp; deliver!</div>
+                    </div>
+                    <a href="https://wa.me/919876543210?text=Hi PickleHub! I want to order:%0A1x Rajasthani Mango Pickle 500g - ₹320%0A2x Andhra Garlic Pickle 250g - ₹398%0A1x Gujarati Mixed Achaar 400g - ₹249%0ATotal: ₹967%0APlease confirm my order." style="background:#25D366; color:#fff; padding:12px 20px; border-radius:50px; font-weight:700; font-size:13px; text-decoration:none; display:flex; align-items:center; gap:7px; white-space:nowrap;" aria-label="Order via WhatsApp">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Order
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="summary-sticky">
+                <div class="white-card" style="overflow:visible;">
+                    <div class="card-head"><span>📦 Order Summary</span></div>
+                    <div class="summary-body">
+                        <div class="sum-row"><span>Subtotal (3 items)</span><span>₹1,230</span></div>
+                        <div class="sum-row green"><span>🎉 Product Discount</span><span>− ₹263</span></div>
+                        <div class="sum-row green" id="couponRow" style="display:none;"><span>🏷️ Coupon (PICKLE20)</span><span>− ₹193</span></div>
+                        <div class="sum-row green"><span>🚚 Delivery</span><span>FREE</span></div>
+                        <hr class="sum-divider">
+                        <div class="sum-total"><span>Total</span><span id="totalAmt">₹967</span></div>
+                        <div class="savings-pill" role="status" aria-live="polite">🎉 You save <strong id="saveAmt">₹263</strong> on this order!</div>
+                        <button class="btn-proceed" onclick="goToCheckout()" aria-label="Proceed to checkout">
+                            <i class="fa fa-arrow-right"></i> Proceed to Checkout
+                        </button>
+                        <button class="btn-continue-shop" onclick="window.location='/products/'" aria-label="Continue shopping">← Continue Shopping</button>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px;" aria-label="Accepted payment methods">
+                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">📱 UPI</span>
+                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">🏦 Bank Transfer</span>
+                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">💵 COD</span>
+                        </div>
+                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:8px;"><i class="fa fa-lock"></i> Secure & Trusted Checkout</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="checkoutSection" class="checkout-section">
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon-circle" aria-hidden="true">📍</div>
+                    Delivery Address
+                </div>
+                <form id="checkoutForm" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="fullName">Full Name *</label>
+                            <input type="text" class="form-control" id="fullName" placeholder="e.g. Rahul Ramteke" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="phone">Mobile Number *</label>
+                            <input type="tel" class="form-control" id="phone" placeholder="10-digit mobile number" required maxlength="10">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="address">Full Address *</label>
+                            <textarea class="form-control" id="address" rows="2" placeholder="House No., Street, Area, Locality, Landmark" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="city">City *</label>
+                            <input type="text" class="form-control" id="city" value="Nagpur" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="state">State</label>
+                            <select class="form-select" id="state">
+                                <option>Maharashtra</option>
+                                <option>Madhya Pradesh</option>
+                                <option>Chhattisgarh</option>
+                                <option>Gujarat</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="pincode">PIN Code *</label>
+                            <input type="text" class="form-control" id="pincode" placeholder="440001" maxlength="6" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email (for receipt)</label>
+                            <input type="email" class="form-control" id="email" placeholder="yourname@email.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="notes">Delivery Notes (optional)</label>
+                            <input type="text" class="form-control" id="notes" placeholder="e.g. Call before delivery">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon-circle" aria-hidden="true">💳</div>
+                    Select Payment Method
+                </div>
+
+                <div class="pay-option selected" id="payUPI" onclick="selectPay('upi')" role="radio" aria-checked="true" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="upi" id="radioUPI" checked aria-label="Pay via UPI / QR Code">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);" aria-hidden="true">📱</div>
+                        <div>
+                            <div class="pay-title">UPI / QR Code Payment</div>
+                            <div class="pay-desc">Scan QR &amp; pay via GPay, PhonePe, Paytm, BHIM</div>
+                        </div>
+                        <div class="pay-badge orange ms-auto">Recommended</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div style="background:#fffaf7; border-radius:12px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:13px; font-weight:700; color:#1a1a2e; margin-bottom:12px;">
+                                📲 Scan & Pay — UPI QR Code
+                            </div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-5">
+                                    <div class="qr-upload-area" onclick="document.getElementById('qrFileInput').click()" id="qrUploadArea" role="button" aria-label="Upload QR code image">
+                                        <img id="qrPreview" class="qr-preview" src="" alt="Uploaded QR Code">
+                                        <div id="qrPlaceholder">
+                                            <span class="qr-placeholder" aria-hidden="true">📷</span>
+                                            <div class="qr-upload-label">Upload Your UPI QR Code</div>
+                                            <div class="qr-hint">(Admin: Upload your payment QR here)</div>
+                                            <div class="qr-hint mt-1">JPG, PNG — Max 2MB</div>
+                                        </div>
+                                        <input type="file" id="qrFileInput" accept="image/*" onchange="previewQR(event)" aria-label="QR code file upload">
+                                    </div>
+                                    <div style="margin-top:8px; text-align:center;">
+                                        <button onclick="document.getElementById('qrFileInput').click()" style="background:transparent; border:1.5px solid #e85d04; color:#e85d04; border-radius:50px; padding:6px 16px; font-size:12px; font-weight:600; cursor:pointer; transition:.3s;" aria-label="Change QR code">
+                                            <i class="fa fa-upload me-1"></i> Change QR
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="upi-detail-box">
+                                        <div style="font-size:12px; font-weight:700; color:#555; margin-bottom:6px;">📋 UPI Payment Details</div>
+                                        <div style="font-size:12px; color:#888; margin-bottom:4px;">UPI ID (tap to copy):</div>
+                                        <div class="upi-id-row">
+                                            <span class="upi-id-text" id="upiIdText">picklehub@upi</span>
+                                            <button class="copy-btn" id="copyUpiBtn" onclick="copyUPI()" aria-label="Copy UPI ID">
+                                                <i class="fa fa-copy me-1"></i> Copy
+                                            </button>
+                                        </div>
+                                        <div style="font-size:12px; color:#888; margin:8px 0 4px;">Pay Amount:</div>
+                                        <div style="font-size:22px; font-weight:800; color:#e85d04;" aria-label="Payment amount: 967 rupees">₹967</div>
+                                        <div style="font-size:11px; color:#aaa; margin-top:4px;">Add your name &amp; Order ID in UPI note</div>
+                                    </div>
+                                    <div style="background:#e3f2fd; border-radius:10px; padding:10px; font-size:12px; color:#1565c0;">
+                                        <i class="fa fa-info-circle me-1"></i>
+                                        After paying, <strong>upload your payment screenshot</strong> below so we can confirm your order instantly.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:8px;">
+                                📸 Upload Payment Screenshot <span style="color:#e85d04;">*</span>
+                                <span style="font-weight:400; color:#aaa;">(After paying, upload screenshot for fast confirmation)</span>
+                            </label>
+                            <div class="screenshot-upload" onclick="document.getElementById('screenshotInput').click()" role="button" aria-label="Upload payment screenshot">
+                                <input type="file" id="screenshotInput" accept="image/*" onchange="previewScreenshot(event)" aria-label="Payment screenshot">
+                                <img id="screenshotPreview" class="screenshot-preview" src="" alt="Payment screenshot preview">
+                                <div id="screenshotPlaceholder">
+                                    <span style="font-size:32px; display:block; margin-bottom:6px;" aria-hidden="true">📤</span>
+                                    <div style="font-weight:600; color:#888; font-size:13px;">Click to upload payment screenshot</div>
+                                    <div style="font-size:11px; color:#aaa; margin-top:4px;">PNG, JPG, JPEG — Max 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-option" id="payBank" onclick="selectPay('bank')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="bank" id="radioBank" aria-label="Pay via Bank Transfer / NEFT">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb);" aria-hidden="true">🏦</div>
+                        <div>
+                            <div class="pay-title">Bank Transfer / NEFT / IMPS</div>
+                            <div class="pay-desc">Direct bank transfer — NEFT, IMPS, RTGS</div>
+                        </div>
+                        <div class="pay-badge ms-auto" style="background:linear-gradient(135deg,#1565c0,#1976d2);">Secure</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div style="background:#f8fbff; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #e3f2fd;">
+                            <div style="font-size:13px; font-weight:700; color:#1a1a2e; margin-bottom:12px;"><i class="fa fa-university me-2" style="color:#1565c0;"></i>Bank Account Details</div>
+                            <table class="bank-detail-table" aria-label="Bank account details">
+                                <tbody>
+                                    <tr><td>Account Name</td><td>PickleHub Nagpur</td></tr>
+                                    <tr><td>Account No.</td>
+                                        <td>
+                                            <span id="accNoText">1234 5678 9012 3456</span>
+                                            <button onclick="copyText('accNoText','copyAccBtn')" id="copyAccBtn" class="copy-btn ms-2" style="font-size:11px; padding:3px 9px;" aria-label="Copy account number"><i class="fa fa-copy"></i> Copy</button>
+                                        </td>
+                                    </tr>
+                                    <tr><td>IFSC Code</td>
+                                        <td>
+                                            <span id="ifscText">HDFC0001234</span>
+                                            <button onclick="copyText('ifscText','copyIfscBtn')" id="copyIfscBtn" class="copy-btn ms-2" style="font-size:11px; padding:3px 9px;" aria-label="Copy IFSC code"><i class="fa fa-copy"></i> Copy</button>
+                                        </td>
+                                    </tr>
+                                    <tr><td>Bank Name</td><td>HDFC Bank</td></tr>
+                                    <tr><td>Branch</td><td>Nagpur Main Branch</td></tr>
+                                    <tr><td>Account Type</td><td>Current Account</td></tr>
+                                    <tr><td><strong>Amount to Pay</strong></td><td><strong style="color:#e85d04; font-size:16px;">₹967</strong></td></tr>
+                                </tbody>
+                            </table>
+                            <div style="background:#fff3cd; border-radius:10px; padding:10px; font-size:12px; color:#856404; margin-top:12px; border:1px solid #ffc107;">
+                                <i class="fa fa-exclamation-triangle me-1"></i>
+                                <strong>Important:</strong> Please add your <strong>Name + Phone Number</strong> in the bank transfer remarks/description for quick order confirmation.
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:8px;">
+                                📸 Upload Transfer Confirmation Screenshot <span style="color:#e85d04;">*</span>
+                            </label>
+                            <div class="screenshot-upload" onclick="document.getElementById('bankScreenshotInput').click()" role="button" aria-label="Upload bank transfer screenshot">
+                                <input type="file" id="bankScreenshotInput" accept="image/*" onchange="previewBankScreenshot(event)" aria-label="Bank transfer screenshot">
+                                <img id="bankScreenshotPreview" class="screenshot-preview" src="" alt="Bank transfer screenshot">
+                                <div id="bankScreenshotPlaceholder">
+                                    <span style="font-size:32px; display:block; margin-bottom:6px;" aria-hidden="true">📤</span>
+                                    <div style="font-weight:600; color:#888; font-size:13px;">Upload bank transfer screenshot</div>
+                                    <div style="font-size:11px; color:#aaa; margin-top:4px;">PNG, JPG — Max 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-option" id="payCOD" onclick="selectPay('cod')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="cod" id="radioCOD" aria-label="Cash on Delivery">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);" aria-hidden="true">💵</div>
+                        <div>
+                            <div class="pay-title">Cash on Delivery (COD)</div>
+                            <div class="pay-desc">Pay cash when your order is delivered at your doorstep</div>
+                        </div>
+                        <div class="pay-badge ms-auto" style="background:linear-gradient(135deg,#2d6a4f,#52b788);">Most Popular</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div class="cod-info-box">
+                            <div class="cod-row"><span class="ico">✅</span><span>Pay in cash when our delivery person arrives at your door — no advance payment needed.</span></div>
+                            <div class="cod-row"><span class="ico">💰</span><span>Keep exact change of <strong>₹967</strong> ready for smooth delivery.</span></div>
+                            <div class="cod-row"><span class="ico">📦</span><span>Please inspect the package before paying. Damaged packaging? Refuse and WhatsApp us immediately.</span></div>
+                            <div class="cod-row"><span class="ico">🕐</span><span>Order will be delivered <strong>within 24 hours</strong> across Nagpur. Our delivery person will call before arriving.</span></div>
+                            <div class="cod-row"><span class="ico">📱</span><span>You will receive a <strong>WhatsApp confirmation</strong> once your order is dispatched.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="summary-sticky">
+                <div class="white-card" style="overflow:visible;">
+                    <div class="card-head"><span>🧾 Final Bill</span></div>
+                    <div class="summary-body">
+                        <div class="sum-row"><span>🥭 Rajasthani Mango × 1</span><span>₹320</span></div>
+                        <div class="sum-row"><span>🧄 Andhra Garlic × 2</span><span>₹398</span></div>
+                        <div class="sum-row"><span>🌶️ Gujarati Mixed × 1</span><span>₹249</span></div>
+                        <hr class="sum-divider">
+                        <div class="sum-row"><span>Subtotal</span><span>₹1,230</span></div>
+                        <div class="sum-row green"><span>Discount</span><span>−₹263</span></div>
+                        <div class="sum-row green"><span>Delivery</span><span>FREE 🎉</span></div>
+                        <hr class="sum-divider">
+                        <div class="sum-total"><span>Total</span><span>₹967</span></div>
+                        <div class="savings-pill">You save ₹263 on this order! 🎉</div>
+                        <div style="background:#fff3e0; border-radius:10px; padding:10px; margin:10px 0; font-size:12px; color:#e85d04;" id="selectedPayDisplay">
+                            <i class="fa fa-check-circle me-1"></i> Payment: <strong>UPI / QR Code</strong>
+                        </div>
+                        <button class="btn-place-order" onclick="placeOrder()" aria-label="Place order">
+                            <i class="fa fa-check-circle"></i> Place Order — ₹967
+                        </button>
+                        <button class="btn-back" onclick="goBackToCart()" aria-label="Go back to cart">← Back to Cart</button>
+                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:10px;">
+                            <i class="fa fa-lock"></i> Your data is safe &amp; secure
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="successSection" class="success-section">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="success-card">
+                <span class="success-icon" aria-hidden="true">🎉</span>
+                <h2 style="font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:#2d6a4f; margin:12px 0 6px;">Order Placed Successfully!</h2>
+                <p style="font-size:13px; color:#777; margin-bottom:14px;">Thank you for ordering from PickleHub Nagpur. Your pickles will be delivered within 24 hours.</p>
+                <div class="order-id-pill" role="status" aria-live="polite">Order ID: #PH-2026-00847</div>
+                <div class="detail-box" aria-label="Order details">
+                    <div class="detail-row"><span>Customer Name</span><strong id="successName">—</strong></div>
+                    <div class="detail-row"><span>Mobile</span><strong id="successPhone">—</strong></div>
+                    <div class="detail-row"><span>Total Amount</span><strong>₹967</strong></div>
+                    <div class="detail-row"><span>Payment Method</span><strong id="successPayment">COD</strong></div>
+                    <div class="detail-row"><span>Estimated Delivery</span><strong style="color:#2d6a4f;">Tomorrow by 6 PM</strong></div>
+                    <div class="detail-row" id="screenshotRow" style="display:none;"><span>Payment Proof</span><strong style="color:#2d6a4f;">✅ Uploaded</strong></div>
+                </div>
+                <div style="background:#fff3e0; border-radius:12px; padding:12px; margin:12px 0; font-size:13px; color:#e85d04;">
+                    <i class="fa fa-whatsapp me-1" style="color:#25D366;"></i>
+                    We'll send a <strong>WhatsApp confirmation</strong> to your mobile number shortly!
+                </div>
+                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:14px;">
+                    <button class="btn-success-action btn-track-order" aria-label="Track order">📦 Track Order</button>
+                    <button class="btn-success-action btn-shop-more" onclick="window.location='/'" aria-label="Continue shopping">🛒 Shop More Pickles</button>
+                </div>
+                <a id="waConfirmLink" href="https://wa.me/919876543210?text=Hi! My Order ID is PH-2026-00847. Please confirm my order." class="btn-wa-confirm" aria-label="Confirm order on WhatsApp">
+                    <i class="fab fa-whatsapp"></i> Confirm Order on WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var currentPay = 'upi';
+
+    // ---- Cart Functions ----
+    function chQty(btn, d) {
+        var inp = btn.parentElement.querySelector('.qty-inp');
+        var v = parseInt(inp.value) + d;
+        if (v >= 1 && v <= 10) inp.value = v;
+    }
+    function removeItem(btn) {
+        if (confirm('Remove this item from your cart?')) {
+            var el = btn.closest('.cart-item');
+            el.style.transition = 'all 0.3s'; el.style.opacity = '0'; el.style.height = el.offsetHeight + 'px';
+            setTimeout(function() { el.style.height = '0'; el.style.padding = '0'; setTimeout(function() { el.remove(); }, 200); }, 100);
+        }
+    }
+    function applyCoupon() {
+        var code = document.getElementById('couponInput').value.trim().toUpperCase();
+        var msg = document.getElementById('couponMsg');
+        var row = document.getElementById('couponRow');
+        var total = document.getElementById('totalAmt');
+        var save = document.getElementById('saveAmt');
+        msg.style.display = 'block';
+        if (code === 'PICKLE20') {
+            msg.innerHTML = '<span style="color:#2d6a4f; font-weight:600;">✅ Coupon applied! ₹193 extra discount.</span>';
+            row.style.display = 'flex'; total.textContent = '₹774'; save.textContent = '₹456';
+        } else if (code === 'FIRSTORDER') {
+            msg.innerHTML = '<span style="color:#2d6a4f; font-weight:600;">✅ First order coupon applied! ₹100 off.</span>';
+            row.innerHTML = '<span>🏷️ Coupon (FIRSTORDER)</span><span>− ₹100</span>';
+            row.style.display = 'flex'; total.textContent = '₹867'; save.textContent = '₹363';
+        } else if (!code) {
+            msg.innerHTML = '<span style="color:#e85d04;">Please enter a coupon code.</span>';
+        } else {
+            msg.innerHTML = '<span style="color:#c62828;">❌ Invalid code. Try PICKLE20 or FIRSTORDER</span>';
+        }
+    }
+
+    // ---- Navigation ----
+    function goToCheckout() {
+        document.getElementById('cartSection').style.display = 'none';
+        document.getElementById('checkoutSection').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '📋 Delivery & Payment';
+        document.getElementById('pageHeaderLabel').textContent = 'Checkout';
+        document.getElementById('pageSubtitle').textContent = 'Enter delivery address & choose payment';
+        setStep(1);
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function goBackToCart() {
+        document.getElementById('checkoutSection').style.display = 'none';
+        document.getElementById('cartSection').style.display = 'block';
+        document.getElementById('pageTitle').textContent = '🛒 Shopping Cart';
+        document.getElementById('pageHeaderLabel').textContent = 'Shopping Cart';
+        document.getElementById('pageSubtitle').textContent = '3 items in your cart';
+        resetSteps();
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    // ---- Payment Selection ----
+    function selectPay(type) {
+        currentPay = type;
+        ['UPI','Bank','COD'].forEach(function(t) {
+            var el = document.getElementById('pay'+t);
+            var radio = document.getElementById('radio'+t);
+            el.classList.remove('selected');
+            el.setAttribute('aria-checked','false');
+            radio.checked = false;
+        });
+        var map = { upi:'UPI', bank:'Bank', cod:'COD' };
+        var el = document.getElementById('pay' + map[type]);
+        el.classList.add('selected');
+        el.setAttribute('aria-checked','true');
+        document.getElementById('radio' + map[type]).checked = true;
+        var labels = { upi:'UPI / QR Code', bank:'Bank Transfer / NEFT', cod:'Cash on Delivery (COD)' };
+        document.getElementById('selectedPayDisplay').innerHTML =
+            '<i class="fa fa-check-circle me-1"></i> Payment: <strong>' + labels[type] + '</strong>';
+    }
+
+    // ---- QR Code Upload Preview ----
+    function previewQR(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('qrPreview').src = ev.target.result;
+            document.getElementById('qrPreview').style.display = 'block';
+            document.getElementById('qrPlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ---- Payment Screenshot Preview ----
+    function previewScreenshot(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('screenshotPreview').src = ev.target.result;
+            document.getElementById('screenshotPreview').style.display = 'block';
+            document.getElementById('screenshotPlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+    function previewBankScreenshot(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('bankScreenshotPreview').src = ev.target.result;
+            document.getElementById('bankScreenshotPreview').style.display = 'block';
+            document.getElementById('bankScreenshotPlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ---- Copy Functions ----
+    function copyUPI() {
+        var upiId = document.getElementById('upiIdText').textContent;
+        navigator.clipboard.writeText(upiId).then(function() {
+            var btn = document.getElementById('copyUpiBtn');
+            btn.innerHTML = '<i class="fa fa-check me-1"></i> Copied!';
+            btn.classList.add('copied');
+            setTimeout(function() { btn.innerHTML = '<i class="fa fa-copy me-1"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    }
+    function copyText(spanId, btnId) {
+        var text = document.getElementById(spanId).textContent.trim();
+        navigator.clipboard.writeText(text).then(function() {
+            var btn = document.getElementById(btnId);
+            btn.innerHTML = '<i class="fa fa-check"></i> Copied!';
+            btn.classList.add('copied');
+            setTimeout(function() { btn.innerHTML = '<i class="fa fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    }
+
+    // ---- Place Order ----
+    function placeOrder() {
+        var name = document.getElementById('fullName').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var addr = document.getElementById('address').value.trim();
+        var pin = document.getElementById('pincode').value.trim();
+        if (!name) { alert('Please enter your full name.'); document.getElementById('fullName').focus(); return; }
+        if (!phone || phone.length < 10) { alert('Please enter a valid 10-digit mobile number.'); document.getElementById('phone').focus(); return; }
+        if (!addr) { alert('Please enter your delivery address.'); document.getElementById('address').focus(); return; }
+        if (!pin || pin.length < 6) { alert('Please enter a valid 6-digit PIN code.'); document.getElementById('pincode').focus(); return; }
+        if (currentPay === 'upi') {
+            var sc = document.getElementById('screenshotInput').files.length;
+            if (sc === 0) { if (!confirm('You have not uploaded a payment screenshot. Place order without screenshot?')) return; }
+        }
+        if (currentPay === 'bank') {
+            var bsc = document.getElementById('bankScreenshotInput').files.length;
+            if (bsc === 0) { if (!confirm('You have not uploaded a bank transfer screenshot. Continue?')) return; }
+        }
+        var payLabels = { upi:'UPI / QR Code', bank:'Bank Transfer / NEFT', cod:'Cash on Delivery (COD)' };
+        document.getElementById('successName').textContent = name;
+        document.getElementById('successPhone').textContent = phone;
+        document.getElementById('successPayment').textContent = payLabels[currentPay];
+        var screenshotUploaded = (currentPay === 'upi' && document.getElementById('screenshotInput').files.length > 0) ||
+                                  (currentPay === 'bank' && document.getElementById('bankScreenshotInput').files.length > 0);
+        if (screenshotUploaded) document.getElementById('screenshotRow').style.display = 'flex';
+        var waMsg = 'Hi PickleHub! My Order ID is PH-2026-00847.%0AName: '+encodeURIComponent(name)+'%0APhone: '+phone+'%0APayment: '+encodeURIComponent(payLabels[currentPay])+'%0AAmount: ₹967%0APlease confirm my order.';
+        document.getElementById('waConfirmLink').href = 'https://wa.me/919876543210?text=' + waMsg;
+        document.getElementById('checkoutSection').style.display = 'none';
+        document.getElementById('successSection').style.display = 'block';
+        document.getElementById('cartCount').textContent = '0';
+        document.getElementById('pageTitle').textContent = '✅ Order Confirmed!';
+        setStep(3);
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    // ---- Steps ----
+    function setStep(completedUpTo) {
+        for (var i = 1; i <= 4; i++) {
+            var s = document.getElementById('step'+i);
+            s.className = 'step';
+            s.querySelector('.num').textContent = i;
+        }
+        for (var j = 1; j <= 3; j++) {
+            document.getElementById('line'+j).className = 'step-line';
+        }
+        for (var k = 1; k <= completedUpTo; k++) {
+            document.getElementById('step'+k).className = 'step done';
+            document.getElementById('step'+k).querySelector('.num').textContent = '✓';
+            if (k < 4) document.getElementById('line'+k).className = 'step-line done';
+        }
+        if (completedUpTo < 4) {
+            document.getElementById('step'+(completedUpTo+1)).className = 'step active';
+        }
+    }
+    function resetSteps() {
+        document.getElementById('step1').className = 'step active';
+        for (var i = 2; i <= 4; i++) { document.getElementById('step'+i).className = 'step'; document.getElementById('step'+i).querySelector('.num').textContent = i; }
+        for (var j = 1; j <= 3; j++) { document.getElementById('line'+j).className = 'step-line'; }
+    }
+    setStep(0);
+    document.getElementById('step1').className = 'step active';
+</script>
+{% endblock %}

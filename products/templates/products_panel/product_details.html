@@ -1,0 +1,436 @@
+{% extends 'home/base.html' %}
+
+{% block title %}{{ product.name }} | PickleHub{% endblock %}
+
+{% block extra_css %}
+<style>
+.breadcrumb-wrap{background:#fff;padding:10px 24px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#888;}
+.breadcrumb-wrap a{color:#e85d04;text-decoration:none;}
+.prod-section{padding:24px;max-width:1200px;margin:0 auto;}
+.gallery-main{border-radius:16px;overflow:hidden;background:#fff;aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.08);cursor:zoom-in;position:relative;}
+.gallery-main img{width:100%;height:100%;object-fit:cover;transition:.4s;}
+.gallery-emoji{font-size:100px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
+.gallery-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;}
+.thumb{width:68px;height:68px;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0;}
+.thumb:hover,.thumb.active{border-color:#e85d04;}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.badge-corner{position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:6px;}
+.prod-badge{border-radius:8px;padding:4px 11px;font-size:11px;font-weight:800;display:inline-block;}
+.badge-new{background:#e85d04;color:#fff;}
+.badge-off{background:#2d6a4f;color:#fff;}
+.badge-sell{background:#ffd60a;color:#1a1a2e;}
+.brand-link{font-size:12px;color:#e85d04;font-weight:700;text-decoration:none;}
+.prod-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:#1a1a2e;line-height:1.3;margin:6px 0;}
+.short-desc{font-size:13px;color:#666;line-height:1.7;margin-bottom:14px;}
+.rating-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.stars{color:#ffd60a;font-size:15px;}
+.rating-num{font-size:13px;font-weight:700;color:#1a1a2e;}
+.rating-count{font-size:12px;color:#aaa;}
+.review-link{font-size:12px;color:#e85d04;text-decoration:none;}
+.price-block{background:linear-gradient(135deg,#fff8f5,#fff);border:1.5px solid #ffe0cc;border-radius:14px;padding:16px 18px;margin-bottom:16px;}
+.price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.price-main{font-size:32px;font-weight:800;color:#e85d04;}
+.price-mrp{font-size:16px;color:#aaa;text-decoration:line-through;}
+.price-save{font-size:13px;color:#2d6a4f;font-weight:700;background:#d4edda;padding:3px 10px;border-radius:50px;}
+.gst-note{font-size:11px;color:#aaa;margin-top:4px;}
+.qty-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.qty-lbl{font-size:12px;font-weight:700;color:#555;}
+.qty-ctrl{display:flex;align-items:center;border:1.5px solid #ddd;border-radius:10px;overflow:hidden;}
+.qty-btn{width:36px;height:36px;border:none;background:#f8f9fa;font-size:16px;cursor:pointer;font-weight:700;transition:.2s;}
+.qty-btn:hover{background:#e85d04;color:#fff;}
+.qty-num{width:44px;text-align:center;font-size:14px;font-weight:700;border:none;outline:none;font-family:'Poppins',sans-serif;}
+.stock-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px;}
+.in-stock{background:#d4edda;color:#155724;}
+.low-stock-pill{background:#fff3cd;color:#856404;}
+.out-stock{background:#fdecea;color:#c62828;}
+.btn-row{display:flex;gap:10px;margin-bottom:16px;}
+.btn-cart{flex:1;background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;text-decoration:none;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-cart:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(232,93,4,.3);color:#fff;}
+.btn-buy{flex:1;background:#1a1a2e;color:#ffd60a;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.3s;}
+.btn-buy:hover{background:#0f3460;transform:translateY(-2px);}
+.btn-wish{width:48px;height:48px;border:1.5px solid #ddd;border-radius:12px;background:#fff;font-size:18px;cursor:pointer;flex-shrink:0;transition:.2s;}
+.btn-wish:hover,.btn-wish.active{border-color:#e74c3c;color:#e74c3c;background:#fff5f5;}
+.btn-wa-full{width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;text-decoration:none;transition:.3s;}
+.btn-wa-full:hover{background:#128C7E;color:#fff;}
+.del-info{background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;}
+.del-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:12px;color:#555;}
+.del-row:last-child{margin-bottom:0;}
+.del-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
+.highlights{margin-bottom:16px;}
+.hl-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#444;padding:5px 0;border-bottom:1px solid #f5f5f5;}
+.hl-item:last-child{border-bottom:none;}
+.hl-ico{width:20px;height:20px;background:#d4edda;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.tabs-section{background:#fff;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);margin-bottom:22px;overflow:hidden;}
+.tab-nav{display:flex;border-bottom:2px solid #f0f0f0;overflow-x:auto;}
+.tab-btn{padding:14px 22px;font-size:13px;font-weight:600;color:#888;border:none;background:none;cursor:pointer;font-family:'Poppins',sans-serif;border-bottom:2px solid transparent;white-space:nowrap;transition:.2s;margin-bottom:-2px;}
+.tab-btn:hover{color:#e85d04;}
+.tab-btn.active{color:#e85d04;border-bottom-color:#e85d04;}
+.tab-content{padding:22px 24px;display:none;}
+.tab-content.active{display:block;}
+.tab-content h4{font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:12px;}
+.tab-content p,.tab-content li{font-size:13px;color:#555;line-height:1.8;}
+.tab-content ul{padding-left:20px;}
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;}
+.info-row{display:flex;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:13px;}
+.info-row:last-child{border-bottom:none;}
+.info-key{font-weight:700;color:#1a1a2e;width:160px;flex-shrink:0;}
+.info-val{color:#555;}
+.rel-section{margin-bottom:24px;}
+.section-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:16px;}
+.prod-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+.pc{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);transition:.3s;cursor:pointer;border:1.5px solid transparent;text-decoration:none;color:inherit;display:block;}
+.pc:hover{border-color:#e85d04;transform:translateY(-3px);}
+.pc-img{aspect-ratio:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;}
+.pc-img img{width:100%;height:100%;object-fit:cover;transition:.4s;}
+.pc:hover .pc-img img{transform:scale(1.06);}
+.pc-emoji{font-size:48px;}
+.pc-badge{position:absolute;top:8px;left:8px;background:#e85d04;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:4px;}
+.pc-body{padding:12px 14px;}
+.pc-brand{font-size:10px;color:#e85d04;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.pc-name{font-size:13px;font-weight:700;color:#1a1a2e;margin:2px 0 6px;}
+.pc-price{font-size:15px;font-weight:800;color:#e85d04;}
+.pc-mrp{font-size:11px;color:#aaa;text-decoration:line-through;margin-left:4px;}
+.toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:.35s;transform:translateY(80px);opacity:0;display:flex;align-items:center;gap:10px;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-left:4px solid #52b788;}
+.toast.err{border-left:4px solid #e85d04;}
+@media(max-width:768px){
+  .prod-name{font-size:20px;}
+  .price-main{font-size:26px;}
+  .btn-row{flex-wrap:wrap;}
+  .btn-cart,.btn-buy{flex:unset;width:100%;}
+  .btn-wish{width:100%;height:44px;}
+  .prod-cards{grid-template-columns:repeat(2,1fr);}
+  .info-grid{grid-template-columns:1fr;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-wrap">
+  <div class="container-fluid" style="max-width:1200px;">
+    <a href="/">Home</a> &rsaquo;
+    <a href="{% url 'All_products' %}">All Pickles</a> &rsaquo;
+    {% if product.category %}
+      <a href="{% url  "All_products" %}?cat={{ product.category_id }}">{{ product.category.name }}</a> &rsaquo;
+    {% endif %}
+    {{ product.name }}
+  </div>
+</div>
+
+
+<div class="prod-section">
+  <div class="row g-4">
+
+    <!-- IMAGE GALLERY -->
+    <div class="col-lg-5">
+      <div class="gallery-main">
+        {% if product.image %}
+          <img id="mainImgEl" src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+          <div class="gallery-emoji">{{ product.emoji }}</div>
+        {% endif %}
+
+     <div class="badge-corner">
+  {# ✅ Offer badge — takes priority over product badge #}
+  {% if product.active_offer %}
+    <span class="prod-badge badge-new">{{ product.active_offer.badge_label }}</span>
+  {% elif product.badge %}
+    <span class="prod-badge badge-new">{{ product.badge }}</span>
+  {% endif %}
+
+  {% if product.discount_label %}
+    <span class="prod-badge badge-off">{{ product.discount_label }}</span>
+  {% endif %}
+  {% if product.is_featured %}
+    <span class="prod-badge badge-sell">🏆 BESTSELLER</span>
+  {% endif %}
+</div>
+      </div>
+    </div>
+
+    <!-- PRODUCT INFO -->
+    <div class="col-lg-7">
+
+      {% if product.brand %}
+        <a class="brand-link" href="{% url 'All_products' %}?brand={{ product.brand_id }}">
+          {{ product.brand.emoji }} {{ product.brand.name }}
+        </a>
+      {% endif %}
+
+      <h1 class="prod-name">{{ product.name }}</h1>
+
+      <p class="short-desc">
+        {{ product.weight }}{% if product.oil_type %} · {{ product.oil_type }}{% endif %}
+        {% if product.region %} · {{ product.region }}{% endif %}
+      </p>
+
+      <!-- RATING -->
+      <div class="rating-row">
+        <span class="stars">{{ product.stars_html }}</span>
+        <span class="rating-num">{{ product.rating }}</span>
+        <span class="rating-count">({{ product.review_count }} reviews)</span>
+        <a class="review-link" href="#reviews">Read reviews</a>
+      </div>
+
+      <!-- PRICE -->
+      <div class="price-block">
+        <div class="price-row">
+          <span class="price-main">₹{{ product.price }}</span>
+          {% if product.old_price %}
+            <span class="price-mrp">₹{{ product.old_price }}</span>
+            {% if product.discount_label %}
+              <span class="price-save">{{ product.discount_label }}</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <div class="gst-note">Price inclusive of GST &nbsp;|&nbsp; Free delivery above ₹499</div>
+      </div>
+
+      <!-- STOCK -->
+      <div class="qty-row">
+        <span class="qty-lbl">Quantity:</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <input class="qty-num" id="qtyNum" value="1" readonly>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        {% if product.stock == 0 %}
+          <span class="stock-pill out-stock">❌ Out of Stock</span>
+        {% elif product.is_low_stock %}
+          <span class="stock-pill low-stock-pill">🔥 Only {{ product.stock }} left</span>
+        {% else %}
+          <span class="stock-pill in-stock">✅ In Stock</span>
+        {% endif %}
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="btn-row">
+        <button class="btn-cart" {% if product.stock == 0 %}disabled{% endif %}>
+          <i class="fa fa-shopping-cart"></i> Add to Cart
+        </button>
+        <button class="btn-buy" {% if product.stock == 0 %}disabled{% endif %}>
+          ⚡ Buy Now
+        </button>
+        <button class="btn-wish" id="wishBtn" onclick="toggleWish()">🤍</button>
+      </div>
+
+      <!-- WHATSAPP ORDER -->
+      <a href="https://wa.me/{{ product.whatsapp_number }}?text=Hi%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}%20({{ product.weight }})"
+         class="btn-wa-full" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Order via WhatsApp
+      </a>
+
+      <!-- DELIVERY INFO -->
+      <div class="del-info">
+        <div class="del-row"><span class="del-ico">🚚</span><div><b>Free Delivery</b> on orders above ₹499</div></div>
+        <div class="del-row"><span class="del-ico">📦</span><div><b>Estimated Delivery:</b> 2-4 business days</div></div>
+        <div class="del-row"><span class="del-ico">💳</span><div><b>Cash on Delivery</b> available &nbsp;|&nbsp; <b>Easy Returns</b> within 7 days</div></div>
+      </div>
+
+      <!-- HIGHLIGHTS -->
+      <div class="highlights">
+        <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">✨ Product Highlights</div>
+        {% if product.weight %}
+          <div class="hl-item"><div class="hl-ico">✅</div> Weight: {{ product.weight }}</div>
+        {% endif %}
+        {% if product.oil_type %}
+          <div class="hl-item"><div class="hl-ico">✅</div> Oil: {{ product.oil_type }}</div>
+        {% endif %}
+        {% if product.region %}
+          <div class="hl-item"><div class="hl-ico">✅</div> Region: {{ product.region }}</div>
+        {% endif %}
+        {% if product.brand %}
+          <div class="hl-item"><div class="hl-ico">✅</div> Brand: {{ product.brand.name }}</div>
+        {% endif %}
+        <div class="hl-item"><div class="hl-ico">✅</div> FSSAI Certified | Hygienic Packaging</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div style="max-width:1200px;margin:0 auto;padding:0 24px 24px;">
+  <div class="tabs-section" id="reviews">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'details')">ℹ️ Product Details</button>
+      <button class="tab-btn" onclick="switchTab(this,'return')">↩️ Return Policy</button>
+    </div>
+
+    <div class="tab-content active" id="tab-details">
+      <h4>Product Specifications</h4>
+      <div class="info-grid">
+        <div>
+          {% if product.brand %}
+          <div class="info-row"><div class="info-key">Brand</div><div class="info-val">{{ product.brand.name }}</div></div>
+          {% endif %}
+          {% if product.category %}
+          <div class="info-row"><div class="info-key">Category</div><div class="info-val">{{ product.category.name }}</div></div>
+          {% endif %}
+          <div class="info-row"><div class="info-key">Weight</div><div class="info-val">{{ product.weight }}</div></div>
+          <div class="info-row"><div class="info-key">Oil Type</div><div class="info-val">{{ product.oil_type }}</div></div>
+        </div>
+        <div>
+          {% if product.region %}
+          <div class="info-row"><div class="info-key">Region</div><div class="info-val">{{ product.region }}</div></div>
+          {% endif %}
+          <div class="info-row"><div class="info-key">Rating</div><div class="info-val">{{ product.rating }} / 5 ({{ product.review_count }} reviews)</div></div>
+          <div class="info-row"><div class="info-key">Stock</div><div class="info-val">{{ product.stock }} units</div></div>
+          <div class="info-row"><div class="info-key">Vegetarian</div><div class="info-val">✅ Yes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-return">
+      <h4>Return &amp; Refund Policy</h4>
+      <ul style="margin-top:8px;">
+        <li>Returns accepted within <strong>7 days</strong> of delivery</li>
+        <li>Product must be <strong>unopened and sealed</strong> for return</li>
+        <li>In case of damaged or wrong product — full refund or replacement</li>
+        <li>Refund processed within <strong>5-7 business days</strong></li>
+        <li>To initiate return: WhatsApp us at +91-{{ product.whatsapp_number }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  {% if related %}
+<div class="rel-section">
+  <div class="section-title">🥭 More like this</div>
+  <div class="prod-cards">
+    {% for p in related %}
+    <a class="pc" href="{% url 'product_details' p.slug %}">
+      <div class="pc-img" style="background:{{ p.card_bg }};">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% else %}
+          <div class="pc-emoji">{{ p.emoji }}</div>
+        {% endif %}
+
+        {% if p.active_offer %}
+          <span class="pc-badge">{{ p.active_offer.badge_label }}</span>
+        {% elif p.badge %}
+          <span class="pc-badge">{{ p.badge }}</span>
+        {% endif %}
+
+      </div>
+      <div class="pc-body">
+        <div class="pc-brand">{% if p.brand %}{{ p.brand.name }}{% endif %}</div>
+        <div class="pc-name">{{ p.name }}</div>
+        <div>
+          <span class="pc-price">₹{{ p.price }}</span>
+          {% if p.old_price %}<span class="pc-mrp">₹{{ p.old_price }}</span>{% endif %}
+        </div>
+{% if p.assigned_coupons_list and p.stock > 0 %}
+<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+
+  {% for coupon in p.assigned_coupons_list %}
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              background:#fff8f0;border:1px dashed #f48c06;
+              border-radius:10px;padding:8px 12px;">
+
+      <div>
+          <span style="font-family:monospace;font-size:12px;font-weight:800;
+                       color:#e85d04;letter-spacing:1px;">
+              {{ coupon.code }}
+          </span>
+          <span style="font-size:11px;color:#666;margin-left:6px;">
+              · {{ coupon.discount_display }}
+          </span>
+      </div>
+
+      <button onclick="copyCoupon('{{ coupon.code|escapejs }}')"
+              style="background:#e85d04;color:#fff;border:none;
+                     border-radius:6px;padding:4px 10px;
+                     font-size:11px;font-weight:700;cursor:pointer;">
+          Copy
+      </button>
+
+  </div>
+  {% endfor %}
+
+</div>
+{% endif %}
+        
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+  <!-- ALSO BOUGHT -->
+  {% if also_bought %}
+  <div class="rel-section">
+    <div class="section-title">🔥 Customers Also Bought</div>
+    <div class="prod-cards">
+      {% for p in also_bought %}
+      <a class="pc" href="{% url 'product_details' p.slug %}">
+        <div class="pc-img" style="background:{{ p.card_bg }};">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.name }}">
+          {% else %}
+            <div class="pc-emoji">{{ p.emoji }}</div>
+          {% endif %}
+          {% if p.badge %}<span class="pc-badge">{{ p.badge }}</span>{% endif %}
+        </div>
+        <div class="pc-body">
+          <div class="pc-brand">{% if p.brand %}{{ p.brand.name }}{% endif %}</div>
+          <div class="pc-name">{{ p.name }}</div>
+          <div>
+            <span class="pc-price">₹{{ p.price }}</span>
+            {% if p.old_price %}<span class="pc-mrp">₹{{ p.old_price }}</span>{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var qty = 1;
+var isWished = false;
+
+function changeQty(d){
+  qty = Math.max(1, Math.min(10, qty + d));
+  document.getElementById('qtyNum').value = qty;
+}
+
+function toggleWish(){
+  isWished = !isWished;
+  var btn = document.getElementById('wishBtn');
+  btn.textContent = isWished ? '❤️' : '🤍';
+  toast(isWished ? '❤️ Added to wishlist!' : 'Removed from wishlist', isWished ? 'ok' : 'err');
+}
+
+function switchTab(btn, id){
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function toast(msg, type){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'ok') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+function copyCoupon(code) {
+    navigator.clipboard.writeText(code).then(function() {
+        alert("Coupon " + code + " copied!");
+    });
+}
+</script>
+{% endblock %}

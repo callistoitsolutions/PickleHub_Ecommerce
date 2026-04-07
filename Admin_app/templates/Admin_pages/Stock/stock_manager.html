@@ -1,0 +1,409 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Stock Manager | PickleHub Admin{% endblock %}
+{% block page_title %}📦 Stock Manager{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── reuse admin palette, override only what's needed ── */
+.sm-wrap { max-width: 100%; }
+
+/* summary cards — match admin stat-card style */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.s-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: .3s;
+  border-left: 4px solid transparent;
+}
+.s-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+.s-card .num { font-size: 32px; font-weight: 800; line-height: 1; color: #1a1a2e; }
+.s-card .lbl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.s-card.green  { border-left-color: #2d6a4f; } .s-card.green .num  { color: #2d6a4f; }
+.s-card.yellow { border-left-color: #f59e0b; } .s-card.yellow .num { color: #e67e00; }
+.s-card.red    { border-left-color: #c62828; } .s-card.red .num    { color: #c62828; }
+.s-card.white  { border-left-color: #e85d04; }
+.s-card.active-filter { box-shadow: 0 0 0 2px #e85d04; }
+
+/* toolbar */
+.toolbar {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  padding: 14px 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.toolbar input, .toolbar select {
+  background: #f0f2f5;
+  border: 1px solid #e0e0e0;
+  color: #1a1a2e;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+}
+.toolbar input:focus, .toolbar select:focus { border-color: #e85d04; }
+.toolbar input { flex: 1; min-width: 180px; }
+.btn-accent { background: linear-gradient(135deg,#e85d04,#f48c06); color:#fff; border:none; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; }
+.btn-ghost  { background:transparent; color:#888; border:1px solid #e0e0e0; border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; text-decoration:none; font-family:'Poppins',sans-serif; }
+.btn-ghost:hover { color:#1a1a2e; border-color:#1a1a2e; }
+
+/* bulk bar */
+.bulk-bar {
+  background: #fff8f3;
+  border: 1px solid #fddcbc;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.bulk-bar.show { display: flex; }
+.bulk-bar .sel-count { font-size: 13px; color: #e85d04; font-weight: 700; }
+.btn-bulk { border:none; border-radius:8px; padding:7px 16px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; }
+.btn-bulk.red   { background:#fff0f0; color:#c62828; }
+.btn-bulk.green { background:#f0faf4; color:#2d6a4f; }
+.btn-bulk.blue  { background:#e8f0fb; color:#1565c0; }
+
+/* table — match admin sec-card */
+.stock-table { background:#fff; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.06); overflow:hidden; }
+.stock-table table { width:100%; border-collapse:collapse; }
+.stock-table th {
+  background:#f8f9fa;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#888;
+  padding:12px 16px;
+  text-align:left;
+  border-bottom:1px solid #f5f5f5;
+  font-weight:700;
+}
+.stock-table td { padding:13px 16px; border-bottom:1px solid #f8f8f8; font-size:13px; vertical-align:middle; color:#1a1a2e; }
+.stock-table tr:last-child td { border-bottom:none; }
+.stock-table tr:hover td { background:#fffaf7; }
+
+/* product cell */
+.prod-cell  { display:flex; align-items:center; gap:10px; }
+.prod-emoji { font-size:22px; width:40px; height:40px; background:#f0f2f5; border-radius:10px;
+              display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+.prod-name  { font-weight:600; font-size:13px; color:#1a1a2e; line-height:1.3; }
+.prod-brand { font-size:11px; color:#aaa; }
+
+/* status badges */
+.badge-status { font-size:10px; font-weight:700; padding:3px 10px; border-radius:50px; text-transform:uppercase; letter-spacing:1px; }
+.badge-status.in_stock     { background:#d4edda; color:#155724; }
+.badge-status.low_stock    { background:#fff3cd; color:#856404; }
+.badge-status.out_of_stock { background:#f8d7da; color:#721c24; }
+
+/* qty controls */
+.qty-wrap  { display:flex; align-items:center; gap:6px; }
+.qty-btn   { width:28px; height:28px; border-radius:6px; border:1px solid #e0e0e0;
+             background:#f0f2f5; color:#1a1a2e; font-size:16px; cursor:pointer;
+             display:flex; align-items:center; justify-content:center; line-height:1; }
+.qty-btn:hover { border-color:#e85d04; color:#e85d04; }
+.qty-input { width:65px; background:#f0f2f5; border:1px solid #e0e0e0; color:#1a1a2e;
+             border-radius:8px; padding:5px 10px; font-size:14px; font-weight:700;
+             text-align:center; outline:none; font-family:'Poppins',sans-serif; }
+.qty-input:focus { border-color:#e85d04; }
+
+/* toggle */
+.toggle-wrap   { display:flex; align-items:center; gap:8px; }
+.toggle-label  { position:relative; display:inline-block; width:44px; height:24px; }
+.toggle-label input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:#e0e0e0; border-radius:50px; cursor:pointer; transition:.3s; }
+.toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+input:checked + .toggle-slider { background:#c62828; }
+input:checked + .toggle-slider:before { transform:translateX(20px); }
+.toggle-text { font-size:11px; color:#888; }
+
+/* save btn */
+.btn-save { background:transparent; border:1px solid #e85d04; color:#e85d04; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; transition:.2s; font-family:'Poppins',sans-serif; white-space:nowrap; }
+.btn-save:hover  { background:#e85d04; color:#fff; }
+.btn-save.saving { opacity:.5; pointer-events:none; }
+.btn-save.saved  { background:#d4edda; border-color:#2d6a4f; color:#155724; }
+.btn-save.error  { background:#f8d7da; border-color:#c62828; color:#721c24; }
+
+input[type=checkbox].row-check { accent-color:#e85d04; width:15px; height:15px; cursor:pointer; }
+
+/* toast */
+.toast-box { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+.toast { background:#fff; border:1px solid #e0e0e0; color:#1a1a2e; border-radius:12px;
+         padding:12px 18px; font-size:13px; display:flex; align-items:center; gap:10px;
+         box-shadow:0 8px 24px rgba(0,0,0,.12); animation:slideIn .3s ease; min-width:260px;
+         font-family:'Poppins',sans-serif; }
+.toast.ok  { border-left:4px solid #2d6a4f; }
+.toast.err { border-left:4px solid #c62828; }
+@keyframes slideIn { from{transform:translateX(60px);opacity:0;} to{transform:none;opacity:1;} }
+
+.empty-state { text-align:center; padding:60px 20px; color:#aaa; }
+.empty-state .icon { font-size:48px; margin-bottom:12px; }
+
+/* restock inline row */
+#restockRow { background:#e8f0fb; border:1px solid #b3c9f0; border-radius:12px; padding:14px 18px; margin-bottom:16px; display:none; align-items:center; gap:12px; flex-wrap:wrap; }
+
+@media(max-width:768px){
+  .summary-grid { grid-template-columns:repeat(2,1fr); }
+  .stock-table th:nth-child(3), .stock-table td:nth-child(3) { display:none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sm-wrap">
+
+  <!-- summary cards -->
+  <div class="summary-grid">
+    <a href="?status=" style="text-decoration:none;">
+      <div class="s-card white {% if not sel_status %}active-filter{% endif %}">
+        <div class="num">{{ summary.total }}</div>
+        <div class="lbl">Total Products</div>
+      </div>
+    </a>
+    <a href="?status=in_stock" style="text-decoration:none;">
+      <div class="s-card green {% if sel_status == 'in_stock' %}active-filter{% endif %}">
+        <div class="num">{{ summary.in_stock }}</div>
+        <div class="lbl">In Stock</div>
+      </div>
+    </a>
+    <a href="?status=low_stock" style="text-decoration:none;">
+      <div class="s-card yellow {% if sel_status == 'low_stock' %}active-filter{% endif %}">
+        <div class="num">{{ summary.low_stock }}</div>
+        <div class="lbl">Low Stock</div>
+      </div>
+    </a>
+    <a href="?status=out_of_stock" style="text-decoration:none;">
+      <div class="s-card red {% if sel_status == 'out_of_stock' %}active-filter{% endif %}">
+        <div class="num">{{ summary.out_of_stock }}</div>
+        <div class="lbl">Out of Stock</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <form method="get" style="display:contents;">
+      <input type="text" name="q" value="{{ search }}" placeholder="🔍  Search product or brand…">
+      <select name="brand">
+        <option value="">All Brands</option>
+        {% for b in brands %}
+        <option value="{{ b.id }}" {% if sel_brand == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="cat">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if sel_cat == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="status" value="{{ sel_status }}">
+      <button type="submit" class="btn-accent">Filter</button>
+      <a href="{% url 'stock_manager' %}" class="btn-ghost">Reset</a>
+    </form>
+  </div>
+
+  <!-- bulk action bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <span class="sel-count" id="selCount">0 selected</span>
+    <button class="btn-bulk red"   onclick="bulkAction('mark_oos')">🚫 Mark Out of Stock</button>
+    <button class="btn-bulk green" onclick="bulkAction('mark_available')">✅ Mark Available</button>
+    <button class="btn-bulk blue"  onclick="showRestockModal()">📦 Bulk Restock</button>
+    <button class="btn-ghost" onclick="clearSelection()" style="margin-left:auto;">✕ Clear</button>
+  </div>
+
+  <!-- restock qty row -->
+  <div id="restockRow">
+    <span style="font-size:13px;color:#1565c0;font-weight:600;">Set stock quantity to:</span>
+    <input type="number" id="bulkQty" value="100" min="1"
+           style="width:80px;background:#fff;border:1px solid #b3c9f0;color:#1a1a2e;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:700;outline:none;">
+    <button class="btn-bulk blue" onclick="bulkAction('restock')" style="background:#d0e4fb;">Confirm Restock</button>
+    <button class="btn-ghost" onclick="document.getElementById('restockRow').style.display='none';">Cancel</button>
+  </div>
+
+  <!-- table -->
+  <div class="stock-table">
+    {% if products %}
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;"><input type="checkbox" class="row-check" id="selectAll" onchange="toggleAll(this)"></th>
+           <th>Sr.No</th>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Quantity</th>
+          <th>Force OOS</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="stockTableBody">
+      {% for p in products %}
+      <tr id="row-{{ p.id }}" data-id="{{ p.id }}">
+        <td><input type="checkbox" class="row-check item-check" value="{{ p.id }}" onchange="onRowCheck()"></td>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          <div class="prod-cell">
+            <div class="prod-emoji">
+              {% if p.image %}<img src="{{ p.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+              {% else %}{{ p.emoji }}{% endif %}
+            </div>
+            <div>
+              <div class="prod-name">{{ p.name }}</div>
+              <div class="prod-brand">{{ p.brand.name|default:"—" }} · {{ p.weight }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="color:#888;font-size:12px;">{{ p.category.name|default:"—" }}</td>
+        <td>
+          <span class="badge-status {{ p.stock_status }}" id="badge-{{ p.id }}">
+            {% if p.stock_status == 'in_stock' %}In Stock
+            {% elif p.stock_status == 'low_stock' %}Low Stock
+            {% else %}Out of Stock{% endif %}
+          </span>
+        </td>
+        <td>
+          <div class="qty-wrap">
+            <button class="qty-btn" onclick="adjustQty({{ p.id }}, -1)">−</button>
+            <input type="number" class="qty-input" id="qty-{{ p.id }}"
+                   value="{{ p.stock }}" min="0" onchange="markDirty({{ p.id }})">
+            <button class="qty-btn" onclick="adjustQty({{ p.id }}, 1)">+</button>
+          </div>
+        </td>
+        <td>
+          <div class="toggle-wrap">
+            <label class="toggle-label">
+              <input type="checkbox" id="oos-{{ p.id }}"
+                     {% if p.is_out_of_stock_manual %}checked{% endif %}
+                     onchange="markDirty({{ p.id }})">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-text" id="oos-text-{{ p.id }}">
+              {% if p.is_out_of_stock_manual %}Forced OOS{% else %}Auto{% endif %}
+            </span>
+          </div>
+        </td>
+        <td>
+          <button class="btn-save" id="save-{{ p.id }}" onclick="saveRow({{ p.id }})">Save</button>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">📭</div>
+      <p>No products match your filters.</p>
+      <a href="{% url 'stock_manager' %}" class="btn-accent" style="text-decoration:none;display:inline-block;margin-top:10px;">Clear Filters</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const CSRF = '{{ csrf_token }}';
+const URL_UPDATE      = "{% url 'stock_update' product_id=0 %}".replace('/0/', '/');
+const URL_BULK_UPDATE = "{% url 'stock_bulk_update' %}";
+
+function toast(msg, type='ok') {
+  var box = document.getElementById('toastBox');
+  var t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='ok' ? '✅' : '❌') + ' <span>' + msg + '</span>';
+  box.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3500);
+}
+function markDirty(id) {
+  var btn = document.getElementById('save-' + id);
+  btn.textContent = 'Save ●'; btn.className = 'btn-save';
+  var oos = document.getElementById('oos-' + id);
+  document.getElementById('oos-text-' + id).textContent = oos.checked ? 'Forced OOS' : 'Auto';
+}
+function adjustQty(id, delta) {
+  var input = document.getElementById('qty-' + id);
+  input.value = Math.max(0, parseInt(input.value || 0) + delta);
+  markDirty(id);
+}
+function saveRow(id) {
+  var btn = document.getElementById('save-' + id);
+  var stock = parseInt(document.getElementById('qty-' + id).value) || 0;
+  var oos = document.getElementById('oos-' + id).checked;
+  btn.textContent = 'Saving…'; btn.className = 'btn-save saving';
+  fetch(URL_UPDATE + id + '/', {
+    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify({ stock: stock, is_out_of_stock_manual: oos })
+  })
+  .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+': '+t.substring(0,120)); }); return r.json(); })
+  .then(function(data){
+    if(data.ok){
+      btn.textContent='✓ Saved'; btn.className='btn-save saved';
+      updateBadge(id, data.stock_status);
+      toast(data.is_out_of_stock ? '🚫 Marked Out of Stock' : '✅ Stock updated to '+data.stock);
+      setTimeout(function(){ btn.textContent='Save'; btn.className='btn-save'; }, 2500);
+    } else { btn.textContent='✗ Error'; btn.className='btn-save error'; toast(data.error||'Something went wrong','err'); }
+  })
+  .catch(function(err){ btn.textContent='✗ Error'; btn.className='btn-save error'; toast('Error: '+err.message,'err'); });
+}
+function updateBadge(id, status) {
+  var b = document.getElementById('badge-'+id);
+  b.className = 'badge-status '+status;
+  b.textContent = {in_stock:'In Stock',low_stock:'Low Stock',out_of_stock:'Out of Stock'}[status]||status;
+}
+function onRowCheck() {
+  var checks = document.querySelectorAll('.item-check:checked');
+  document.getElementById('selCount').textContent = checks.length + ' selected';
+  document.getElementById('bulkBar').className = checks.length > 0 ? 'bulk-bar show' : 'bulk-bar';
+}
+function toggleAll(master) {
+  document.querySelectorAll('.item-check').forEach(function(c){ c.checked = master.checked; });
+  onRowCheck();
+}
+function clearSelection() {
+  document.querySelectorAll('.item-check, #selectAll').forEach(function(c){ c.checked = false; });
+  onRowCheck();
+}
+function showRestockModal() {
+  var row = document.getElementById('restockRow');
+  row.style.display = row.style.display === 'flex' ? 'none' : 'flex';
+}
+function bulkAction(action) {
+  var ids = Array.from(document.querySelectorAll('.item-check:checked')).map(function(c){ return parseInt(c.value); });
+  if(!ids.length){ toast('Select at least one product','err'); return; }
+  var qty = parseInt(document.getElementById('bulkQty').value) || 100;
+  fetch(URL_BULK_UPDATE, {
+    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify({ ids:ids, action:action, qty:qty })
+  })
+  .then(function(r){ if(!r.ok) throw new Error('Server '+r.status); return r.json(); })
+  .then(function(data){
+    if(data.ok){ toast(data.updated+' products updated — refreshing…'); setTimeout(function(){ window.location.reload(); }, 1200); }
+    else toast(data.error||'Bulk action failed','err');
+  })
+  .catch(function(err){ toast('Error: '+err.message,'err'); });
+}
+</script>
+{% endblock %}

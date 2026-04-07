@@ -1,0 +1,60 @@
+{# ── OFFER STRIP — 3 cards (BOGO / Flat Discount / Coupon) ── #}
+{# Context: offer_strip (Coupon QuerySet, max 3 items)         #}
+
+<style>
+.offer-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
+.offer-card{border-radius:16px;padding:20px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;border:1.5px solid transparent;transition:all .2s;cursor:pointer;}
+.offer-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.13);}
+.offer-card.bogo{background:linear-gradient(135deg,#e8f4ff,#d0e8ff);border-color:#1a5fa8;}
+.offer-card.flat{background:linear-gradient(135deg,#e6f8ed,#c8f0d8);border-color:#2d7a2f;}
+.offer-card.coupon{background:linear-gradient(135deg,#f5eeff,#e8d8ff);border-color:#7c3aed;}
+.offer-card.free_del{background:linear-gradient(135deg,#fff8e0,#ffedaa);border-color:#e8a020;}
+.oc-icon{font-size:28px;}
+.oc-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;}
+.oc-desc{font-size:12px;color:#7a6a58;line-height:1.7;}
+.oc-code{background:rgba(255,255,255,.7);border:1.5px dashed #e8ddd0;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:900;letter-spacing:2px;display:flex;align-items:center;justify-content:space-between;}
+.oc-copy{font-size:12px;color:#c8470a;font-weight:700;cursor:pointer;}
+@media(max-width:700px){.offer-strip{grid-template-columns:1fr;}}
+</style>
+
+{% if offer_strip %}
+<div class="container">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:800;">Top Offers <span style="background:#c8470a;color:#fff;font-size:12px;padding:3px 10px;border-radius:50px;font-family:sans-serif;">Live Now</span></h2>
+  </div>
+  <div class="offer-strip" role="list">
+    {% for coupon in offer_strip %}
+    <div class="offer-card {{ coupon.coupon_type }}" role="listitem" tabindex="0">
+      <div class="oc-icon">{{ coupon.icon }}</div>
+      <div class="oc-title">{{ coupon.discount_val }}</div>
+      <p class="oc-desc">{{ coupon.description }}</p>
+      <div class="oc-code">
+        <span>{{ coupon.code }}</span>
+        <span class="oc-copy" onclick="phCopyCoupon('{{ coupon.code }}')">Copy</span>
+      </div>
+      <div style="font-size:11px;color:#b5a898;">⏰ {{ coupon.expiry_note }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+📄 templates/deals/_arrivals_banner.html — Module 4: New Arrivals Green Banner
+Django HTML
+_arrivals_banner.html
+{# ── NEW ARRIVALS BANNER — green announcement strip ── #}
+{# No context variable needed — static or add model later #}
+
+<style>
+.arrivals-banner{background:linear-gradient(90deg,#2d7a2f,#1a6b35,#2d7a2f);border-radius:16px;padding:20px 32px;margin-bottom:32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.ab-badge{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:900;padding:4px 14px;border-radius:50px;white-space:nowrap;}
+.ab-text{font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:800;flex:1;}
+.ab-btn{background:#fff;color:#2d7a2f;padding:8px 20px;border-radius:50px;font-size:14px;font-weight:800;text-decoration:none;white-space:nowrap;}
+</style>
+
+<div class="container">
+  <div class="arrivals-banner" role="banner">
+    <span class="ab-badge">🆕 Just In</span>
+    <div class="ab-text">New Varieties Added This Week — Including Kashmiri Walnut & Goan Fish Pickle</div>
+    <a href="{% url 'All_products' %}" class="ab-btn">Explore New Arrivals →</a>
+  </div>
+</div>

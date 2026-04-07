@@ -1,0 +1,529 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Hero Section Settings | PickleHub Admin{% endblock %}
+
+{% block page_title %}🦸 Hero Section Settings{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================
+   PAGE SPECIFIC CSS 
+   (Layout rules removed to prevent conflicts with Base CSS)
+========================================= */
+
+/* BUTTONS */
+.content{padding:0!important;}
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+
+/* CARDS & PANELS */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}
+.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}
+.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+
+/* FORM INPUTS */
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.lbl-hint{font-size:10px;color:#aaa;font-weight:400;margin-left:5px;}
+.req{color:#e85d04;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+textarea.inp{resize:vertical;min-height:65px;}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.inp-w60{width:60px;}.inp-w80{width:80px;}.inp-w100{width:100px;}.inp-w120{width:120px;}.inp-w140{width:140px;}.inp-flex{flex:1;}
+
+/* TOGGLES & PILLS */
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.stat-row,.btn-row{background:#f8f9fa;border-radius:11px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:9px;border:1.5px solid #f0f0f0;transition:.2s;flex-wrap:wrap;}
+.stat-row:hover,.btn-row:hover{border-color:#e85d04;}
+.si{font-size:14px;color:#ccc;cursor:grab;}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.inp-w80{width:80px;}.inp-w100{width:100px;}.inp-w120{width:120px;}.inp-w140{width:140px;}.inp-flex{flex:1;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+.preview-wrap{position:sticky;top:80px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;font-size:11px;}
+.pv-hero{background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 40%,#16213e 100%);padding:18px;color:#fff;}
+.pv-badge{background:linear-gradient(135deg,#e85d04,#ffd60a);color:#1a1a2e;font-weight:800;font-size:9px;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px;}
+.pv-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px;}
+.pv-sub{font-size:10px;color:rgba(255,255,255,.65);margin-bottom:10px;line-height:1.6;}
+.pv-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.pv-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+.pv-stat .num{font-size:14px;font-weight:800;color:#ffd60a;display:block;}
+.pv-stat .lbl-s{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;}
+.pv-hero-img-wrap{text-align:center;padding:10px 0 4px;}
+.pv-hero-img{width:80px;height:80px;object-fit:contain;border-radius:12px;display:block;margin:0 auto;}
+.pv-hero-emoji{font-size:52px;display:block;text-align:center;animation:pvFloat 3s ease-in-out infinite;}
+@keyframes pvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pv-float-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.pv-float-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:50px;font-size:9px;font-weight:700;}
+.pv-btn-primary{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;padding:6px 14px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.pv-btn-secondary{border:1.5px solid #ffd60a;color:#ffd60a;padding:5px 13px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.pv-btn-outline{border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:5px 13px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.page{padding:22px 26px;}
+.img-upload-box{border:2px dashed #e0e0e0;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa;position:relative;}
+.img-upload-box:hover{border-color:#e85d04;background:#fff8f5;}
+.img-upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-upload-box .upload-icon{font-size:24px;margin-bottom:6px;}
+.img-upload-box .upload-text{font-size:11px;font-weight:700;color:#888;}
+.img-preview-thumb{width:80px;height:80px;object-fit:contain;border-radius:10px;border:2px solid #e0e0e0;}
+.btn-type-select{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;cursor:pointer;}
+.btn-type-select:focus{border-color:#e85d04;}
+.section-divider{background:#f8f9fa;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:11px;font-weight:800;color:#e85d04;border-left:3px solid #e85d04;}
+</style>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+  <button class="btn-s" onclick="resetAll()"><i class="fa fa-undo"></i> Reset</button>
+  <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+{% endblock %}
+
+{% block nav_builders_main %}active{% endblock %}
+{% block nav_builders_show %}show{% endblock %}
+{% block nav_build_hero %}active{% endblock %}
+
+{% block content %}
+
+<script>
+  window.HERO_DATA = {{ hero_json|safe }};
+</script>
+
+<div class="page">
+<div class="row g-4">
+
+<!-- ══ LEFT: HERO FORM ══ -->
+<div class="col-lg-7">
+  <div class="card">
+    <div class="card-head">
+      <span class="ch-ico">🦸</span>
+      <span class="ch-title">Hero Section</span>
+      <span class="ch-sub">— main banner</span>
+      <div class="ch-right">
+        <div class="tog-row">
+          <div class="tog on" id="tog-hero" onclick="togSwitch(this,'tog-hero')"></div>
+          <span class="tog-lbl" id="tog-hero-lbl">Visible</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- TEXT CONTENT -->
+      <div class="section-divider">📝 Text Content</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="lbl">Hero Badge Text <span class="req">*</span></label>
+          <input class="inp" id="heroBadge" value="🏆 Nagpur's #1 Pickle Store" oninput="updatePreview()">
+        </div>
+        <div class="col-md-6">
+          <label class="lbl">Hero Title Line 1</label>
+          <input class="inp" id="heroTitle1" value="Discover" oninput="updatePreview()">
+        </div>
+        <div class="col-md-6">
+          <label class="lbl">Title Highlight <span class="lbl-hint">(yellow color)</span></label>
+          <input class="inp" id="heroTitleHighlight" value="Rare &amp; Exclusive" oninput="updatePreview()">
+        </div>
+        <div class="col-md-6">
+          <label class="lbl">Hero Title Line 2</label>
+          <input class="inp" id="heroTitle2" value="Pickle Brands" oninput="updatePreview()">
+        </div>
+        <div class="col-12">
+          <label class="lbl">Hero Subtitle / Description</label>
+          <textarea class="inp" id="heroSubtitle" oninput="updatePreview()">Handpicked regional pickles from Andhra, Rajasthan, Punjab &amp; more — not available in local stores. Order online with 24-hour delivery across Nagpur.</textarea>
+        </div>
+      </div>
+
+      <hr style="margin:16px 0;border-color:#f0f0f0;">
+
+      <!-- BUTTONS -->
+      <div class="section-divider">🔘 Hero Buttons <span style="font-size:10px;font-weight:400;color:#888;">— add, edit or remove CTA buttons</span></div>
+      <div id="heroBtnsList"></div>
+      <button class="btn-add" onclick="addHeroBtn()"><i class="fa fa-plus"></i> Add Button</button>
+
+      <hr style="margin:16px 0;border-color:#f0f0f0;">
+
+      <!-- IMAGE / JAR -->
+      <div class="section-divider">🖼️ Hero Right Side Image</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="lbl">Upload Image <span class="lbl-hint">(replaces emoji jar)</span></label>
+          <div class="img-upload-box" id="uploadBox">
+            <input type="file" accept="image/*" onchange="handleImageUpload(event)">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click to upload image<br><span style="font-size:10px;color:#bbb;">PNG, JPG, WEBP supported</span></div>
+          </div>
+          <div id="imgPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px;">
+            <img id="imgThumb" class="img-preview-thumb" src="" alt="Preview">
+            <button class="btn-danger" onclick="removeImage()" style="height:fit-content;margin-left:10px;"><i class="fa fa-trash"></i> Remove</button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="lbl">OR use Emoji Jar <span class="lbl-hint">(if no image)</span></label>
+          <input class="inp" id="heroJar" value="🫙" maxlength="4" oninput="updatePreview()" style="font-size:24px;text-align:center;padding:12px;">
+          <div style="font-size:10px;color:#aaa;margin-top:5px;">💡 Emoji is hidden when an image is uploaded</div>
+        </div>
+      </div>
+
+      <hr style="margin:16px 0;border-color:#f0f0f0;">
+
+      <!-- STATS -->
+      <div class="section-divider">📊 Hero Stats <span style="font-size:10px;font-weight:400;color:#888;">— numbers shown below buttons</span></div>
+      <div id="heroStatsList"></div>
+      <button class="btn-add" onclick="addHeroStat()"><i class="fa fa-plus"></i> Add Stat</button>
+
+      <hr style="margin:16px 0;border-color:#f0f0f0;">
+
+      <!-- FLOATING BADGES -->
+      <div class="section-divider">🎈 Floating Badges <span style="font-size:10px;font-weight:400;color:#888;">— animated badges on image</span></div>
+      <div id="heroBadgesList"></div>
+      <button class="btn-add" onclick="addFloatBadge()"><i class="fa fa-plus"></i> Add Badge</button>
+
+    </div>
+  </div>
+</div><!-- /col-left -->
+
+<!-- ══ RIGHT: LIVE PREVIEW ══ -->
+<div class="col-lg-5">
+  <div class="preview-wrap">
+    <div class="prev-lbl">👁️ Live Hero Preview</div>
+    <div class="pv-box">
+      <div class="pv-hero" id="pv-hero">
+        <div class="pv-badge" id="pv-heroBadge">🏆 Nagpur's #1 Pickle Store</div>
+        <div class="pv-title" id="pv-heroTitle">Discover <span style="color:#ffd60a;">Rare &amp; Exclusive</span><br>Pickle Brands</div>
+        <div class="pv-sub" id="pv-heroSub">Handpicked regional pickles from Andhra, Rajasthan &amp; more</div>
+        <div class="pv-btns" id="pv-heroBtns"></div>
+        <div class="pv-stats" id="pv-heroStats"></div>
+        <div class="pv-hero-img-wrap">
+          <img id="pv-heroImg" class="pv-hero-img" src="" alt="" style="display:none;">
+          <span id="pv-heroEmoji" class="pv-hero-emoji">🫙</span>
+        </div>
+        <div class="pv-float-badges" id="pv-floatBadges"></div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-top:14px;border:1.5px solid #f0f0f0;">
+      <div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:6px;">📋 How it works</div>
+      <div style="font-size:11px;color:#888;line-height:2;">
+        ① Edit fields on the left<br>
+        ② Preview updates <strong>instantly</strong> on the right<br>
+        ③ <strong>Save & Publish</strong> → saves to Django DB<br>
+        ④ Template reads <code>{{ hero.badge_text }}</code>
+      </div>
+    </div>
+  </div>
+</div><!-- /col-right -->
+
+</div><!-- /row -->
+</div><!-- /page -->
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.HERO_DATA = window.HERO_DATA || {};
+
+/* ══ STATE ══ */
+var STATE = {
+  heroBtns: [
+    {icon:'fa-shopping-bag', text:'Shop Now',          url:'/products/',               type:'primary'},
+    {icon:'fa-whatsapp',     text:'Order on WhatsApp', url:'https://wa.me/919876543210', type:'secondary'},
+  ],
+  heroStats: [
+    {num:'50+',   lbl:'Pickle Brands'},
+    {num:'200+',  lbl:'Products'},
+    {num:'5000+', lbl:'Happy Customers'},
+    {num:'24Hr',  lbl:'Delivery'},
+  ],
+  heroFloatBadges: ['🌶️ Extra Spicy','✅ 100% Natural','🚚 Free Delivery'],
+  heroImageUrl: '',
+};
+
+/* ══ IMAGE UPLOAD ══ */
+function handleImageUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    STATE.heroImageUrl = e.target.result;
+    document.getElementById('imgThumb').src = e.target.result;
+    document.getElementById('imgPreviewWrap').style.display = 'flex';
+    document.getElementById('uploadBox').style.display = 'none';
+    updatePreview(); markUnsaved();
+    toast('✅ Image uploaded!', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage() {
+  STATE.heroImageUrl = '';
+  document.getElementById('imgThumb').src = '';
+  document.getElementById('imgPreviewWrap').style.display = 'none';
+  document.getElementById('uploadBox').style.display = 'block';
+  updatePreview(); markUnsaved();
+  toast('🗑️ Image removed', 'ok');
+}
+
+/* ══ RENDER: BUTTONS ══ */
+function renderHeroBtns() {
+  var el = document.getElementById('heroBtnsList'); el.innerHTML = '';
+  STATE.heroBtns.forEach(function(b, i) {
+    var d = document.createElement('div'); d.className = 'btn-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">ICON</span>' +
+        '<input class="inp-sm inp-w100" value="' + esc(b.icon) + '" placeholder="fa-shopping-bag" title="FontAwesome icon class" oninput="STATE.heroBtns[' + i + '].icon=this.value;updatePreview()">' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;flex:1;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">BUTTON TEXT</span>' +
+        '<input class="inp-sm inp-flex" value="' + esc(b.text) + '" placeholder="Shop Now" oninput="STATE.heroBtns[' + i + '].text=this.value;updatePreview()">' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;flex:1;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">URL</span>' +
+        '<input class="inp-sm inp-flex" value="' + esc(b.url) + '" placeholder="/products/" oninput="STATE.heroBtns[' + i + '].url=this.value">' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;">STYLE</span>' +
+        '<select class="btn-type-select" onchange="STATE.heroBtns[' + i + '].type=this.value;updatePreview()">' +
+          '<option value="primary"'   + (b.type==='primary'   ?' selected':'') + '>🟠 Primary</option>' +
+          '<option value="secondary"' + (b.type==='secondary' ?' selected':'') + '>🟡 Secondary</option>' +
+          '<option value="outline"'   + (b.type==='outline'   ?' selected':'') + '>⬜ Outline</option>' +
+        '</select>' +
+      '</div>' +
+      '<button class="btn-danger" onclick="STATE.heroBtns.splice(' + i + ',1);renderHeroBtns();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addHeroBtn() {
+  STATE.heroBtns.push({icon:'fa-star', text:'New Button', url:'/', type:'outline'});
+  renderHeroBtns(); updatePreview(); markUnsaved();
+  toast('✅ Button added', 'ok');
+}
+
+/* ══ RENDER: STATS ══ */
+function renderHeroStats() {
+  var el = document.getElementById('heroStatsList'); el.innerHTML = '';
+  STATE.heroStats.forEach(function(s, i) {
+    var d = document.createElement('div'); d.className = 'stat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(s.num) + '" placeholder="50+" oninput="STATE.heroStats[' + i + '].num=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(s.lbl) + '" placeholder="Label" oninput="STATE.heroStats[' + i + '].lbl=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.heroStats.splice(' + i + ',1);renderHeroStats();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addHeroStat() {
+  STATE.heroStats.push({num:'0+', lbl:'New Stat'});
+  renderHeroStats(); updatePreview(); markUnsaved();
+  toast('✅ Stat added', 'ok');
+}
+
+/* ══ RENDER: FLOAT BADGES ══ */
+function renderHeroBadges() {
+  var el = document.getElementById('heroBadgesList'); el.innerHTML = '';
+  STATE.heroFloatBadges.forEach(function(b, i) {
+    var d = document.createElement('div'); d.className = 'stat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-flex" value="' + esc(b) + '" placeholder="🌶️ Badge text" oninput="STATE.heroFloatBadges[' + i + ']=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.heroFloatBadges.splice(' + i + ',1);renderHeroBadges();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+function addFloatBadge() {
+  STATE.heroFloatBadges.push('✨ New Badge');
+  renderHeroBadges(); updatePreview(); markUnsaved();
+  toast('✅ Badge added', 'ok');
+}
+
+/* ══ TOGGLE ══ */
+function togSwitch(el, id) {
+  el.classList.toggle('on');
+  var on = el.classList.contains('on');
+  document.getElementById(id + '-lbl').textContent = on ? 'Visible' : 'Hidden';
+  document.getElementById('pv-hero').style.display = on ? 'block' : 'none';
+  markUnsaved();
+}
+
+/* ══ LIVE PREVIEW ══ */
+function updatePreview() {
+  markUnsaved();
+  document.getElementById('pv-heroBadge').textContent = document.getElementById('heroBadge').value;
+  var t1 = document.getElementById('heroTitle1').value;
+  var hl = document.getElementById('heroTitleHighlight').value;
+  var t2 = document.getElementById('heroTitle2').value;
+  document.getElementById('pv-heroTitle').innerHTML = t1 + ' <span style="color:#ffd60a;">' + hl + '</span><br>' + t2;
+  var sub = document.getElementById('heroSubtitle').value;
+  document.getElementById('pv-heroSub').textContent = sub.length > 90 ? sub.substring(0,90)+'…' : sub;
+
+  // Buttons
+  document.getElementById('pv-heroBtns').innerHTML = STATE.heroBtns.map(function(b) {
+    var ic = b.icon || 'fa-star';
+    var pre = /whatsapp|twitter|facebook|instagram/.test(ic) ? 'fab' : 'fa';
+    var cls = b.type === 'primary' ? 'pv-btn-primary' : (b.type === 'secondary' ? 'pv-btn-secondary' : 'pv-btn-outline');
+    return '<div class="' + cls + '"><i class="' + pre + ' ' + ic + '"></i> ' + esc(b.text) + '</div>';
+  }).join('');
+
+  // Stats
+  document.getElementById('pv-heroStats').innerHTML = STATE.heroStats.map(function(s) {
+    return '<div class="pv-stat"><span class="num">' + esc(s.num) + '</span><span class="lbl-s">' + esc(s.lbl) + '</span></div>';
+  }).join('');
+
+  // Image / emoji
+  var imgEl = document.getElementById('pv-heroImg');
+  var emojiEl = document.getElementById('pv-heroEmoji');
+  if (STATE.heroImageUrl) {
+    imgEl.src = STATE.heroImageUrl; imgEl.style.display = 'block'; emojiEl.style.display = 'none';
+  } else {
+    imgEl.style.display = 'none'; emojiEl.style.display = 'block';
+    emojiEl.textContent = document.getElementById('heroJar').value || '🫙';
+  }
+
+  // Float badges
+  document.getElementById('pv-floatBadges').innerHTML = STATE.heroFloatBadges.map(function(b) {
+    return '<span class="pv-float-badge">' + esc(b) + '</span>';
+  }).join('');
+}
+
+/* ══ SAVE / RESET ══ */
+var unsaved = false;
+function markUnsaved() {
+  if (unsaved) return;
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⏳ Unsaved changes';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+}
+
+function saveAll() {
+  var data = {
+    badge_text:        document.getElementById('heroBadge').value,
+    title_line1:       document.getElementById('heroTitle1').value,
+    title_highlight:   document.getElementById('heroTitleHighlight').value,
+    title_line2:       document.getElementById('heroTitle2').value,
+    subtitle:          document.getElementById('heroSubtitle').value,
+    jar_emoji:         document.getElementById('heroJar').value,
+    hero_image_url:    STATE.heroImageUrl || '',
+    buttons_json:      STATE.heroBtns,
+    stats_json:        STATE.heroStats,
+    float_badges_json: STATE.heroFloatBadges,
+    is_visible:        document.getElementById('tog-hero').classList.contains('on'),
+  };
+  localStorage.setItem('picklehub_hero_settings', JSON.stringify(data));
+  document.getElementById('saveStatus').textContent = '⏳ Saving…';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+  toast('💾 Saving...', 'ok');
+
+  fetch('/api/hero/save/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify(data),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(r) {
+    if (r.ok) {
+      unsaved = false;
+      document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+      document.getElementById('saveStatus').className   = 's-pill sp-green';
+      toast('✅ Hero section saved & published!', 'ok');
+    } else {
+      toast('❌ Save failed — check server', 'err');
+      document.getElementById('saveStatus').textContent = '❌ Save failed';
+    }
+  })
+  .catch(function() {
+    unsaved = false;
+    document.getElementById('saveStatus').textContent = '✅ Saved locally';
+    document.getElementById('saveStatus').className   = 's-pill sp-green';
+    toast('❌ Network error — saved locally only', 'err');
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset hero section settings?')) return;
+  localStorage.removeItem('picklehub_hero_settings');
+  location.reload();
+}
+
+/* ══ INIT FROM DJANGO ══ */
+(function init() {
+  var hd = window.HERO_DATA || {};
+
+  // Arrays
+  if (hd.buttons_json)      STATE.heroBtns       = hd.buttons_json;
+  if (hd.stats_json)        STATE.heroStats       = hd.stats_json;
+  if (hd.float_badges_json) STATE.heroFloatBadges = hd.float_badges_json;
+
+  // Image
+  if (hd.hero_image_url) {
+    STATE.heroImageUrl = hd.hero_image_url;
+    document.getElementById('imgThumb').src = hd.hero_image_url;
+    document.getElementById('imgPreviewWrap').style.display = 'flex';
+    document.getElementById('uploadBox').style.display = 'none';
+  }
+
+  // Text fields
+  var map = {heroBadge:'badge_text',heroTitle1:'title_line1',heroTitleHighlight:'title_highlight',heroTitle2:'title_line2',heroSubtitle:'subtitle',heroJar:'jar_emoji'};
+  Object.keys(map).forEach(function(id) {
+    if (hd[map[id]] !== undefined) document.getElementById(id).value = hd[map[id]];
+  });
+
+  // Visibility
+  if (hd.is_visible === false) {
+    document.getElementById('tog-hero').classList.remove('on');
+    document.getElementById('tog-hero-lbl').textContent = 'Hidden';
+  }
+
+  renderHeroBtns(); renderHeroStats(); renderHeroBadges();
+  updatePreview();
+  unsaved = false;
+  document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+  document.getElementById('saveStatus').className   = 's-pill sp-green';
+})();
+
+/* ══ HELPERS ══ */
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toast(msg, type) {
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 't-item' + (type==='err'?' err':'');
+  t.textContent = msg; wrap.appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('show'); }); });
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },400); }, 3000);
+}
+</script>
+{% endblock %}

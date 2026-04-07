@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brand Builder | PickleHub Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:#f0f2f5;color:#1a1a2e;font-size:13px;}
+.wrap{display:flex;min-height:100vh;}
+.sb{width:220px;background:#1a1a2e;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:50;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:#ffd60a;}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;}
+.sb-sec{padding:14px 16px 4px;font-size:9px;font-weight:800;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:2px;}
+.sb-a{display:flex;align-items:center;gap:10px;padding:9px 16px;color:rgba(255,255,255,.55);text-decoration:none;font-size:12px;font-weight:600;border-left:3px solid transparent;transition:.2s;}
+.sb-a:hover{background:rgba(255,255,255,.05);color:#fff;}
+.sb-a.on{background:rgba(232,93,4,.15);color:#ffd60a;border-left-color:#e85d04;}
+.sb-a i{width:16px;text-align:center;}
+.main{margin-left:220px;flex:1;}
+.tbar{background:#fff;padding:13px 26px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:40;flex-wrap:wrap;}
+.tbar-title{font-size:16px;font-weight:800;color:#1a1a2e;}
+.tbar-sub{font-size:11px;color:#aaa;margin-top:1px;}
+.tbar-right{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.page{padding:22px 26px;}
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+.brand-row{background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:10px;border:1.5px solid #f0f0f0;transition:.2s;}
+.brand-row:hover{border-color:#e85d04;}
+.brand-row-fields{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.si{font-size:14px;color:#ccc;cursor:grab;}
+.info-tip{background:#fff8f5;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#e85d04;font-weight:600;border-left:3px solid #e85d04;}
+/* preview */
+.preview-wrap{position:sticky;top:75px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;}
+.pv-filter-section{background:#fff;padding:16px;}
+.pv-filter-title{font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;display:flex;align-items:center;gap:6px;}
+.pv-filter-check{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px;color:#444;}
+.pv-filter-count{font-size:10px;color:#aaa;background:#f5f5f5;padding:1px 6px;border-radius:50px;margin-left:auto;}
+/* brand strip preview */
+.pv-brand-strip{background:#fff;padding:10px 14px;border-top:1px solid #f0f0f0;}
+.pv-brand-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.pv-brand-chip{background:#f5f5f5;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;color:#1a1a2e;}
+/* toast */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-name">🥒 PickleHub</div>
+    <div class="sb-logo-sub">Admin Panel</div>
+  </div>
+  <div class="sb-sec">Main</div>
+  <a class="sb-a" href="{% url 'dashboard' %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+  <a class="sb-a" href="{% url 'product_builder' %}"><i class="fa fa-boxes"></i> Products</a>
+  <a class="sb-a" href="#"><i class="fa fa-shopping-bag"></i> Orders</a>
+  <div class="sb-sec">Home Page Sections</div>
+  <a class="sb-a" href="{% url 'hero_section' %}"><i class="fa fa-star"></i> Hero Section</a>
+  <a class="sb-a" href="{% url 'feature_section' %}"><i class="fa fa-list-ul"></i> Features Strip</a>
+  <a class="sb-a" href="{% url 'category_section' %}"><i class="fa fa-th-large"></i> Categories</a>
+  <a class="sb-a on" href="{% url 'brand_builder' %}"><i class="fa fa-tag"></i> Brands</a>
+  <div class="sb-sec">Products Page</div>
+  <a class="sb-a" href="{% url 'product_builder' %}"><i class="fa fa-cubes"></i> Product Builder</a>
+  <a class="sb-a" href="{% url 'product_filter_builder' %}"><i class="fa fa-filter"></i> Filter Settings</a>
+  <div class="sb-sec">Site Settings</div>
+  <a class="sb-a" href="#"><i class="fa fa-cog"></i> General Settings</a>
+  <a class="sb-a" href="#"><i class="fa fa-sign-out-alt"></i> Logout</a>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="tbar">
+    <div>
+      <div class="tbar-title">🏷️ Brand Builder</div>
+      <div class="tbar-sub">Brands appear in filter sidebar & home page brand strip</div>
+    </div>
+    <div class="tbar-right">
+      <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+      <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+    </div>
+  </div>
+
+  <div class="page">
+  <div class="row g-4">
+
+    <!-- LEFT: BUILDER -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-head">
+          <span class="ch-ico">🏷️</span>
+          <span class="ch-title">Brands</span>
+          <span class="ch-sub">— shown in filter sidebar & brand strip</span>
+          <div class="ch-right"><span id="brandCount" style="font-size:11px;font-weight:700;color:#888;"></span></div>
+        </div>
+        <div class="card-body">
+          <div class="info-tip">💡 Add brands here. They auto-appear in the filter sidebar on the Products page and the brand strip on the Home page. Set product count for each brand.</div>
+          <div id="brandsList"></div>
+          <button class="btn-add mt-2" onclick="addBrand()"><i class="fa fa-plus"></i> Add Brand</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="col-lg-5">
+      <div class="preview-wrap">
+        <div class="prev-lbl">👁️ Live Preview</div>
+        <div class="pv-box">
+          <!-- filter preview -->
+          <div class="pv-filter-section">
+            <div class="pv-filter-title">🏢 Brand <span style="font-size:10px;color:#e85d04;background:#fff3e0;padding:1px 7px;border-radius:50px;cursor:pointer;">Clear</span></div>
+            <div id="pv-brandFilters"></div>
+          </div>
+          <!-- brand strip preview -->
+          <div class="pv-brand-strip">
+            <div style="font-size:10px;font-weight:800;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Home Page Brand Strip</div>
+            <div class="pv-brand-chips" id="pv-brandChips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+
+
+<script>
+window.BRANDS_DATA = {{ brands_json|safe }};
+
+
+var URLS = {
+  save:   "{% url 'save_brand' %}",
+  delete: "{% url 'delete_brand' brand_id=0 %}".replace('/0/', '/'),
+};
+
+var STATE  = { brands: [] };
+var unsaved = false;
+
+function markUnsaved() {
+  if (unsaved) return;
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⏳ Unsaved changes';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+}
+
+/* ── RENDER ── */
+function renderBrands() {
+  var el = document.getElementById('brandsList');
+  el.innerHTML = '';
+  STATE.brands.forEach(function(b, i) {
+    var d = document.createElement('div');
+    d.className = 'brand-row';
+    d.innerHTML =
+      '<div class="brand-row-fields">' +
+        '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Emoji</span>' +
+          '<input class="inp-sm" style="width:52px;font-size:20px;text-align:center;padding:4px;" maxlength="4" value="' + esc(b.emoji) + '"' +
+            ' oninput="STATE.brands[' + i + '].emoji=this.value;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;flex:1;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Brand Name</span>' +
+          '<input class="inp-sm" style="width:100%;" placeholder="Rajasthani Pickles" value="' + esc(b.name) + '"' +
+            ' oninput="STATE.brands[' + i + '].name=this.value;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Count</span>' +
+          '<input class="inp-sm" style="width:60px;" type="number" min="0" placeholder="28" value="' + esc(b.product_count) + '"' +
+            ' oninput="STATE.brands[' + i + '].product_count=parseInt(this.value)||0;updatePreview();markUnsaved()">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;align-items:center;">' +
+          '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;">Active</span>' +
+          '<div class="tog' + (b.is_active ? ' on' : '') + '" onclick="toggleBrandActive(' + i + ',this)"></div>' +
+        '</div>' +
+        '<button class="btn-danger" onclick="removeBrand(' + i + ')"><i class="fa fa-trash"></i></button>' +
+      '</div>' +
+      '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;">' +
+        '<span style="font-size:9px;font-weight:800;color:#aaa;text-transform:uppercase;white-space:nowrap;">Link URL</span>' +
+        '<input class="inp-sm" style="flex:1;" placeholder="/brand/rajasthani-pickles/" value="' + esc(b.url) + '"' +
+          ' oninput="STATE.brands[' + i + '].url=this.value;markUnsaved()">' +
+      '</div>';
+    el.appendChild(d);
+  });
+  document.getElementById('brandCount').textContent =
+    STATE.brands.length + ' brand' + (STATE.brands.length !== 1 ? 's' : '');
+}
+
+function toggleBrandActive(i, el) {
+  el.classList.toggle('on');
+  STATE.brands[i].is_active = el.classList.contains('on');
+  updatePreview();
+  markUnsaved();
+}
+
+function addBrand() {
+  STATE.brands.push({
+    id: null, emoji: '🏷️', name: 'New Brand',
+    url: '/brand/new/', product_count: 0,
+    is_active: true, sort_order: STATE.brands.length
+  });
+  renderBrands();
+  updatePreview();
+  markUnsaved();
+  toast('✅ Brand added', 'ok');
+}
+
+function removeBrand(i) {
+  var bid = STATE.brands[i].id;
+  STATE.brands.splice(i, 1);
+  renderBrands();
+  updatePreview();
+  markUnsaved();
+  if (bid) {
+    fetch(URLS.delete + bid + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res.ok) toast('❌ Delete failed: ' + (res.error || ''), 'err');
+    })
+    .catch(function(){ toast('❌ Delete network error', 'err'); });
+  }
+  toast('🗑️ Brand removed', 'ok');
+}
+
+/* ── PREVIEW ── */
+function updatePreview() {
+  var active = STATE.brands.filter(function(b){ return b.is_active; });
+
+  document.getElementById('pv-brandFilters').innerHTML = active.map(function(b, i) {
+    return '<div class="pv-filter-check">' +
+      '<input type="checkbox" style="accent-color:#e85d04;width:13px;height:13px;"' + (i === 0 ? ' checked' : '') + '>' +
+      '<span style="font-size:11px;color:#444;flex:1;">' + esc(b.name) + '</span>' +
+      '<span class="pv-filter-count">' + b.product_count + '</span>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('pv-brandChips').innerHTML = active.map(function(b) {
+    return '<span class="pv-brand-chip">' + b.emoji + ' ' + esc(b.name) + '</span>';
+  }).join('');
+}
+
+/* ── SAVE ── */
+function saveAll() {
+  STATE.brands.forEach(function(b, i){ b.sort_order = i; });
+
+  toast('💾 Saving…', 'ok');
+  document.getElementById('saveStatus').textContent = '⏳ Saving…';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+
+  fetch(URLS.save, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken':  getCookie('csrftoken')
+    },
+    body: JSON.stringify({ brands: STATE.brands }),
+  })
+  .then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(res) {
+    if (res.ok) {
+      unsaved = false;
+      document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+      document.getElementById('saveStatus').className   = 's-pill sp-green';
+      toast(res.message || '✅ Brands saved!', 'ok');
+      setTimeout(function(){ location.reload(); }, 1200);
+    } else {
+      toast('❌ ' + (res.error || 'Save failed'), 'err');
+      document.getElementById('saveStatus').textContent = '❌ Save failed';
+      document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+    }
+  })
+  .catch(function(err){
+    toast('❌ Network error: ' + err.message, 'err');
+    document.getElementById('saveStatus').textContent = '❌ Save failed';
+    document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+  });
+}
+
+/* ── HELPERS ── */
+function toast(msg, type) {
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 't-item' + (type === 'err' ? ' err' : '');
+  t.textContent = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+  });
+  setTimeout(function(){
+    t.classList.remove('show');
+    setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 400);
+  }, 3000);
+}
+
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;');
+}
+
+/* ── INIT ── */
+(function init() {
+  STATE.brands = window.BRANDS_DATA || [];
+  renderBrands();
+  updatePreview();
+  unsaved = false;
+  document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+  document.getElementById('saveStatus').className   = 's-pill sp-green';
+})();
+</script>
+</body>
+</html>

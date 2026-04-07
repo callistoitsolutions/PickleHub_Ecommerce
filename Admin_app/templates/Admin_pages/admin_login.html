@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | PickleHub Nagpur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        :root {
+            --primary: #e85d04;
+            --dark: #1a1a2e;
+            --accent: #ffd60a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            margin: 20px;
+        }
+
+        .logo-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .ico {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 15px rgba(232, 93, 4, 0.25);
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .brand-sub {
+            font-size: 10px;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .input-group-text {
+            background: #f8f9fa;
+            border-right: none;
+            color: #aaa;
+            border-color: #e0e0e0;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .form-control {
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+            border-left: none;
+            background: #f8f9fa;
+            color: var(--dark);
+        }
+
+        /* Adjust input radius for the middle password field */
+        .pwd-input {
+            border-radius: 0 !important;
+            border-right: none !important;
+        }
+
+        /* Style for the new eye icon button */
+        .pwd-toggle {
+            border-radius: 0 10px 10px 0 !important;
+            border-left: none !important;
+            border-right: 1px solid #e0e0e0 !important;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: none;
+            background: #fff;
+        }
+
+        /* Highlight BOTH icons when input is focused */
+        .input-group:focus-within .input-group-text {
+            border-color: var(--primary) !important;
+            background: #fff;
+            color: var(--primary);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), #f48c06);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(232, 93, 4, 0.3);
+            color: #fff;
+        }
+
+        .alert-custom {
+            background: #f8d7da;
+            color: #721c24;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-wrap">
+            <div class="ico">🥒</div>
+            <div class="brand-name">PickleHub</div>
+            <div class="brand-sub">Secure Admin Portal</div>
+        </div>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            {% if form.errors or messages %}
+                <div class="alert alert-custom">
+                    <i class="fa fa-exclamation-circle me-1"></i> Invalid username or password. Please try again.
+                </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-user"></i></span>
+                    <input type="text" name="admin_email" id="admin_email" class="form-control" placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                    
+                    <input type="password" name="admin_password" id="admin_password" class="form-control pwd-input" placeholder="Enter your password" required>
+                    
+                    <span class="input-group-text pwd-toggle" onclick="togglePassword()">
+                        <i class="fa fa-eye" id="toggleIcon"></i>
+                    </span>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-login" onclick="Admin_Login(this)">
+                Access Dashboard <i class="fa fa-arrow-right ms-2"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pwdInput = document.getElementById('admin_password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash'); // Changes icon to eye with a slash
+            } else {
+                pwdInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye'); // Changes icon back to normal eye
+            }
+        }
+    </script>
+
+{% comment %} Ajax and Jquery for admin login {% endcomment %}
+
+
+      <script>
+        function Admin_Login(_this){
+            var admin_email = $("#admin_email").val();
+            var admin_password = $("#admin_password").val();
+            if (admin_email == "")
+            {
+                alert("Please Enter Email Address");
+            }
+            else if(admin_password == "")
+            {
+                alert("Please Enter Password");
+            }
+             else
+            {
+                _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+                
+                $.ajax({
+                    method:"POST",
+                    url : "{% url 'Admin_Login' %}",
+                    data:JSON.stringify({
+                    "admin_email":admin_email,
+                    "admin_password":admin_password
+                    }),
+                    success : function (response){
+                    $(_this).prop("disabled", false);
+                        _this.innerHTML = `Access Dashboard`;
+                    if (response.status == '1'){
+                        window.location.href ="{% url 'dashboard' %}";
+                    }
+                    else
+                    {
+                        swal( 
+                        {
+                            content: {
+                                element: "div",
+                                attributes: {
+                                    innerHTML: '<span style="font-weight:bold; color:red;font-size:20px;">' + response.msg + '</span>'
+                                }
+                            },
+
+                            icon: "warning",
+                            closeOnClickOutside: false,
+                        }) 
+                    }
+        
+                    }
+                });
+            }
+        }
+      </script>
+
+
+</body>
+</html>

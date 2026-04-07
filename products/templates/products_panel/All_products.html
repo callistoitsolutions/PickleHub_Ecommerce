@@ -1,0 +1,864 @@
+{% extends 'home/base.html' %}
+
+
+{% block title %}{{ settings.page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════ */
+.breadcrumb-bar { background:#fff; border-bottom:1px solid #eee; padding:10px 0; }
+.breadcrumb { margin:0; background:transparent; }
+.breadcrumb-item a { color:#e85d04; text-decoration:none; font-size:13px; }
+.breadcrumb-item.active { color:#666; font-size:13px; }
+
+/* ══════════════════════════════════════
+   FILTER SIDEBAR
+══════════════════════════════════════ */
+.sidebar {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.06);
+    position: sticky;
+    top: 80px;
+}
+.filter-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.filter-title span {
+    font-size: 11px;
+    color: #e85d04;
+    background: #fff3e0;
+    padding: 2px 8px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-left: auto;
+}
+.filter-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    cursor: pointer;
+}
+.filter-check input[type=checkbox],
+.filter-check input[type=radio] { accent-color: #e85d04; width: 15px; height: 15px; }
+.filter-check label { font-size: 13px; color: #444; cursor: pointer; flex: 1; margin: 0; }
+.filter-check .count {
+    font-size: 11px;
+    color: #aaa;
+    background: #f5f5f5;
+    padding: 1px 7px;
+    border-radius: 50px;
+}
+.price-range input[type=range] { accent-color: #e85d04; width: 100%; }
+.price-display { font-weight: 700; color: #e85d04; font-size: 14px; }
+.filter-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+.filter-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+/* ══════════════════════════════════════
+   SORT BAR
+══════════════════════════════════════ */
+.sort-bar {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.sort-bar select {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    outline: none;
+    color: #333;
+    background: #f9f9f9;
+}
+.result-count { font-size: 13px; color: #666; }
+.result-count strong { color: #e85d04; }
+
+/* ══════════════════════════════════════
+   PRODUCT CARD — BASE
+══════════════════════════════════════ */
+.product-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    transition: transform .25s, box-shadow .25s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.12);
+}
+
+/* image area */
+.product-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+}
+
+/* card body */
+.product-body {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+/* ── card text ── */
+.p-brand { font-size: 10px; color: #e85d04; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.p-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 2px 0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.p-weight { font-size: 11px; color: #aaa; }
+.p-stars  { color: #ffd60a; font-size: 11px; }
+.p-price  { font-size: 18px; font-weight: 800; color: #e85d04; }
+.p-old    { font-size: 12px; color: #bbb; text-decoration: line-through; }
+.p-disc   { background: #e8f5e9; color: #2d6a4f; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 50px; }
+
+/* ── badge & wishlist ── */
+.p-badge {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: linear-gradient(135deg,#e85d04,#f48c06);
+    color: #fff;
+    padding: 2px 9px;
+    border-radius: 50px;
+    font-size: 10px;
+    font-weight: 600;
+    z-index: 2;
+}
+.p-wish {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    transition: color .3s;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.p-wish:hover { color: #e85d04; }
+
+/* ── qty selector — inside card, low stock only ── */
+.qty-selector {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    background: #fff3e0;
+    border-radius: 8px;
+    padding: 5px 8px;
+}
+.qty-selector span { font-size: 11px; color: #e85d04; font-weight: 700; white-space: nowrap; }
+.qty-selector select {
+    border: 1px solid #f5c89a;
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    width: 52px;
+}
+.qty-selector select:focus { border-color: #e85d04; }
+
+/* ══════════════════════════════════════
+   PRODUCT CARD — ACTION BUTTONS
+══════════════════════════════════════ */
+.btn-cart {
+    background: linear-gradient(135deg,#e85d04,#f48c06);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 9px 0;
+    width: 100%;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .3s;
+    margin-top: 8px;
+}
+.btn-cart:hover { background: linear-gradient(135deg,#9d0208,#e85d04); }
+
+.btn-wa {
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 7px 0;
+    width: 100%;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background .3s;
+}
+.btn-wa:hover { background: #128C7E; color: #fff; }
+
+/* ══════════════════════════════════════
+   PRODUCT CARD — OUT OF STOCK STATE
+══════════════════════════════════════ */
+.oos-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(26,26,46,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px 16px 0 0;
+    z-index: 3;
+}
+.oos-label {
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 50px;
+    border: 1.5px solid rgba(255,255,255,0.18);
+}
+.product-card.oos .p-price { color: #aaa !important; }
+.product-card.oos .p-old,
+.product-card.oos .p-disc  { display: none; }
+
+.btn-oos {
+    background: #f0f0f0;
+    color: #aaa;
+    border: none;
+    border-radius: 50px;
+    padding: 9px 0;
+    width: 100%;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: not-allowed;
+    margin-top: 8px;
+}
+.btn-notify {
+    background: transparent;
+    color: #e85d04;
+    border: 1.5px solid #e85d04;
+    border-radius: 50px;
+    padding: 7px 0;
+    width: 100%;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.btn-notify:hover { background: #fff3e0; }
+
+/* ══════════════════════════════════════
+   PAGINATION
+══════════════════════════════════════ */
+.pagination .page-link { color: #e85d04; border-color: #eee; border-radius: 8px; margin: 0 3px; }
+.pagination .page-item.active .page-link { background: #e85d04; border-color: #e85d04; color: #fff; }
+
+/* ══════════════════════════════════════
+   MOBILE
+══════════════════════════════════════ */
+.mobile-filter-btn { display: none; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1999; }
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0; left: -100%;
+        width: 80%;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 2000;
+        transition: left .3s;
+        border-radius: 0;
+    }
+    .sidebar.open { left: 0; }
+    .mobile-filter-btn { display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .sidebar-overlay.show { display: block; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ══ BREADCRUMB ══ -->
+<div class="breadcrumb-bar">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">All Pickles</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-4">
+<div class="row g-4">
+
+    <!-- ══ FILTER SIDEBAR ══ -->
+    <div class="col-lg-3 col-md-3">
+
+        <button class="btn btn-warning fw-bold w-100 mb-3 mobile-filter-btn d-md-none"
+                id="filterToggle" aria-expanded="false">
+            <i class="fa fa-filter"></i> Filters &amp; Sort
+        </button>
+
+        <div id="filterSidebar" class="sidebar" role="complementary" aria-label="Product filters">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 style="font-size:17px;font-weight:800;margin:0;color:#1a1a2e;">
+                    <i class="fa fa-filter" style="color:#e85d04;"></i> Filters
+                </h2>
+                <a href="{% url 'All_products' %}"
+                   style="color:#e85d04;font-size:12px;font-weight:600;text-decoration:none;">
+                   Clear All
+                </a>
+            </div>
+
+            {# ── CATEGORY ── #}
+            {% if settings.show_category_filter %}
+            <div class="filter-section">
+                <div class="filter-title">🏷️ Category <span onclick="clearFilter('cat')">Clear</span></div>
+                {% for cat in categories.items_json %}
+                <div class="filter-check">
+                    <input type="checkbox" id="cat-{{ forloop.counter }}"
+                           name="cat" value="{{ forloop.counter }}"
+                           {% if forloop.counter in selected_cats %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="cat-{{ forloop.counter }}">{{ cat.name }}</label>
+                    <span class="count">{{ cat.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# ── BRAND ── #}
+            {% if settings.show_brand_filter %}
+            <div class="filter-section">
+                <div class="filter-title">🏢 Brand <span onclick="clearFilter('brand')">Clear</span></div>
+                {% for brand in brands %}
+                <div class="filter-check">
+                    <input type="checkbox" id="brand-{{ brand.id }}"
+                           name="brand" value="{{ brand.id }}"
+                           {% if brand.id in selected_brands %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="brand-{{ brand.id }}">{{ brand.name }}</label>
+                    <span class="count">{{ brand.product_count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# ── PRICE ── #}
+            {% if settings.show_price_filter %}
+            <div class="filter-section">
+                <div class="filter-title">💰 Price Range <span onclick="clearFilter('price')">Clear</span></div>
+                <div class="price-range">
+                    <input type="range" id="priceRange"
+                           min="{{ settings.price_min }}"
+                           max="{{ settings.price_max }}"
+                           value="{{ current_price_max }}"
+                           aria-label="Maximum price filter">
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span style="font-size:12px;color:#666;">₹{{ settings.price_min }}</span>
+                    <span class="price-display" id="priceDisplay">Max: ₹{{ current_price_max }}</span>
+                    <span style="font-size:12px;color:#666;">₹{{ settings.price_max }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            {# ── REGION ── #}
+            {% if settings.show_region_filter %}
+            <div class="filter-section">
+                <div class="filter-title">🗺️ Region <span onclick="clearFilter('region')">Clear</span></div>
+                {% for reg in settings.regions_json %}
+                <div class="filter-check">
+                    <input type="checkbox" id="reg-{{ forloop.counter }}"
+                           name="region" value="{{ reg.name }}"
+                           {% if reg.name in selected_regions %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="reg-{{ forloop.counter }}">{{ reg.name }}</label>
+                    <span class="count">{{ reg.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# ── RATING ── #}
+            {% if settings.show_rating_filter %}
+            <div class="filter-section">
+                <div class="filter-title">⭐ Minimum Rating</div>
+                <div class="filter-check">
+                    <input type="radio" name="rating" id="r4" value="4"
+                           {% if current_rating == '4' %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="r4">★★★★☆ 4 &amp; above</label>
+                </div>
+                <div class="filter-check">
+                    <input type="radio" name="rating" id="r3" value="3"
+                           {% if current_rating == '3' %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="r3">★★★☆☆ 3 &amp; above</label>
+                </div>
+                <div class="filter-check">
+                    <input type="radio" name="rating" id="rall" value=""
+                           {% if not current_rating %}checked{% endif %}
+                           onchange="applyFilters()">
+                    <label for="rall">All Ratings</label>
+                </div>
+            </div>
+            {% endif %}
+
+            {# ── WEIGHT ── #}
+            {% if settings.show_weight_filter %}
+            <div class="filter-section">
+                <div class="filter-title">⚖️ Weight</div>
+                {% for w in settings.weights_json %}
+                <div class="filter-check">
+                    <input type="checkbox" id="w-{{ forloop.counter }}"
+                           name="weight" value="{{ w.label }}"
+                           onchange="applyFilters()">
+                    <label for="w-{{ forloop.counter }}">{{ w.label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <button class="btn btn-warning fw-bold w-100 rounded-pill"
+                    onclick="applyFilters()" style="font-size:14px;">
+                <i class="fa fa-check"></i> Apply Filters
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ══ PRODUCTS GRID ══ -->
+    <div class="col-lg-9 col-md-9">
+
+        <!-- sort bar -->
+        <div class="sort-bar">
+            <div class="result-count flex-grow-1">
+                Showing <strong>{{ total_count }}</strong>
+                result{{ total_count|pluralize }} for "All Pickles"
+            </div>
+            <label for="sortSelect" class="visually-hidden">Sort by</label>
+            <select id="sortSelect" onchange="applySort(this.value)">
+                <option value="popular"    {% if current_sort == 'popular'    %}selected{% endif %}>Sort by: Popular</option>
+                <option value="price_asc"  {% if current_sort == 'price_asc'  %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="newest"     {% if current_sort == 'newest'     %}selected{% endif %}>Newest First</option>
+                <option value="rating"     {% if current_sort == 'rating'     %}selected{% endif %}>Best Rating</option>
+            </select>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-warning" title="Grid view"><i class="fa fa-th"></i></button>
+                <button class="btn btn-sm btn-outline-warning" title="List view"><i class="fa fa-list"></i></button>
+            </div>
+        </div>
+
+        <!-- active filter pills -->
+        {% if selected_cats or selected_brands or selected_regions %}
+        <div class="d-flex gap-2 flex-wrap mb-3" aria-label="Active filters">
+            <span style="font-size:12px;color:#666;align-self:center;">Active:</span>
+            {% for cat in categories.items_json %}
+                {% if forloop.counter in selected_cats %}
+                <span class="badge rounded-pill"
+                      style="background:#fff3e0;color:#e85d04;font-size:12px;padding:6px 12px;">
+                    {{ cat.name }}
+                    <a href="#" onclick="removeFilter('cat','{{ forloop.counter }}');return false;"
+                       style="color:#e85d04;text-decoration:none;">✕</a>
+                </span>
+                {% endif %}
+            {% endfor %}
+            {% for brand in brands %}
+                {% if brand.id in selected_brands %}
+                <span class="badge rounded-pill"
+                      style="background:#fff3e0;color:#e85d04;font-size:12px;padding:6px 12px;">
+                    {{ brand.name }}
+                    <a href="#" onclick="removeFilter('brand','{{ brand.id }}');return false;"
+                       style="color:#e85d04;text-decoration:none;">✕</a>
+                </span>
+                {% endif %}
+            {% endfor %}
+            <a href="{% url 'All_products' %}"
+               style="color:#e85d04;font-size:12px;text-decoration:underline;align-self:center;">
+               Clear All
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- ══ PRODUCT GRID ══ -->
+        <div class="row g-3" role="list">
+
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3" role="listitem">
+
+            <!-- card wrapped in link -->
+            <a href="{% url 'product_details' product.slug %}"
+               class="text-decoration-none text-dark">
+                <article class="product-card {% if product.is_out_of_stock %}oos{% endif %}">
+
+                    <!-- image -->
+                    <div class="product-img" style="background:{{ product.card_bg }};">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                 style="width:100%;height:100%;object-fit:cover;display:block;">
+                        {% else %}
+                            <span>{{ product.emoji }}</span>
+                        {% endif %}
+
+                        
+
+                        {% if product.is_out_of_stock %}
+    <div class="oos-overlay">
+        <span class="oos-label">Out of Stock</span>
+    </div>
+{% else %}
+    {# ✅ ONLY THIS CHANGED — offer badge first, product badge as fallback #}
+    {% if product.active_offer %}
+        <span class="p-badge" style="background:#e85d04;">
+            {{ product.active_offer.badge_label }}
+        </span>
+    {% elif product.badge %}
+        <span class="p-badge" style="background:{{ product.badge_color }};">
+            {{ product.badge }}
+        </span>
+    {% endif %}
+{% endif %}
+
+
+                        <button class="p-wish" aria-label="Add to wishlist"
+                                onclick="event.preventDefault()">
+                            <i class="fa fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <!-- body -->
+                    <div class="product-body">
+                        <div class="p-brand">
+                            {% if product.brand %}{{ product.brand.name }}{% endif %}
+                        </div>
+                        <h3 class="p-name">{{ product.name }}</h3>
+                        <div class="p-weight">
+                            {{ product.weight }}{% if product.oil_type %} | {{ product.oil_type }}{% endif %}
+                        </div>
+                        <div class="d-flex align-items-center gap-1 mt-1">
+                            <div class="p-stars">{{ product.stars_html }}</div>
+                            <small class="text-muted" style="font-size:11px;">
+                                ({{ product.review_count }})
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                            <span class="p-price">₹{{ product.price }}</span>
+                            {% if product.old_price and not product.is_out_of_stock %}
+                                <span class="p-old">₹{{ product.old_price }}</span>
+                            {% endif %}
+                            {% if product.discount_label and not product.is_out_of_stock %}
+                                <span class="p-disc">{{ product.discount_label }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if product.assigned_coupons_list and not product.is_out_of_stock %}
+<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+    {% for coupon in product.assigned_coupons_list %}
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#fff8f0;border:1px dashed #f48c06;border-radius:8px;padding:5px 8px;">
+        
+        <div>
+            <span style="font-family:monospace;font-size:10px;font-weight:800;color:#e85d04;">
+                {{ coupon.code }}
+            </span>
+            <span style="font-size:10px;color:#888;margin-left:4px;">
+                · {{ coupon.discount_display }}
+            </span>
+        </div>
+
+        <button onclick="event.preventDefault();copyCoupon('{{ coupon.code|escapejs }}')"
+                style="background:#e85d04;color:#fff;border:none;border-radius:6px;padding:2px 8px;font-size:9px;font-weight:700;cursor:pointer;">
+            Copy
+        </button>
+
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+                        {# qty selector — only when low stock, shown ONCE inside card #}
+                       {% if product.is_low_stock %}
+<div class="qty-selector" onclick="event.preventDefault()">
+    <span>Qty:</span>
+    <select id="qty-{{ product.id }}"
+            aria-label="Select quantity for {{ product.name }}"
+            onclick="event.preventDefault()"
+            onchange="event.preventDefault()">
+        {% for i in "x"|ljust:product.stock %}
+        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+        {% endfor %}
+    </select>
+    <span style="color:#c62828;font-weight:700;font-size:11px;">
+        Only {{ product.stock }} left!
+    </span>
+</div>
+{% endif %}
+
+                    </div>
+                    <!-- end body -->
+
+                </article>
+            </a>
+            <!-- end card link -->
+
+            <!-- action buttons — outside <a> so they don't trigger navigation -->
+            {% if product.is_out_of_stock %}
+                <button class="btn-oos" disabled>
+                    <i class="fa fa-ban"></i> Out of Stock
+                </button>
+                <button class="btn-notify"
+                        onclick="notifyMe('{{ product.name|escapejs }}','{{ product.whatsapp_number }}')">
+                    🔔 Notify When Available
+                </button>
+            {% else %}
+                <button class="btn-cart"
+                        data-product="{{ product.id }}"
+                        {% if product.is_low_stock %}data-max="{{ product.stock }}"{% endif %}>
+                    <i class="fa fa-cart-plus"></i> Add to Cart
+                </button>
+                <a href="https://wa.me/{{ product.whatsapp_number }}?text=Hi%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}"
+                   class="btn-wa" target="_blank" rel="noopener">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Order
+                </a>
+            {% endif %}
+
+        </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <div style="font-size:48px;">🫙</div>
+                <h4 style="color:#aaa;margin-top:12px;">No products found</h4>
+                <p style="color:#bbb;font-size:13px;">Try clearing some filters</p>
+                <a href="{% url 'All_products' %}"
+                   class="btn btn-warning rounded-pill mt-2">Clear All Filters</a>
+            </div>
+        {% endfor %}
+
+        </div>
+        <!-- end product grid -->
+
+        <!-- pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-4" aria-label="Product page navigation">
+            <ul class="pagination justify-content-center flex-wrap">
+
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                       ← Prev
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">← Prev</a></li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link"
+                       href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                       {{ num }}
+                    </a>
+                </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                       Next →
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">Next →</a></li>
+                {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+
+    </div>
+    <!-- end products col -->
+
+</div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+/* ── price range slider ── */
+var priceRange = document.getElementById('priceRange');
+if (priceRange) {
+    priceRange.addEventListener('input', function() {
+        document.getElementById('priceDisplay').textContent = 'Max: ₹' + this.value;
+    });
+}
+
+/* ── mobile sidebar toggle ── */
+var filterBtn = document.getElementById('filterToggle');
+var sidebar   = document.getElementById('filterSidebar');
+var overlay   = document.getElementById('sidebarOverlay');
+if (filterBtn) {
+    filterBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+        filterBtn.setAttribute('aria-expanded', sidebar.classList.contains('open'));
+    });
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        filterBtn.setAttribute('aria-expanded', 'false');
+    });
+}
+
+/* ── build URL from all checked filters and navigate ── */
+function applyFilters() {
+    var params = new URLSearchParams();
+    document.querySelectorAll('input[name=cat]:checked').forEach(function(el) {
+        params.append('cat', el.value);
+    });
+    document.querySelectorAll('input[name=brand]:checked').forEach(function(el) {
+        params.append('brand', el.value);
+    });
+    document.querySelectorAll('input[name=region]:checked').forEach(function(el) {
+        params.append('region', el.value);
+    });
+    document.querySelectorAll('input[name=weight]:checked').forEach(function(el) {
+        params.append('weight', el.value);
+    });
+    var rating = document.querySelector('input[name=rating]:checked');
+    if (rating && rating.value) params.set('rating', rating.value);
+    var priceR = document.getElementById('priceRange');
+    if (priceR) params.set('price_max', priceR.value);
+    var sort = document.getElementById('sortSelect').value;
+    if (sort) params.set('sort', sort);
+    window.location.href = '?' + params.toString();
+}
+
+function applySort(val) {
+    var url = new URL(window.location.href);
+    url.searchParams.set('sort', val);
+    window.location.href = url.toString();
+}
+
+function clearFilter(type) {
+    var url = new URL(window.location.href);
+    var map = { cat: 'cat', brand: 'brand', region: 'region', price: 'price_max' };
+    url.searchParams.delete(map[type] || type);
+    window.location.href = url.toString();
+}
+
+function removeFilter(type, val) {
+    var url    = new URL(window.location.href);
+    var values = url.searchParams.getAll(type).filter(function(v) {
+        return v !== String(val);
+    });
+    url.searchParams.delete(type);
+    values.forEach(function(v) { url.searchParams.append(type, v); });
+    window.location.href = url.toString();
+}
+
+/* ── notify me (OOS) ── */
+function notifyMe(productName, waNumber) {
+    var msg = 'Hi! Please notify me when *' + productName + '* is back in stock. Thank you!';
+    window.open('https://wa.me/' + waNumber + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+/* ── copy coupon code ── */
+function copyCoupon(code) {
+    navigator.clipboard.writeText(code).then(function() {
+        var toast = document.createElement('div');
+        toast.textContent = '✅ Coupon ' + code + ' copied!';
+        toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;border-left:4px solid #52b788;';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 2500);
+    });
+}
+/* ── add to cart animation ── */
+document.querySelectorAll('.btn-cart').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var orig = this.innerHTML;
+        this.innerHTML = '<i class="fa fa-check"></i> Added!';
+        this.style.background = 'linear-gradient(135deg,#2d6a4f,#52b788)';
+        var self = this;
+        setTimeout(function() {
+            self.innerHTML = orig;
+            self.style.background = '';
+        }, 1500);
+    });
+});
+
+/* ── wishlist heart toggle ── */
+document.querySelectorAll('.p-wish').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var icon = this.querySelector('i');
+        icon.style.color = icon.style.color === 'rgb(232, 93, 4)' ? '#ccc' : '#e85d04';
+    });
+});
+</script>
+
+
+{% endblock %}

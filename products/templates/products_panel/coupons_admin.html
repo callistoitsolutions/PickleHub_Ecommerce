@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupons Management | PickleHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root{--primary:#e85d04;--dark:#1a1a2e;--sidebar:240px;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Poppins',sans-serif;background:#f0f2f5;display:flex;min-height:100vh;}
+
+        /* ════ SIDEBAR ════ */
+        .sidebar{width:var(--sidebar);background:linear-gradient(180deg,#1a1a2e,#0f3460);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+        .sidebar-logo{padding:18px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
+        .s-ico{width:36px;height:36px;background:linear-gradient(135deg,#e85d04,#ffd60a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+        .s-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#ffd60a;}
+        .s-sub{font-size:9px;color:#f48c06;letter-spacing:1px;display:block;}
+        .nav-sec{padding:12px 14px 3px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;}
+        .nav-i{display:flex;align-items:center;gap:10px;padding:10px 18px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:500;transition:.2s;border-left:3px solid transparent;}
+        .nav-i:hover,.nav-i.active{background:rgba(232,93,4,0.15);color:#ffd60a;border-left-color:#e85d04;}
+        .nav-i i{width:18px;text-align:center;font-size:13px;}
+        .nbadge{background:#e85d04;color:#fff;border-radius:50px;padding:1px 7px;font-size:10px;margin-left:auto;}
+
+        /* ════ MAIN AREA ════ */
+        .main-w{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+        .topbar{background:#fff;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:99;}
+        .topbar-title{font-size:16px;font-weight:700;color:#1a1a2e;}
+        .content{padding:22px;flex:1;}
+
+        /* ════ STATS ════ */
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+        .stat-c{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;align-items:center;gap:14px;}
+        .stat-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+        .stat-val{font-size:22px;font-weight:800;color:#1a1a2e;}
+        .stat-lbl{font-size:11px;color:#aaa;margin-top:1px;}
+
+        /* ════ COUPON CARDS ════ */
+        .coupon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px;}
+        .coupon-card{background:#fff;border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,0.07);overflow:hidden;transition:.3s;border:1.5px solid transparent;position:relative;}
+        .coupon-card:hover{border-color:#e85d04;transform:translateY(-3px);box-shadow:0 10px 28px rgba(232,93,4,0.1);}
+        .coupon-card.inactive{opacity:.65;}
+
+        /* TICKET HEADER */
+        .coupon-ticket{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:18px 20px;position:relative;overflow:hidden;}
+        .coupon-ticket::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;background:#f0f2f5;border-radius:50%;}
+        .coupon-ticket::after{content:'';position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;background:#f0f2f5;border-radius:50%;}
+        .coupon-code{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#ffd60a;letter-spacing:3px;display:flex;align-items:center;gap:10px; z-index:2; position:relative;}
+        .copy-btn{background:rgba(255,213,10,0.15);border:1px solid rgba(255,213,10,0.3);color:#ffd60a;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+        .copy-btn:hover{background:rgba(255,213,10,0.3);}
+        .coupon-discount{font-size:28px;font-weight:800;color:#fff;margin-top:4px; z-index:2; position:relative;}
+        .coupon-type-badge{position:absolute;top:12px;right:20px;border-radius:50px;padding:3px 12px;font-size:10px;font-weight:800; z-index:2;}
+        .type-percent{background:rgba(232,93,4,0.25);color:#ffd60a;border:1px solid rgba(232,93,4,0.3);}
+        .type-flat{background:rgba(45,106,79,0.25);color:#52b788;border:1px solid rgba(45,106,79,0.3);}
+        .type-free_del{background:rgba(21,101,192,0.25);color:#90caf9;border:1px solid rgba(21,101,192,0.3);}
+
+        /* CARD BODY */
+        .coupon-body{padding:14px 18px;}
+        .coupon-name{font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:3px;}
+        .coupon-desc{font-size:12px;color:#888;margin-bottom:10px;line-height:1.5;}
+        .coupon-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+        .meta-item{background:#f8f9fa;border-radius:8px;padding:7px 10px;}
+        .meta-lbl{font-size:10px;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+        .meta-val{font-size:12px;font-weight:700;color:#1a1a2e;margin-top:1px;}
+
+        /* USAGE BAR */
+        .usage-bar-wrap{margin-bottom:10px;}
+        .usage-label{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px;}
+        .usage-bar{height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;}
+        .usage-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#e85d04,#ffd60a);transition:.3s;}
+        
+        .status-pill{padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;display:inline-block;}
+        .s-active{background:#d4edda;color:#155724;}
+        .s-inactive{background:#e0e0e0;color:#555;}
+
+        /* CARD BUTTONS */
+        .coupon-actions{display:flex;gap:6px;border-top:1px solid #f5f5f5;padding:10px 18px;}
+        .act-btn{flex:1;border:none;border-radius:8px;padding:8px 0;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+        .btn-edit{background:#e3f2fd;color:#1565c0;} .btn-edit:hover{background:#1565c0;color:#fff;}
+        .btn-toggle-c{background:#fff3e0;color:#e85d04;} .btn-toggle-c:hover{background:#e85d04;color:#fff;}
+        .btn-del{background:#fdecea;color:#c62828;} .btn-del:hover{background:#c62828;color:#fff;}
+
+        /* ════ FILTERS & BUTTONS ════ */
+        .filter-bar{background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+        .finp{border-radius:10px;border:1.5px solid #e0e0e0;padding:8px 12px;font-size:13px;outline:none;}
+        .finp:focus{border-color:#e85d04;}
+        .btn-add{background:linear-gradient(135deg,#2d6a4f,#52b788);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;}
+        .btn-gen{background:linear-gradient(135deg,#6a0dad,#9c27b0);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;}
+        .btn-save{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:50px;padding:12px 28px;font-weight:800;font-size:14px;cursor:pointer;}
+
+        /* ════ MODAL ════ */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+        .modal-overlay.show{display:flex;}
+        .modal-box{background:#fff;border-radius:20px;width:100%;max-width:580px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+        .modal-head{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:18px 24px;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;position:sticky;top:0;z-index:10;}
+        .modal-title{font-size:16px;font-weight:700;color:#ffd60a;}
+        .modal-close{background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;}
+        .modal-body{padding:22px;}
+        .lbl{font-size:12px;font-weight:700;color:#555;margin-bottom:4px;display:block;}
+        .inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;outline:none;}
+        .inp:focus{border-color:#e85d04;}
+        
+        .coupon-preview{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:14px;padding:18px;margin-top:14px;display:none;}
+        .coupon-preview.show{display:block;}
+        .preview-code{font-family:'Playfair Display',serif;font-size:20px;color:#ffd60a;letter-spacing:3px;font-weight:700;}
+        .preview-disc{font-size:24px;font-weight:800;color:#fff;margin-top:4px;}
+
+        /* TOAST */
+        .toast-bar{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:.3s;}
+        .toast-bar.show{transform:translateY(0);opacity:1;}
+        .toast-bar.ok{border-left:4px solid #52b788;}
+        .toast-bar.err{border-left:4px solid #e85d04;}
+
+        @media(max-width:768px){.sidebar{display:none;}.main-w{margin-left:0;}.stats-row{grid-template-columns:repeat(2,1fr);}}
+    </style>
+</head>
+<body>
+
+{% csrf_token %}
+
+<nav class="sidebar" aria-label="Admin sidebar">
+    <div class="sidebar-logo">
+        <div class="s-ico">🥒</div>
+        <div><span class="s-name">PickleHub</span><small class="s-sub">Admin Panel</small></div>
+    </div>
+    <div class="nav-sec">Main</div>
+    <a class="nav-i" href="#"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+    
+    <div class="nav-sec">Orders</div>
+    <a class="nav-i" href="#"><i class="fa fa-shopping-bag"></i> All Orders</a>
+    
+    <div class="nav-sec">Catalogue</div>
+    <a class="nav-i" href="#"><i class="fa fa-box"></i> Products</a>
+    <a class="nav-i active" href="#"><i class="fa fa-ticket-alt"></i> Coupons</a>
+    <a class="nav-i" href="#"><i class="fa fa-star"></i> Reviews</a>
+    
+    <div class="nav-sec">Settings</div>
+    <a class="nav-i" href="#"><i class="fa fa-cog"></i> Site Settings</a>
+</nav>
+
+<div class="main-w">
+    <div class="topbar">
+        <div class="topbar-title">🎟️ Coupons Management</div>
+        <div style="display:flex;gap:8px;">
+            <button class="btn-gen" id="genCodeBtn" type="button"><i class="fa fa-magic me-1"></i> Generate Code</button>
+            <button class="btn-add" id="addCouponBtn" type="button"><i class="fa fa-plus me-1"></i> Add Coupon</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="stats-row">
+            <div class="stat-c"><div class="stat-ico" style="background:#d4edda;">✅</div><div><div class="stat-val" id="stA" style="color:#2d6a4f;">0</div><div class="stat-lbl">Active Coupons</div></div></div>
+            <div class="stat-c"><div class="stat-ico" style="background:#fff3cd;">📊</div><div><div class="stat-val" id="stU" style="color:#e85d04;">0</div><div class="stat-lbl">Total Uses</div></div></div>
+            <div class="stat-c"><div class="stat-ico" style="background:#f8d7da;">⏸</div><div><div class="stat-val" id="stP" style="color:#c62828;">0</div><div class="stat-lbl">Paused Coupons</div></div></div>
+        </div>
+
+        <div class="filter-bar">
+            <div><label class="lbl" style="color:#888;">Search</label><input class="finp" type="text" id="fsearch" placeholder="Code / name..." style="width:200px;"></div>
+            <div><label class="lbl" style="color:#888;">Type</label>
+                <select class="finp" id="ftype">
+                    <option value="">All Types</option>
+                    <option value="percent">% Percentage</option>
+                    <option value="flat">₹ Flat Amount</option>
+                    <option value="free_del">🚚 Free Delivery</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="coupon-grid" id="couponGrid">
+            </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="couponModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="modal-title" id="couponModalTitle">🎟️ Add New Coupon</span>
+            <button class="modal-close" id="closeModal" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="formMsg" style="display:none;background:#f8d7da;color:#721c24;border-radius:10px;padding:10px;margin-bottom:14px;font-weight:600;font-size:12px;"></div>
+            
+            <form id="couponForm" novalidate>
+                <input type="hidden" id="couponId">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="lbl">Coupon Code *</label>
+                        <div style="display:flex;gap:8px;">
+                            <input class="inp" type="text" id="couponCode" required maxlength="20" style="text-transform:uppercase;font-weight:700;font-size:15px;letter-spacing:2px;">
+                            <button type="button" class="btn-gen" id="autoGenBtn" style="white-space:nowrap; padding: 0 15px;">⚡ Auto</button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="lbl">Coupon Name / Label *</label>
+                        <input class="inp" type="text" id="couponName" required maxlength="80">
+                    </div>
+                    <div class="col-12">
+                        <label class="lbl">Description (shown to customer)</label>
+                        <textarea class="inp" id="couponDesc" rows="2" style="resize:vertical;"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Discount Type *</label>
+                        <select class="inp" id="discType" required>
+                            <option value="">Select type...</option>
+                            <option value="percent">% Percentage</option>
+                            <option value="flat">₹ Flat Amount</option>
+                            <option value="free_del">🚚 Free Delivery</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="discValueWrap">
+                        <label class="lbl">Discount Value *</label>
+                        <input class="inp" type="number" id="discValue" min="1" max="10000">
+                    </div>
+                    <div class="col-md-6" id="maxDiscWrap" style="display:none;">
+                        <label class="lbl">Max Discount Cap (₹)</label>
+                        <input class="inp" type="number" id="maxDisc" min="1">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Min Order Value (₹)</label>
+                        <input class="inp" type="number" id="minOrder" min="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Max Total Uses</label>
+                        <input class="inp" type="number" id="maxUses" placeholder="Blank = unlimited">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Uses Per Customer</label>
+                        <select class="inp" id="perUser">
+                            <option value="1">1 time</option>
+                            <option value="2">2 times</option>
+                            <option value="0">Unlimited</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Start Date</label>
+                        <input class="inp" type="date" id="startDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="lbl">Expiry Date</label>
+                        <input class="inp" type="date" id="endDate">
+                    </div>
+                    <div class="col-12">
+                        <label class="lbl">Applies To</label>
+                        <select class="inp" id="appliesTo">
+                            <option value="all">All Products</option>
+                            <option value="mango">Mango Pickles</option>
+                            <option value="lemon">Lemon Pickles</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;">
+                            <label><input type="checkbox" id="isActive" checked> Active</label>
+                            <label><input type="checkbox" id="isPublic" checked> Public</label>
+                            <label><input type="checkbox" id="firstOrder"> First order only</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="coupon-preview" id="couponPreview">
+                            <div class="preview-code" id="previewCode">CODE</div>
+                            <div class="preview-disc" id="previewDisc">0% OFF</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.6);" id="previewMin">No min order</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12" style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button type="button" class="btn-s" id="cancelModal" style="background:#eee;border:none;padding:12px 20px;border-radius:50px;font-weight:700;">Cancel</button>
+                        <button type="submit" class="btn-save" id="saveBtn">💾 Save Coupon</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="toast-bar" id="toastBar"></div>
+
+<script>
+// Load DB securely from Django Context. If missing, default to empty array.
+var DB = {% if coupons_json %}{{ coupons_json|safe }}{% else %}[]{% endif %};
+var TYPE_LBL = {"percent":"% Percentage","flat":"₹ Flat","free_del":"Free Delivery"};
+
+function tGrad(t){ return t==="percent"?"linear-gradient(135deg,#1a1a2e,#0f3460)":t==="flat"?"linear-gradient(135deg,#2d6a4f,#52b788)":"linear-gradient(135deg,#1565c0,#1976d2)"; }
+function discStr(c){ return c.type==="percent"?c.val+"% OFF":c.type==="flat"?"₹"+c.val+" OFF":"FREE DELIVERY"; }
+
+/* Get CSRF Token reliably from the hidden input generated by Django */
+function getCSRFToken() {
+    var tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    return tokenElement ? tokenElement.value : '';
+}
+
+function toast(msg, type) {
+    var t = document.getElementById("toastBar");
+    t.textContent = msg;
+    t.className = "toast-bar " + (type || "ok") + " show";
+    setTimeout(function () { t.classList.remove("show"); }, 3200);
+}
+
+/* RENDER STATS */
+function updateStats(){
+    var a=0, p=0, u=0;
+    DB.forEach(c => { if(c.active) a++; else p++; u+=c.uses||0; });
+    document.getElementById("stA").textContent = a;
+    document.getElementById("stP").textContent = p;
+    document.getElementById("stU").textContent = u;
+}
+
+/* RENDER GRID */
+function renderGrid(){
+    var grid = document.getElementById("couponGrid");
+    var q = document.getElementById("fsearch").value.trim().toLowerCase();
+    var tf = document.getElementById("ftype").value;
+    grid.innerHTML = "";
+
+    var list = DB.filter(c => (!q || c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) && (!tf || c.type === tf));
+
+    if(list.length === 0){
+        grid.innerHTML = "<div style='grid-column:1/-1;text-align:center;padding:40px;color:#aaa;'>No coupons found.</div>";
+        return;
+    }
+
+    list.forEach(c => {
+        var pct = c.maxUses ? Math.min(100, Math.round((c.uses/c.maxUses)*100)) : 0;
+        var html = `
+        <div class="coupon-card ${c.active ? '' : 'inactive'}">
+            <div class="coupon-ticket" style="background:${tGrad(c.type)}">
+                <span class="coupon-type-badge ${'type-'+c.type}">${TYPE_LBL[c.type]}</span>
+                <div class="coupon-code">${c.code} <button class="copy-btn" onclick="copyCode('${c.code}')">📋 Copy</button></div>
+                <div class="coupon-discount">${discStr(c)}</div>
+            </div>
+            <div class="coupon-body">
+                <div class="coupon-name">${c.name}</div>
+                <div class="coupon-desc">${c.desc||'No description'}</div>
+                <div class="coupon-meta">
+                    <div class="meta-item"><div class="meta-lbl">Min Order</div><div class="meta-val">₹${c.minOrder||0}</div></div>
+                    <div class="meta-item"><div class="meta-lbl">Max Disc</div><div class="meta-val">₹${c.maxDisc||'—'}</div></div>
+                    <div class="meta-item"><div class="meta-lbl">Expiry</div><div class="meta-val">${c.end?c.end.split('-').reverse().join('/'):'None'}</div></div>
+                    <div class="meta-item"><div class="meta-lbl">Per User</div><div class="meta-val">${c.perUser===0?'Unlimited':c.perUser}</div></div>
+                </div>
+                <div class="usage-bar-wrap">
+                    <div class="usage-label"><span>Used: ${c.uses} / ${c.maxUses||'∞'}</span></div>
+                    <div class="usage-bar"><div class="usage-fill" style="width:${pct}%;"></div></div>
+                </div>
+                <span class="status-pill ${c.active ? 's-active' : 's-inactive'}">${c.active ? '✅ Active' : '⏸ Paused'}</span>
+            </div>
+            <div class="coupon-actions">
+                <button class="act-btn btn-edit" onclick="editCoupon(${c.id})">✏️ Edit</button>
+                <button class="act-btn btn-toggle-c" onclick="toggleCoupon(${c.id})">${c.active ? '⏸ Pause' : '▶ Resume'}</button>
+                <button class="act-btn btn-del" onclick="deleteCoupon(${c.id})">🗑 Delete</button>
+            </div>
+        </div>`;
+        grid.insertAdjacentHTML('beforeend', html);
+    });
+    updateStats();
+}
+
+function copyCode(c) { navigator.clipboard.writeText(c); toast('✅ Copied: '+c, 'ok'); }
+
+/* AJAX CALLS */
+function toggleCoupon(id) {
+    fetch('/admin/api/coupons/toggle/', { 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()}, 
+        body: JSON.stringify({id: id}) 
+    })
+    .then(r => r.json()).then(data => { 
+        if(data.status==='success'){ 
+            DB.find(c => c.id === id).active = data.is_active; 
+            renderGrid(); 
+            toast('Status updated','ok'); 
+        } else {
+            toast('❌ Error: ' + data.message, 'err');
+        }
+    });
+}
+
+function deleteCoupon(id) {
+    if(!confirm("Delete this coupon permanently?")) return;
+    fetch('/admin/api/coupons/delete/', { 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()}, 
+        body: JSON.stringify({id: id}) 
+    })
+    .then(r => r.json()).then(data => { 
+        if(data.status==='success'){ 
+            DB = DB.filter(c => c.id !== id); 
+            renderGrid(); 
+            toast('Deleted!','err'); 
+        } else {
+            toast('❌ Error deleting coupon', 'err');
+        }
+    });
+}
+
+/* SAVE COUPON */
+document.getElementById('couponForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var msgBox = document.getElementById('formMsg');
+    msgBox.style.display = "none";
+
+    // 1. Manually Validate inputs before sending to Django
+    var code = document.getElementById('couponCode').value.trim();
+    var name = document.getElementById('couponName').value.trim();
+    var type = document.getElementById('discType').value;
+    var val = document.getElementById('discValue').value;
+
+    if(!code || !name || !type) {
+        msgBox.textContent = "⚠ Please fill out the Code, Name, and Discount Type.";
+        msgBox.style.display = "block";
+        return;
+    }
+    if(type !== 'free_del' && !val) {
+        msgBox.textContent = "⚠ Please enter a Discount Value.";
+        msgBox.style.display = "block";
+        return;
+    }
+
+    var payload = {
+        id: document.getElementById('couponId').value,
+        code: code,
+        name: name,
+        desc: document.getElementById('couponDesc').value.trim(),
+        type: type,
+        val: val,
+        maxDisc: document.getElementById('maxDisc').value,
+        minOrder: document.getElementById('minOrder').value,
+        maxUses: document.getElementById('maxUses').value,
+        perUser: document.getElementById('perUser').value,
+        start: document.getElementById('startDate').value,
+        end: document.getElementById('endDate').value,
+        applies: document.getElementById('appliesTo').value,
+        active: document.getElementById('isActive').checked,
+        isPublic: document.getElementById('isPublic').checked,
+        firstOnly: document.getElementById('firstOrder').checked
+    };
+
+    var btn = document.getElementById('saveBtn');
+    btn.textContent = "Saving..."; 
+    btn.disabled = true;
+
+    // 2. Fetch API to Django
+    fetch('/admin/api/coupons/save/', { 
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': getCSRFToken()
+        }, 
+        body: JSON.stringify(payload) 
+    })
+    .then(r => {
+        // Check if Django crashed (HTTP 500)
+        if(!r.ok) throw new Error("Server returned " + r.status);
+        return r.json();
+    })
+    .then(data => {
+        btn.textContent = "💾 Save Coupon"; 
+        btn.disabled = false;
+        if(data.status === 'success'){
+            toast('✅ Saved successfully!', 'ok');
+            setTimeout(function(){ window.location.reload(); }, 800); // Reload to show new data
+        } else {
+            msgBox.textContent = "⚠ " + (data.message || "Could not save coupon.");
+            msgBox.style.display = "block";
+        }
+    })
+    .catch(err => {
+        btn.textContent = "💾 Save Coupon"; 
+        btn.disabled = false;
+        msgBox.textContent = "❌ Backend error. Please check your Django terminal/console.";
+        msgBox.style.display = "block";
+        console.error(err);
+    });
+});
+
+/* MODAL LOGIC */
+function openModal() { document.getElementById("couponModal").classList.add("show"); updatePreview(); }
+function closeModal() { document.getElementById("couponModal").classList.remove("show"); document.getElementById("couponForm").reset(); document.getElementById("formMsg").style.display="none"; }
+document.getElementById("addCouponBtn").addEventListener("click", () => { document.getElementById('couponId').value=""; document.getElementById('couponForm').reset(); openModal(); });
+document.getElementById("closeModal").addEventListener("click", closeModal);
+document.getElementById("cancelModal").addEventListener("click", closeModal);
+
+function editCoupon(id) {
+    var c = DB.find(x => x.id === id);
+    document.getElementById("couponId").value = c.id;
+    document.getElementById("couponCode").value = c.code;
+    document.getElementById("couponName").value = c.name;
+    document.getElementById("couponDesc").value = c.desc;
+    document.getElementById("discType").value = c.type;
+    document.getElementById("discValue").value = c.val;
+    document.getElementById("maxDisc").value = c.maxDisc;
+    document.getElementById("minOrder").value = c.minOrder;
+    document.getElementById("maxUses").value = c.maxUses;
+    document.getElementById("perUser").value = c.perUser;
+    document.getElementById("startDate").value = c.start;
+    document.getElementById("endDate").value = c.end;
+    document.getElementById("isActive").checked = c.active;
+    
+    document.getElementById("discType").dispatchEvent(new Event("change"));
+    openModal();
+}
+
+/* UI HELPERS */
+document.getElementById("discType").addEventListener("change", function(){
+    document.getElementById("discValueWrap").style.display = this.value==="free_del"?"none":"";
+    document.getElementById("maxDiscWrap").style.display = this.value==="percent"?"":"none";
+    updatePreview();
+});
+document.getElementById("autoGenBtn").addEventListener("click", () => { document.getElementById("couponCode").value = "PICKLE"+Math.floor(Math.random()*900+100); updatePreview(); });
+document.getElementById("genCodeBtn").addEventListener("click", () => { document.getElementById("addCouponBtn").click(); document.getElementById("autoGenBtn").click(); });
+document.getElementById("couponCode").addEventListener("input", function(){ this.value = this.value.toUpperCase(); updatePreview(); });
+document.getElementById("fsearch").addEventListener("input", renderGrid);
+document.getElementById("ftype").addEventListener("change", renderGrid);
+
+function updatePreview(){
+    var code = document.getElementById("couponCode").value || "CODE";
+    var type = document.getElementById("discType").value;
+    var val = document.getElementById("discValue").value;
+    document.getElementById("couponPreview").classList.add("show");
+    document.getElementById("previewCode").textContent = code;
+    document.getElementById("previewDisc").textContent = type==="percent"?(val+"% OFF"):type==="flat"?("₹"+val+" OFF"):type==="free_del"?"FREE DELIVERY":"—";
+}
+
+renderGrid();
+</script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticker Messages | PickleHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root{--primary:#e85d04;--dark:#1a1a2e;--sidebar:240px;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Poppins',sans-serif;background:#f0f2f5;display:flex;min-height:100vh;}
+
+        /* ════ SIDEBAR ════ */
+        .sidebar{width:var(--sidebar);background:linear-gradient(180deg,#1a1a2e,#0f3460);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+        .sidebar-logo{padding:18px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
+        .s-ico{width:36px;height:36px;background:linear-gradient(135deg,#e85d04,#ffd60a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+        .s-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#ffd60a;}
+        .s-sub{font-size:9px;color:#f48c06;letter-spacing:1px;display:block;}
+        .nav-sec{padding:12px 14px 3px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;}
+        .nav-i{display:flex;align-items:center;gap:10px;padding:10px 18px;color:rgba(255,255,255,0.65);text-decoration:none;font-size:13px;font-weight:500;transition:.2s;border-left:3px solid transparent;}
+        .nav-i:hover,.nav-i.active{background:rgba(232,93,4,0.15);color:#ffd60a;border-left-color:#e85d04;}
+        .nav-i i{width:18px;text-align:center;font-size:13px;}
+
+        /* ════ MAIN AREA & TOPBAR ════ */
+        .main-w{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+        .topbar{background:#fff;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:99;}
+        .topbar-title{font-size:16px;font-weight:700;color:#1a1a2e;}
+        .content{padding:24px;flex:1;}
+
+        /* ════ BUTTONS & PILLS ════ */
+        .btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+        .btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+        .btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+        .btn-add:hover{background:#1565c0;color:#fff;}
+        .btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+        .btn-danger:hover{background:#c62828;color:#fff;}
+        .s-pill{padding:5px 12px;border-radius:50px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:6px;}
+        .sp-green{background:#d4edda;color:#155724;}
+        .sp-yellow{background:#fff3cd;color:#856404;}
+
+        /* ════ CARDS & INPUTS ════ */
+        .card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:24px;border:none;}
+        .card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;background:#fff;}
+        .card-body{padding:20px;}
+        .ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+        .inp{width:100%;border-radius:8px;border:1.5px solid #e0e0e0;padding:8px 14px;font-size:13px;outline:none;transition:.2s;}
+        .inp:focus{border-color:#e85d04;}
+
+        /* ════ TICKER ROWS ════ */
+        .ticker-row {background:#f8f9fa;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;border:1.5px solid #f0f0f0;}
+        .ticker-row:hover {border-color:#c8470a;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+        .drag-handle {color:#ccc;cursor:grab;font-size:16px;}
+
+        /* ════ LIVE PREVIEW ════ */
+        .pv-wrap {background:#fff;border-radius:14px;overflow:hidden;border:1.5px solid #e0e0e0;margin-bottom:24px;}
+        .pv-head {background:#f5f5f5;padding:10px 16px;font-size:11px;font-weight:800;color:#888;text-transform:uppercase;border-bottom:1px solid #e0e0e0;}
+        .ticker-wrap {background:#c8470a;overflow:hidden;height:34px;display:flex;align-items:center;}
+        .ticker-inner {display:flex;white-space:nowrap;animation:ticker 20s linear infinite;}
+        .ticker-item {color:#fff;font-size:13px;font-weight:600;padding:0 32px;letter-spacing:.3px;}
+        .ticker-sep {color:rgba(255,255,255,.4);padding:0 8px;}
+        @keyframes ticker { 0% { transform: translateX(0) } 100% { transform: translateX(-50%) } }
+
+        /* ════ TOAST ════ */
+        .toast-bar{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:.3s;}
+        .toast-bar.show{transform:translateY(0);opacity:1;}
+        .toast-bar.ok{border-left:4px solid #52b788;}
+        .toast-bar.err{border-left:4px solid #e85d04;}
+    </style>
+</head>
+<body>
+
+{% csrf_token %}
+
+<nav class="sidebar" aria-label="Admin sidebar">
+    <div class="sidebar-logo">
+        <div class="s-ico">🥒</div>
+        <div><span class="s-name">PickleHub</span><small class="s-sub">Admin Panel</small></div>
+    </div>
+    <div class="nav-sec">Main</div>
+    <a class="nav-i" href="#"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+    
+    <div class="nav-sec">Deals & Offers</div>
+    <a class="nav-i active" href="#"><i class="fa fa-bullhorn"></i> Ticker Messages</a>
+    <a class="nav-i" href="#"><i class="fa fa-bolt"></i> Deal of the Day</a>
+    
+    <div class="nav-sec">Site Settings</div>
+    <a class="nav-i" href="#"><i class="fa fa-home"></i> Home Page</a>
+</nav>
+
+<div class="main-w">
+    <div class="topbar">
+        <div class="topbar-title">🔴 Ticker Messages</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+            <button class="btn-p" onclick="saveTicker()" id="saveBtn"><i class="fa fa-save"></i> Save & Publish</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                
+                <div class="pv-wrap">
+                    <div class="pv-head">👁️ Live Preview</div>
+                    <div class="ticker-wrap" id="pvTickerWrap">
+                        <div class="ticker-inner" id="pvTickerInner"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <span class="ch-ico">📝</span>
+                        <span class="ch-title">Manage Messages</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="tickerList"></div>
+                        <button class="btn-add mt-3" onclick="addTicker()"><i class="fa fa-plus"></i> Add Message</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-bar" id="toastBar"></div>
+
+<script>
+// 1. Data from Django
+var DB = {% if ticker_json %}{{ ticker_json|safe }}{% else %}[]{% endif %};
+
+// Add default if completely empty
+if (DB.length === 0) {
+    DB.push({text: "🔥 Deal of the Day: Andhra Avakaya — 40% OFF", is_active: true});
+}
+
+// ══════════════════════════════════════════
+// 2. CSRF TOKEN — reads from cookie (most reliable)
+// ══════════════════════════════════════════
+function getCSRFToken() {
+    // First try the hidden input Django renders via {% csrf_token %}
+    var inputToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (inputToken && inputToken.value) {
+        return inputToken.value;
+    }
+
+    // Fallback: read directly from the browser cookie
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return decodeURIComponent(cookie.substring('csrftoken='.length));
+        }
+    }
+
+    // Nothing found — return empty (Django will reject, but at least won't crash JS)
+    console.warn('CSRF token not found! Make sure {% csrf_token %} is in the template.');
+    return '';
+}
+
+// 3. Helper Functions
+function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, type) {
+    var t = document.getElementById("toastBar");
+    t.textContent = msg;
+    t.className = "toast-bar " + (type || "ok") + " show";
+    setTimeout(function () { t.classList.remove("show"); }, 3000);
+}
+
+function markUnsaved() {
+    var st = document.getElementById('saveStatus');
+    st.textContent = '⏳ Unsaved changes';
+    st.className = 's-pill sp-yellow';
+}
+
+// 4. Render HTML Rows
+function renderTickers() {
+    var list = document.getElementById('tickerList');
+    list.innerHTML = '';
+    
+    DB.forEach(function(item, i) {
+        var row = document.createElement('div');
+        row.className = 'ticker-row';
+        row.innerHTML = `
+            <span class="drag-handle"><i class="fa fa-grip-vertical"></i></span>
+            <input type="text" class="inp" placeholder="e.g. Free Delivery on orders above ₹499!" 
+                   value="${esc(item.text)}" 
+                   oninput="DB[${i}].text=this.value; updatePreview(); markUnsaved();">
+            
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;cursor:pointer;">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:#2d6a4f;" 
+                       ${item.is_active ? 'checked' : ''} 
+                       onchange="DB[${i}].is_active=this.checked; updatePreview(); markUnsaved();"> 
+                Active
+            </label>
+            
+            <button class="btn-danger" onclick="removeTicker(${i})" title="Remove">
+                <i class="fa fa-trash"></i>
+            </button>
+        `;
+        list.appendChild(row);
+    });
+}
+
+function addTicker() {
+    DB.push({text: "", is_active: true});
+    renderTickers();
+    markUnsaved();
+}
+
+function removeTicker(index) {
+    DB.splice(index, 1);
+    renderTickers();
+    updatePreview();
+    markUnsaved();
+}
+
+// 5. Render Live Preview
+function updatePreview() {
+    var inner = document.getElementById('pvTickerInner');
+    var wrap = document.getElementById('pvTickerWrap');
+    
+    var activeMsgs = DB.filter(function(m) { return m.is_active && m.text.trim() !== ''; });
+    
+    if (activeMsgs.length === 0) {
+        wrap.style.display = 'none';
+        return;
+    }
+    
+    wrap.style.display = 'flex';
+    var html = '';
+    
+    activeMsgs.forEach(function(m) {
+        html += '<span class="ticker-item">' + esc(m.text) + '</span><span class="ticker-sep">|</span>';
+    });
+    
+    // Duplicate for seamless loop
+    inner.innerHTML = html + html + html;
+}
+
+// 6. Save to Django — with improved error handling
+function saveTicker() {
+    var btn = document.getElementById('saveBtn');
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+    btn.disabled = true;
+
+    var csrfToken = getCSRFToken();
+
+    // Debug log — open browser console to verify the token is found
+    console.log('CSRF Token being sent:', csrfToken ? '✅ Found (' + csrfToken.substring(0,8) + '...)' : '❌ NOT FOUND');
+
+    fetch('/admin/api/deals/ticker/save/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ messages: DB })
+    })
+    .then(function(response) {
+        // Log the HTTP status to help debug
+        console.log('Server response status:', response.status);
+
+        if (response.status === 403) {
+            throw new Error('403 Forbidden — CSRF token was rejected by Django. Check middleware settings.');
+        }
+        if (response.status === 404) {
+            throw new Error('404 Not Found — URL /admin/api/deals/ticker/save/ is not registered in urls.py.');
+        }
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status + ' — Unexpected server error.');
+        }
+
+        return response.json();
+    })
+    .then(function(data) {
+        btn.innerHTML = '<i class="fa fa-save"></i> Save & Publish';
+        btn.disabled = false;
+        
+        if (data.status === 'success') {
+            document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+            document.getElementById('saveStatus').className = 's-pill sp-green';
+            toast('✅ ' + data.message, 'ok');
+            
+            // Remove empty entries
+            DB = DB.filter(function(m) { return m.text.trim() !== ''; });
+            renderTickers();
+        } else {
+            toast('❌ Error: ' + data.message, 'err');
+        }
+    })
+    .catch(function(err) {
+        btn.innerHTML = '<i class="fa fa-save"></i> Save & Publish';
+        btn.disabled = false;
+
+        // Show exact error in toast so you can debug without opening console
+        toast('❌ ' + err.message, 'err');
+        console.error('Save failed:', err);
+    });
+}
+
+// Initialize on page load
+renderTickers();
+updatePreview();
+</script>
+</body>
+</html>

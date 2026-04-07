@@ -1,0 +1,306 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Update Profile | PickleHub Nagpur{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #e85d04;
+        --dark: #1a1a2e;
+        --accent: #ffd60a;
+        --bg-light: #f8f9fa;
+    }
+
+    .profile-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .profile-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: none;
+        position: relative; /* Required for absolute positioning of back button */
+    }
+
+    /* 🔙 BACK BUTTON STYLE */
+    .btn-back-circle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-back-circle:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateX(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--dark) 0%, #16213e 100%);
+        padding: 60px 20px 40px; /* Increased top padding for the button */
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-avatar-wrap {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        color: var(--dark);
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .profile-header h2 {
+        color: #fff;
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .profile-header p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .profile-body {
+        padding: 40px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--dark);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(232, 93, 4, 0.1);
+    }
+
+    .input-group-text {
+        background: transparent;
+        border-radius: 12px 0 0 12px;
+        border-right: none;
+        color: #888;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg, var(--primary), #f48c06);
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        padding: 14px 30px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 20px;
+        transition: all 0.3s;
+        box-shadow: 0 5px 15px rgba(232, 93, 4, 0.3);
+    }
+
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(232, 93, 4, 0.4);
+        color: #fff;
+    }
+
+    .section-divider {
+        height: 1px;
+        background: #eee;
+        margin: 30px 0;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        
+        <a href="javascript:history.back()" class="btn-back-circle" title="Go Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+
+        <div class="profile-header">
+            <div class="profile-avatar-wrap">
+                <i class="fa fa-user"></i>
+            </div>
+            <h2>Account Settings</h2>
+            <p>Keep your profile information up to date</p>
+        </div>
+
+        <div class="profile-body">
+                
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-id-card"></i></span>
+                            <input type="text" name="user_name" id="user_name" class="form-control" placeholder="Enter your full name" value="{{user_obj.user_name}}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                            <input type="text" name="user_email" id="user_email" class="form-control" placeholder="example@email.com"  required value="{{user_obj.user_email}}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-phone"></i></span>
+                            <input type="tel" name="user_phone" id="user_phone" class="form-control" placeholder="+91 00000 00000" value="{{user_obj.user_phone}}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">City / Location</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-map-marker-alt"></i></span>
+                            <input type="text" name="user_city" id="user_city" class="form-control" placeholder="e.g. Nagpur" value="{{user_obj.user_city}}" required>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                            <input type="text" name="user_password" id="user_password" class="form-control" placeholder="Leave blank to keep current password" value="{{user_obj.user_password}}">
+                        </div>
+                        <small class="text-muted mt-2 d-block" style="font-size: 11px;">
+                            <i class="fa fa-info-circle me-1"></i> Security tip: Use a mix of letters, numbers, and symbols.
+                        </small>
+                    </div>
+
+                    <div class="col-md-12 mt-5">
+                        <button type="button" class="btn btn-update" onclick="Update_Users(this)">
+                            <i class="fa fa-save me-2" ></i> Save Changes
+                        </button>
+                        
+                        <a href="javascript:history.back()" class="btn btn-link w-100 mt-3 text-muted text-decoration-none" style="font-size: 13px;">
+                            <i class="fa fa-times me-1"></i> Cancel and Go Back
+                        </a>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+    function Update_Users(_this){
+      var user_name = $("#user_name").val();
+      var user_email = $("#user_email").val();
+      var user_phone = $("#user_phone").val();
+      var user_city = $("#user_city").val();
+      var user_password = $("#user_password").val();
+      var emailfilter = /^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i;
+
+      if(user_name==''){
+          alert("Please Enter Full Name");
+      }
+      else if(user_email ==''){
+         alert("Please Enter Email Address");
+      }
+      else if(user_phone ==''){
+         alert("Please Enter Phone Number");
+      }
+      else if(user_city ==''){
+         alert("Please Enter City");
+      }
+      else if(user_password ==''){
+          alert("Please Enter Password");
+      }
+      else{
+          var fd = new FormData();
+          fd.append('id','{{user_obj.id}}');
+          fd.append('user_name',user_name);
+          fd.append('user_email',user_email);
+          fd.append('user_phone',user_phone);
+          fd.append('user_city',user_city);
+          fd.append('user_password',user_password);
+
+          $(_this).prop("disabled", true);
+          _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Updating...`;
+
+          $.ajax({
+              method: "POST",
+              url: "{% url 'Users_Ajax' %}",
+              enctype: "multipart/form-data",
+              processData: false,
+              contentType: false,
+              cache: false,
+              data: fd,
+              success: function (response) {
+                  $(_this).prop("disabled", false);
+                  _this.innerHTML = `<i class="fa fa-save mr-1"></i> Save Changes`;
+                  if (response.status == '1') {
+                      swal({
+                          title: response.msg,
+                          icon: 'success',
+                          confirmButtonColor: 'maroon',
+                          confirmButtonText: 'OK'
+                      }).then(() => {
+                          window.location.href ="{% url 'index' %}"
+                      })
+                  }
+                  else {
+                      swal({
+                          title: response.msg,
+                          icon: 'error',
+                          confirmButtonColor: '#d33',
+                          confirmButtonText: 'Retry'
+                      })
+                  }
+              }
+          });
+      }
+    }
+
+</script>
+
+{% endblock %}

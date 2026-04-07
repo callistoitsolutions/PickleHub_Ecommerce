@@ -1,0 +1,258 @@
+{% extends 'Admin_pages/admin_base.html' %}
+
+{% block title %}Features Strip Settings | PickleHub Admin{% endblock %}
+{% block page_title %}⭐ Features Strip Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+.content{padding:0!important;}
+.btn-p{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,93,4,.3);}
+.btn-s{background:#fff;border:1.5px solid #e0e0e0;color:#555;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:.2s;}
+.btn-s:hover{border-color:#e85d04;color:#e85d04;}
+.btn-danger{background:#fdecea;border:1.5px solid #f5c6cb;color:#c62828;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
+.btn-danger:hover{background:#c62828;color:#fff;}
+.btn-add{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;transition:.2s;}
+.btn-add:hover{background:#1565c0;color:#fff;}
+
+/* CARDS & PANELS */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.card-head{padding:14px 20px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ch-ico{font-size:20px;}
+.ch-title{font-size:14px;font-weight:800;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#aaa;}
+.ch-right{margin-left:auto;}
+.card-body{padding:20px;}
+
+/* FORM INPUTS */
+.lbl{font-size:11px;font-weight:800;color:#333;margin-bottom:5px;display:block;}
+.inp{width:100%;border-radius:10px;border:1.5px solid #e0e0e0;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:.2s;color:#1a1a2e;background:#fff;}
+.inp:focus{border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.08);}
+.tog{width:44px;height:24px;border-radius:50px;background:#ddd;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:#2d6a4f;}
+.tog::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:23px;}
+.tog-row{display:flex;align-items:center;gap:8px;}
+.tog-lbl{font-size:11px;font-weight:700;color:#555;}
+.feat-row{background:#f8f9fa;border-radius:11px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:9px;border:1.5px solid #f0f0f0;transition:.2s;flex-wrap:wrap;}
+.feat-row:hover{border-color:#e85d04;}
+.si{font-size:14px;color:#ccc;cursor:grab;}
+.inp-sm{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Poppins',sans-serif;outline:none;background:#fff;}
+.inp-sm:focus{border-color:#e85d04;}
+.inp-w80{width:80px;}.inp-w120{width:120px;}.inp-flex{flex:1;}
+.s-pill{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sp-green{background:#d4edda;color:#155724;}.sp-yellow{background:#fff3cd;color:#856404;}
+.preview-wrap{position:sticky;top:80px;}
+.prev-lbl{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.prev-lbl::after{content:'';flex:1;height:1px;background:#e0e0e0;}
+.pv-box{border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1.5px solid #e0e0e0;}
+.pv-feats{background:#1a1a2e;padding:16px;display:flex;gap:14px;flex-wrap:wrap;}
+.pv-feat{display:flex;align-items:center;gap:9px;color:#fff;min-width:140px;}
+.pv-feat-ico{width:36px;height:36px;background:linear-gradient(135deg,#e85d04,#ffd60a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.pv-feat h6{font-size:11px;font-weight:700;color:#ffd60a;margin:0 0 2px;}
+.pv-feat p{font-size:10px;color:rgba(255,255,255,.5);margin:0;}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.t-item{background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 18px;font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateX(150px);opacity:0;transition:.35s;border-left:4px solid #52b788;max-width:300px;}
+.t-item.show{transform:translateX(0);opacity:1;}
+.t-item.err{border-left-color:#e85d04;}
+.page{padding:22px 26px;}
+.section-divider{background:#f8f9fa;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:11px;font-weight:800;color:#e85d04;border-left:3px solid #e85d04;}
+</style>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span class="s-pill sp-green" id="saveStatus">✅ All Changes Saved</span>
+  <button class="btn-s" onclick="resetAll()"><i class="fa fa-undo"></i> Reset</button>
+  <button class="btn-p" onclick="saveAll()"><i class="fa fa-save"></i> Save & Publish</button>
+{% endblock %}
+
+{% block nav_builders_main %}active{% endblock %}
+{% block nav_builders_show %}show{% endblock %}
+{% block nav_build_features %}active{% endblock %}
+
+{% block content %}
+
+<script>window.FEATURES_DATA = {{ features_json|safe }};</script>
+
+<div class="page">
+<div class="row g-4">
+
+<!-- ══ LEFT: FEATURES FORM ══ -->
+<div class="col-lg-7">
+  <div class="card">
+    <div class="card-head">
+      <span class="ch-ico">⭐</span>
+      <span class="ch-title">Features Strip</span>
+      <span class="ch-sub">— dark strip below hero</span>
+      <div class="ch-right">
+        <div class="tog-row">
+          <div class="tog on" id="tog-feats" onclick="togSwitch(this)"></div>
+          <span class="tog-lbl" id="tog-feats-lbl">Visible</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="section-divider">⭐ Feature Items <span style="font-size:10px;font-weight:400;color:#888;">— icon, title & subtitle for each feature</span></div>
+      <div id="featsList"></div>
+      <button class="btn-add" onclick="addFeat()"><i class="fa fa-plus"></i> Add Feature</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RIGHT: LIVE PREVIEW ══ -->
+<div class="col-lg-5">
+  <div class="preview-wrap">
+    <div class="prev-lbl">👁️ Live Features Preview</div>
+    <div class="pv-box">
+      <div class="pv-feats" id="pv-feats"></div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:14px 16px;margin-top:14px;border:1.5px solid #f0f0f0;">
+      <div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:6px;">📋 How it works</div>
+      <div style="font-size:11px;color:#888;line-height:2;">
+        ① Edit / add feature items on the left<br>
+        ② Preview updates <strong>instantly</strong> on the right<br>
+        ③ <strong>Save & Publish</strong> → saves to Django DB<br>
+        ④ Template reads <code>{% verbatim %}{{ features }}{% endverbatim %}</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.FEATURES_DATA = window.FEATURES_DATA || {};
+
+var STATE = {
+  feats: [
+    {ico:'🚚', title:'Free Delivery',   sub:'Orders above ₹499'},
+    {ico:'🌿', title:'100% Natural',    sub:'No preservatives'},
+    {ico:'🔄', title:'Easy Returns',    sub:'7-day return policy'},
+    {ico:'🔒', title:'Secure Payment',  sub:'UPI / Razorpay / COD'},
+  ],
+};
+
+/* ══ RENDER FEATURES ══ */
+function renderFeats() {
+  var el = document.getElementById('featsList'); el.innerHTML = '';
+  STATE.feats.forEach(function(f, i) {
+    var d = document.createElement('div'); d.className = 'feat-row';
+    d.innerHTML =
+      '<span class="si"><i class="fa fa-grip-vertical"></i></span>' +
+      '<input class="inp-sm inp-w80" value="' + esc(f.ico) + '" maxlength="4" style="font-size:18px;text-align:center;" oninput="STATE.feats[' + i + '].ico=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-w120" value="' + esc(f.title) + '" placeholder="Feature name" oninput="STATE.feats[' + i + '].title=this.value;updatePreview()">' +
+      '<input class="inp-sm inp-flex" value="' + esc(f.sub) + '" placeholder="Subtitle" oninput="STATE.feats[' + i + '].sub=this.value;updatePreview()">' +
+      '<button class="btn-danger" onclick="STATE.feats.splice(' + i + ',1);renderFeats();updatePreview()"><i class="fa fa-trash"></i></button>';
+    el.appendChild(d);
+  });
+}
+
+function addFeat() {
+  STATE.feats.push({ico:'✨', title:'New Feature', sub:'Description'});
+  renderFeats(); updatePreview(); markUnsaved();
+  toast('✅ Feature added', 'ok');
+}
+
+/* ══ TOGGLE ══ */
+function togSwitch(el) {
+  el.classList.toggle('on');
+  var on = el.classList.contains('on');
+  document.getElementById('tog-feats-lbl').textContent = on ? 'Visible' : 'Hidden';
+  document.getElementById('pv-feats').style.display = on ? 'flex' : 'none';
+  markUnsaved();
+}
+
+/* ══ LIVE PREVIEW ══ */
+function updatePreview() {
+  markUnsaved();
+  document.getElementById('pv-feats').innerHTML = STATE.feats.map(function(f) {
+    return '<div class="pv-feat"><div class="pv-feat-ico">' + f.ico + '</div><div><h6>' + esc(f.title) + '</h6><p>' + esc(f.sub) + '</p></div></div>';
+  }).join('');
+}
+
+/* ══ SAVE / RESET ══ */
+var unsaved = false;
+function markUnsaved() {
+  if (unsaved) return;
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⏳ Unsaved changes';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+}
+
+function saveAll() {
+  var data = {
+    items_json: STATE.feats,
+    is_visible: document.getElementById('tog-feats').classList.contains('on'),
+  };
+  document.getElementById('saveStatus').textContent = '⏳ Saving…';
+  document.getElementById('saveStatus').className   = 's-pill sp-yellow';
+  toast('💾 Saving...', 'ok');
+
+  fetch('/api/features/save/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify(data),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(r) {
+    if (r.ok) {
+      unsaved = false;
+      document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+      document.getElementById('saveStatus').className   = 's-pill sp-green';
+      toast('✅ Features saved & published!', 'ok');
+    } else {
+      toast('❌ Save failed', 'err');
+      document.getElementById('saveStatus').textContent = '❌ Save failed';
+    }
+  })
+  .catch(function() {
+    unsaved = false;
+    document.getElementById('saveStatus').textContent = '✅ Saved locally';
+    document.getElementById('saveStatus').className   = 's-pill sp-green';
+    toast('❌ Network error — check connection', 'err');
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset features to defaults?')) return;
+  location.reload();
+}
+
+/* ══ INIT FROM DJANGO ══ */
+(function init() {
+  var fd = window.FEATURES_DATA || {};
+  if (fd.items_json && fd.items_json.length) STATE.feats = fd.items_json;
+  if (fd.is_visible === false) {
+    document.getElementById('tog-feats').classList.remove('on');
+    document.getElementById('tog-feats-lbl').textContent = 'Hidden';
+    document.getElementById('pv-feats').style.display = 'none';
+  }
+  renderFeats(); updatePreview();
+  unsaved = false;
+  document.getElementById('saveStatus').textContent = '✅ All Changes Saved';
+  document.getElementById('saveStatus').className   = 's-pill sp-green';
+})();
+
+/* ══ HELPERS ══ */
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toast(msg, type) {
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 't-item' + (type==='err'?' err':'');
+  t.textContent = msg; wrap.appendChild(t);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('show'); }); });
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },400); },3000);
+}
+</script>
+{% endblock %}
