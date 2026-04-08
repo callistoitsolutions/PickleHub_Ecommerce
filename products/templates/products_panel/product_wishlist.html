@@ -1,0 +1,353 @@
+{% extends 'home/base.html' %}
+
+{% block title %}My Wishlist | PickleHub Nagpur{% endblock %}
+
+{% block extra_css %}
+<style>
+.breadcrumb-bar{background:#fff;border-bottom:1px solid #eee;padding:10px 0;}
+.breadcrumb{margin:0;background:transparent;}
+.breadcrumb-item a{color:#e85d04;text-decoration:none;font-size:13px;}
+.breadcrumb-item.active{color:#666;font-size:13px;}
+
+.wl-page{max-width:1200px;margin:0 auto;padding:24px 16px;}
+.wl-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.wl-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:#1a1a2e;}
+.wl-sub{font-size:12px;color:#aaa;margin-top:3px;}
+.wl-hdr-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+.wl-btn{border:none;border-radius:10px;padding:10px 18px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+.wl-btn:hover{transform:translateY(-1px);}
+.wl-btn-orange{background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;}
+.wl-btn-outline{background:#fff;border:1.5px solid #ddd;color:#555;}
+
+.wl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.stat-num{font-size:22px;font-weight:800;color:#e85d04;}
+.stat-lbl{font-size:11px;color:#aaa;margin-top:2px;}
+
+.info-card{background:linear-gradient(135deg,#fff8f5,#fff3e0);border:1.5px solid #ffe0cc;border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:flex-start;gap:14px;}
+.info-ico{font-size:26px;flex-shrink:0;margin-top:2px;}
+.info-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;}
+.info-text{font-size:12px;color:#666;line-height:1.75;}
+
+.wl-filter-bar{background:#fff;border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:18px;}
+.filter-lbl{font-size:12px;font-weight:700;color:#555;}
+.filter-pill{border:1.5px solid #ddd;border-radius:50px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:#555;transition:.2s;}
+.filter-pill:hover,.filter-pill.on{border-color:#e85d04;color:#e85d04;background:#fff8f5;}
+.wl-sort{border:1.5px solid #ddd;border-radius:8px;padding:5px 10px;font-size:11px;font-family:'Poppins',sans-serif;outline:none;color:#555;}
+
+.wish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;}
+
+.wc{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);transition:.3s;position:relative;border:1.5px solid transparent;display:flex;flex-direction:column;}
+.wc:hover{border-color:#e85d04;transform:translateY(-3px);}
+.wc-img{aspect-ratio:1;overflow:hidden;position:relative;}
+.wc-img img{width:100%;height:100%;object-fit:cover;transition:.4s;display:block;}
+.wc-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;background:linear-gradient(135deg,#fff3e0,#ffe0b2);}
+.wc:hover .wc-img img{transform:scale(1.06);}
+.wc-badge{position:absolute;top:8px;left:8px;background:#e85d04;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:4px;z-index:2;}
+.wc-oos-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:3;}
+.wc-oos-tag{background:#fff;color:#c62828;font-size:12px;font-weight:800;padding:6px 16px;border-radius:50px;}
+.wc-del{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.95);border:none;border-radius:50%;width:30px;height:30px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:.2s;z-index:4;}
+.wc-del:hover{background:#fdecea;color:#c62828;}
+
+.wc-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:2px;}
+.wc-brand{font-size:10px;color:#e85d04;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.wc-name{font-size:13px;font-weight:700;color:#1a1a2e;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wc-size{font-size:11px;color:#aaa;}
+.wc-price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.wc-price{font-size:16px;font-weight:800;color:#e85d04;}
+.wc-mrp{font-size:11px;color:#aaa;text-decoration:line-through;}
+.wc-save{font-size:10px;font-weight:700;color:#2d6a4f;background:#d4edda;padding:2px 8px;border-radius:50px;}
+.wc-added{font-size:10px;color:#aaa;display:flex;align-items:center;gap:4px;margin-top:4px;}
+
+.wc-actions{padding:0 14px 12px;display:flex;flex-direction:column;gap:5px;}
+.wc-btn-cart{width:100%;background:#1a1a2e;color:#ffd60a;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.wc-btn-cart:hover{background:#e85d04;color:#fff;}
+.wc-btn-oos{width:100%;background:#f0f0f0;color:#aaa;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:not-allowed;font-family:'Poppins',sans-serif;}
+.wc-btn-notify{width:100%;background:transparent;color:#e85d04;border:1.5px solid #e85d04;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.wc-btn-notify:hover{background:#fff3e0;}
+
+.wl-empty{text-align:center;padding:60px 20px;background:#fff;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);grid-column:1/-1;}
+.wl-empty-ico{font-size:64px;margin-bottom:16px;}
+
+.wl-toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:.35s;transform:translateY(80px);opacity:0;pointer-events:none;}
+.wl-toast.show{transform:translateY(0);opacity:1;}
+.wl-toast.ok{border-left:4px solid #52b788;}
+.wl-toast.err{border-left:4px solid #e85d04;}
+
+@media(max-width:600px){
+  .wl-stats{grid-template-columns:repeat(2,1fr);}
+  .wish-grid{grid-template-columns:repeat(2,1fr);}
+  .wl-header{flex-direction:column;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb-bar">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="#">My Account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My Wishlist</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="wl-page">
+
+  <div class="wl-header">
+    <div>
+      <div class="wl-title">❤️ My Wishlist</div>
+      <div class="wl-sub">Products you love — saved for later</div>
+    </div>
+    <div class="wl-hdr-actions">
+      <button class="wl-btn wl-btn-outline" onclick="shareWishlist()">
+        <i class="fa fa-share-alt"></i> Share Wishlist
+      </button>
+      <button class="wl-btn wl-btn-orange" onclick="addAllToCart()">
+        <i class="fa fa-shopping-cart"></i> Add All to Cart
+      </button>
+    </div>
+  </div>
+
+  <div class="wl-stats">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">{{ total }}</div>
+      <div class="stat-lbl">Saved Items</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statIn" style="color:#2d6a4f;">{{ in_stock_count }}</div>
+      <div class="stat-lbl">In Stock</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statOos" style="color:#c62828;">{{ oos_count }}</div>
+      <div class="stat-lbl">Out of Stock</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#f48c06;">♾</div>
+      <div class="stat-lbl">Saved Forever</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-ico">ℹ️</div>
+    <div>
+      <div class="info-title">How Long Are Items Kept in Your Wishlist?</div>
+      <div class="info-text">
+        ✅ <b>Logged-in customers:</b> Items saved <b>forever</b> — no expiry until you remove them.<br>
+        🔔 <b>Price drop alerts:</b> We notify you via WhatsApp when a wishlist item goes on sale.<br>
+        ⚠️ <b>Out of stock items:</b> Kept in wishlist — we notify you when stock is back.
+      </div>
+    </div>
+  </div>
+
+  <div class="wl-filter-bar">
+    <span class="filter-lbl">Filter:</span>
+    <button class="filter-pill on" onclick="filterWish(this,'all')">All (<span id="f-all">{{ total }}</span>)</button>
+    <button class="filter-pill" onclick="filterWish(this,'instock')">In Stock (<span id="f-in">{{ in_stock_count }}</span>)</button>
+    <button class="filter-pill" onclick="filterWish(this,'oos')">Out of Stock (<span id="f-oos">{{ oos_count }}</span>)</button>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <span class="filter-lbl">Sort:</span>
+      <select class="wl-sort" id="wlSort" onchange="applyRender()">
+        <option value="date">Date Added</option>
+        <option value="price_asc">Price: Low → High</option>
+        <option value="price_desc">Price: High → Low</option>
+        <option value="discount">Biggest Discount</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="wish-grid" id="wishGrid"></div>
+
+</div>
+
+<div class="wl-toast" id="wlToast"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var wishItems   = {{ wish_items_json|safe }};
+var CSRF        = '{{ csrf_token }}';
+var REMOVE_URL  = "{% url 'remove_wishlist_item' %}";
+var CART_URL    = "{% url 'cart' %}";   /* adjust to your add-to-cart URL name */
+var currentFilter = 'all';
+
+/* ── filter + sort ── */
+function getFiltered() {
+  var list = wishItems.slice();
+  if (currentFilter === 'instock') list = list.filter(function(i){ return i.inStock; });
+  if (currentFilter === 'oos')     list = list.filter(function(i){ return !i.inStock; });
+  var sort = document.getElementById('wlSort').value;
+  if (sort === 'price_asc')  list.sort(function(a,b){ return a.price - b.price; });
+  if (sort === 'price_desc') list.sort(function(a,b){ return b.price - a.price; });
+  if (sort === 'discount')   list.sort(function(a,b){ return b.discount_pct - a.discount_pct; });
+  return list;
+}
+
+/* ── stat counters ── */
+function updateStats() {
+  var inS = wishItems.filter(function(i){ return i.inStock; }).length;
+  var oos = wishItems.filter(function(i){ return !i.inStock; }).length;
+  document.getElementById('statTotal').textContent = wishItems.length;
+  document.getElementById('statIn').textContent    = inS;
+  document.getElementById('statOos').textContent   = oos;
+  document.getElementById('f-all').textContent = wishItems.length;
+  document.getElementById('f-in').textContent  = inS;
+  document.getElementById('f-oos').textContent = oos;
+}
+
+/* ── render cards ── */
+function renderWish(items) {
+  var grid = document.getElementById('wishGrid');
+  if (!items.length) {
+    grid.innerHTML =
+      "<div class='wl-empty'>"
+      + "<div class='wl-empty-ico'>💔</div>"
+      + "<div style='font-size:18px;font-weight:700;margin-bottom:8px;'>Your wishlist is empty</div>"
+      + "<div style='color:#aaa;font-size:13px;margin-bottom:16px;'>Save products you love and buy them later!</div>"
+      + "<a href='{% url "All_products" %}' class='wl-btn wl-btn-orange'><i class='fa fa-shopping-bag'></i> Browse Pickles</a>"
+      + "</div>";
+    return;
+  }
+  grid.innerHTML = '';
+  items.forEach(function(p) {
+    var imgHtml = p.img
+      ? "<img src='" + p.img + "' alt='" + escHtml(p.name) + "' loading='lazy'>"
+      : "<div class='wc-emoji'>" + (p.emoji || '🥒') + "</div>";
+
+    var oosHtml  = p.inStock ? '' : "<div class='wc-oos-overlay'><span class='wc-oos-tag'>Out of Stock</span></div>";
+    var badgeHtml= p.badge   ? "<span class='wc-badge'>" + escHtml(p.badge) + "</span>" : '';
+    var discHtml = p.discount_pct > 0 ? "<span class='wc-save'>" + p.discount_pct + "% OFF</span>" : '';
+    var mrpHtml  = p.mrp > p.price   ? "<span class='wc-mrp'>₹" + p.mrp.toFixed(0) + "</span>" : '';
+
+    var actionHtml = p.inStock
+      ? "<button class='wc-btn-cart' onclick='addToCart(" + p.id + ",\"" + escHtml(p.name) + "\")'>"
+          + "<i class='fa fa-cart-plus'></i> Add to Cart</button>"
+      : "<button class='wc-btn-oos' disabled><i class='fa fa-ban'></i> Out of Stock</button>"
+          + "<button class='wc-btn-notify' onclick='notifyMe(\"" + escHtml(p.name) + "\")'>"
+          + "🔔 Notify Me</button>";
+
+    var card = document.createElement('div');
+    card.className = 'wc';
+    card.dataset.id = p.id;
+    card.innerHTML =
+      "<a href='/products/" + p.slug + "/' style='text-decoration:none;color:inherit;'>"
+      +   "<div class='wc-img'>" + imgHtml + oosHtml + badgeHtml
+      +     "<button class='wc-del' onclick='event.preventDefault();removeItem(" + p.id + ")' title='Remove from wishlist'>✕</button>"
+      +   "</div>"
+      +   "<div class='wc-body'>"
+      +     (p.brand ? "<div class='wc-brand'>" + escHtml(p.brand) + "</div>" : '')
+      +     "<div class='wc-name'>"  + escHtml(p.name) + "</div>"
+      +     (p.size  ? "<div class='wc-size'>" + escHtml(p.size) + "</div>" : '')
+      +     "<div class='wc-price-row'><span class='wc-price'>₹" + p.price.toFixed(0) + "</span>" + mrpHtml + discHtml + "</div>"
+      +     "<div class='wc-added'><i class='fa fa-heart' style='color:#e85d04;font-size:9px;'></i> Saved on " + escHtml(p.added) + "</div>"
+      +   "</div>"
+      + "</a>"
+      + "<div class='wc-actions'>" + actionHtml + "</div>";
+    grid.appendChild(card);
+  });
+}
+
+function applyRender() { renderWish(getFiltered()); }
+
+function filterWish(el, type) {
+  document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  currentFilter = type;
+  applyRender();
+}
+
+/* ── remove (AJAX) ── */
+function removeItem(productId) {
+  fetch(REMOVE_URL, {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body   : JSON.stringify({ product_id: productId })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.status === '1') {
+      wishItems = wishItems.filter(function(i){ return i.id !== productId; });
+      updateStats();
+      applyRender();
+      wlToast('💔 Removed from wishlist', 'err');
+    } else {
+      wlToast(data.msg || 'Error removing item', 'err');
+    }
+  })
+  .catch(function(){ wlToast('Something went wrong', 'err'); });
+}
+
+/* ── add to cart (AJAX) ── */
+function addToCart(productId, name) {
+  fetch(CART_URL, {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body   : JSON.stringify({ product_id: productId, quantity: 1 })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.status === '1') {
+      wlToast('🛒 ' + name + ' added to cart!', 'ok');
+    } else {
+      wlToast(data.msg || 'Could not add to cart', 'err');
+    }
+  })
+  .catch(function(){ wlToast('Something went wrong', 'err'); });
+}
+
+/* ── add all in-stock to cart ── */
+function addAllToCart() {
+  var inStock = wishItems.filter(function(i){ return i.inStock; });
+  if (!inStock.length) { wlToast('No in-stock items to add', 'err'); return; }
+  var done = 0;
+  inStock.forEach(function(p){
+    fetch(CART_URL, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body   : JSON.stringify({ product_id: p.id, quantity: 1 })
+    }).then(function(){ done++; if (done === inStock.length) wlToast('🛒 ' + done + ' items added to cart!', 'ok'); });
+  });
+}
+
+/* ── notify me via WhatsApp ── */
+function notifyMe(name) {
+  var msg = 'Hi PickleHub! Please notify me when *' + name + '* is back in stock.';
+  window.open('https://wa.me/919876543210?text=' + encodeURIComponent(msg), '_blank');
+}
+
+/* ── share ── */
+function shareWishlist() {
+  var url = window.location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){ wlToast('🔗 Wishlist link copied!', 'ok'); });
+  } else {
+    wlToast('🔗 ' + url, 'ok');
+  }
+}
+
+/* ── toast ── */
+function wlToast(msg, type) {
+  var t = document.getElementById('wlToast');
+  t.textContent = msg;
+  t.className   = 'wl-toast ' + (type || 'ok') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+/* ── XSS helper ── */
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── init ── */
+updateStats();
+applyRender();
+</script>
+{% endblock %}

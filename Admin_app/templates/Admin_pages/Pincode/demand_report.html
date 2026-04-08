@@ -1,0 +1,399 @@
+{% extends "Admin_pages/admin_base.html" %}
+{% load static %}
+
+{% block title %}Demand Report | PickleHub Admin{% endblock %}
+{% block page_title %}📊 Demand Report{% endblock %}
+
+{% block nav_rep_sales %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── stat cards ──────────────────────────────── */
+  .dm-stat { border-radius:16px;padding:18px 20px;color:#fff;display:flex;align-items:center;gap:14px; }
+  .dm-stat .ds-icon { font-size:30px; }
+  .dm-stat .ds-val  { font-size:26px;font-weight:800;line-height:1; }
+  .dm-stat .ds-lbl  { font-size:11px;opacity:.85;margin-top:2px; }
+  .dm-stat.s-total      { background:linear-gradient(135deg,#1a1a2e,#0f3460); }
+  .dm-stat.s-new        { background:linear-gradient(135deg,#e85d04,#f48c06); }
+  .dm-stat.s-progress   { background:linear-gradient(135deg,#1565c0,#1976d2); }
+  .dm-stat.s-fulfilled  { background:linear-gradient(135deg,#2d6a4f,#40916c); }
+
+  /* ── type bars ───────────────────────────────── */
+  .type-bar { display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:13px; }
+  .type-bar:last-child { border-bottom:none; }
+  .type-dot  { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+  .type-prog { flex:1;height:8px;border-radius:4px;background:#f0f0f0; }
+  .type-fill { height:100%;border-radius:4px; }
+
+  /* ── table ───────────────────────────────────── */
+  .dm-table th { font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;background:#f8f9fa; }
+  .dm-table td { padding:12px 14px;vertical-align:middle;font-size:13px;border-bottom:1px solid #f5f5f5; }
+  .dm-table tr:hover td { background:#fffaf7; }
+
+  /* status badges */
+  .ds-new        { background:#fff3cd;color:#856404;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .ds-reviewed   { background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .ds-in_progress{ background:#e8f5e9;color:#2d6a4f;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .ds-fulfilled  { background:#d4edda;color:#155724;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .ds-rejected   { background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+
+  /* type badges */
+  .dt-product  { background:#fff3e0;color:#e65100;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .dt-pincode  { background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .dt-category { background:#f3e5f5;color:#6a0dad;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+
+  .vote-bubble { background:linear-gradient(135deg,#e85d04,#ffd60a);color:#fff;border-radius:50px;padding:3px 10px;font-size:12px;font-weight:800; }
+
+  .btn-sm-icon { border:none;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s; }
+  .btn-status  { background:#e3f2fd;color:#1565c0; }
+  .btn-del     { background:#fce4ec;color:#c62828; }
+  .btn-status:hover { background:#1565c0;color:#fff; }
+  .btn-del:hover    { background:#c62828;color:#fff; }
+
+  /* filters */
+  .search-bar { border-radius:50px;border:1.5px solid #e0e0e0;padding:8px 18px;font-size:13px;min-width:220px; }
+  .search-bar:focus { outline:none;border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.1); }
+  .filter-pill { border-radius:50px;border:1.5px solid #e0e0e0;padding:6px 14px;font-size:12px;font-weight:600;background:#fff;cursor:pointer;text-decoration:none;color:#555;transition:.2s;display:inline-block; }
+  .filter-pill.active,.filter-pill:hover { background:#e85d04;color:#fff;border-color:#e85d04; }
+
+  /* modal */
+  .ph-modal-body .form-label  { font-size:13px;font-weight:600;color:#444; }
+  .ph-modal-body .form-control,.ph-modal-body .form-select {
+    font-size:13px;border-radius:10px;border:1.5px solid #e0e0e0;padding:9px 12px;
+  }
+  .ph-modal-body .form-control:focus { border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.12); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── STAT CARDS ─────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="dm-stat s-total">
+      <div class="ds-icon">📥</div>
+      <div><div class="ds-val">{{ stats.total }}</div><div class="ds-lbl">Total Demands</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="dm-stat s-new">
+      <div class="ds-icon">🆕</div>
+      <div><div class="ds-val">{{ stats.new }}</div><div class="ds-lbl">New</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="dm-stat s-progress">
+      <div class="ds-icon">⚙️</div>
+      <div><div class="ds-val">{{ stats.in_progress }}</div><div class="ds-lbl">In Progress</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="dm-stat s-fulfilled">
+      <div class="ds-icon">🎉</div>
+      <div><div class="ds-val">{{ stats.fulfilled }}</div><div class="ds-lbl">Fulfilled</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Demand Type Breakdown -->
+  <div class="col-md-4">
+    <div class="sec-card h-100">
+      <div class="sec-head"><h3>📊 Demand by Type</h3></div>
+      <div class="sec-body">
+        {% with total=stats.total %}
+        <div class="type-bar">
+          <div class="type-dot" style="background:#e85d04;"></div>
+          <div style="min-width:80px;font-weight:600;">🛒 Products</div>
+          <div class="type-prog">
+            <div class="type-fill" style="background:#e85d04;width:{% if total %}{% widthratio stats.product_demand total 100 %}{% else %}0{% endif %}%;"></div>
+          </div>
+          <strong>{{ stats.product_demand }}</strong>
+        </div>
+        <div class="type-bar">
+          <div class="type-dot" style="background:#1565c0;"></div>
+          <div style="min-width:80px;font-weight:600;">📍 Pincodes</div>
+          <div class="type-prog">
+            <div class="type-fill" style="background:#1565c0;width:{% if total %}{% widthratio stats.pincode_demand total 100 %}{% else %}0{% endif %}%;"></div>
+          </div>
+          <strong>{{ stats.pincode_demand }}</strong>
+        </div>
+        <div class="type-bar">
+          <div class="type-dot" style="background:#6a0dad;"></div>
+          <div style="min-width:80px;font-weight:600;">🏷️ Category</div>
+          <div class="type-prog">
+            <div class="type-fill" style="background:#6a0dad;width:{% if total %}{% widthratio stats.category_demand total 100 %}{% else %}0{% endif %}%;"></div>
+          </div>
+          <strong>{{ stats.category_demand }}</strong>
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Add -->
+  <div class="col-md-8">
+    <div class="sec-card h-100">
+      <div class="sec-head"><h3>✍️ Log New Demand</h3></div>
+      <div class="sec-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:12px;">Type</label>
+            <select id="qa_type" class="form-select form-select-sm" onchange="toggleQAFields()">
+              <option value="product">🛒 Product Demand</option>
+              <option value="pincode">📍 Pincode Demand</option>
+              <option value="category">🏷️ Category Demand</option>
+            </select>
+          </div>
+          <div class="col-md-4" id="qa_product_wrap">
+            <label class="form-label fw-bold" style="font-size:12px;">Product Name</label>
+            <input type="text" id="qa_product" class="form-control form-control-sm" placeholder="e.g. Mango Pickle 500g">
+          </div>
+          <div class="col-md-4" id="qa_pincode_wrap" style="display:none;">
+            <label class="form-label fw-bold" style="font-size:12px;">Pincode</label>
+            <input type="text" id="qa_pincode" class="form-control form-control-sm" placeholder="e.g. 440015">
+          </div>
+          <div class="col-md-4" id="qa_category_wrap" style="display:none;">
+            <label class="form-label fw-bold" style="font-size:12px;">Category</label>
+            <input type="text" id="qa_category" class="form-control form-control-sm" placeholder="e.g. Murabba">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:12px;">Customer Name</label>
+            <input type="text" id="qa_cname" class="form-control form-control-sm" placeholder="Optional">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:12px;">Phone</label>
+            <input type="text" id="qa_phone" class="form-control form-control-sm" placeholder="Optional">
+          </div>
+          <div class="col-12">
+            <button onclick="submitQuickDemand()"
+                    class="btn btn-sm rounded-pill fw-bold px-4"
+                    style="background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;">
+              📥 Log Demand
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN TABLE CARD ────────────────────────────── -->
+<div class="sec-card">
+  <div class="sec-head flex-wrap gap-2">
+    <h3>📋 All Demand Entries</h3>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+      <!-- Search -->
+      <form method="GET" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="type"   value="{{ dtype }}">
+        <input type="hidden" name="status" value="{{ dstatus }}">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search demand…" class="search-bar">
+        <button type="submit" class="filter-pill active">🔍</button>
+        <a href="{% url 'demand_report' %}" class="filter-pill">✖ Clear</a>
+      </form>
+
+      <!-- Type filter pills -->
+      <a href="?type=product{% if q %}&q={{ q }}{% endif %}"  class="filter-pill {% if dtype == 'product' %}active{% endif %}">🛒 Products</a>
+      <a href="?type=pincode{% if q %}&q={{ q }}{% endif %}"  class="filter-pill {% if dtype == 'pincode' %}active{% endif %}">📍 Pincodes</a>
+      <a href="?type=category{% if q %}&q={{ q }}{% endif %}" class="filter-pill {% if dtype == 'category' %}active{% endif %}">🏷️ Categories</a>
+
+      <!-- Status filter pills -->
+      <a href="?status=new{% if q %}&q={{ q }}{% endif %}"         class="filter-pill {% if dstatus == 'new' %}active{% endif %}">🆕 New</a>
+      <a href="?status=fulfilled{% if q %}&q={{ q }}{% endif %}"   class="filter-pill {% if dstatus == 'fulfilled' %}active{% endif %}">✅ Fulfilled</a>
+    </div>
+  </div>
+
+  <div class="sec-body p-0">
+    <div class="table-responsive">
+      <table class="dm-table w-100">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Demand Item</th>
+            <th>Customer</th>
+            <th>Votes</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in demands %}
+          <tr id="drow-{{ d.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td>
+              {% if d.demand_type == 'product' %}
+                <span class="dt-product">🛒 Product</span>
+              {% elif d.demand_type == 'pincode' %}
+                <span class="dt-pincode">📍 Pincode</span>
+              {% else %}
+                <span class="dt-category">🏷️ Category</span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>
+                {% if d.demand_type == 'product' %}{{ d.product_name }}
+                {% elif d.demand_type == 'pincode' %}{{ d.requested_pincode }}
+                {% else %}{{ d.category_name }}
+                {% endif %}
+              </strong>
+              {% if d.notes %}<div class="text-muted" style="font-size:11px;margin-top:2px;">{{ d.notes|truncatechars:60 }}</div>{% endif %}
+            </td>
+            <td>
+              {% if d.customer_name %}
+                <div>{{ d.customer_name }}</div>
+                {% if d.customer_phone %}<div class="text-muted" style="font-size:11px;">📞 {{ d.customer_phone }}</div>{% endif %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td><span class="vote-bubble">🔥 {{ d.vote_count }}</span></td>
+            <td>
+              <span class="ds-{{ d.status }}" id="ds-{{ d.id }}">{{ d.get_status_display }}</span>
+              {% if d.admin_remarks %}
+                <div class="text-muted" style="font-size:10px;margin-top:2px;">{{ d.admin_remarks|truncatechars:40 }}</div>
+              {% endif %}
+            </td>
+            <td style="white-space:nowrap;color:#888;font-size:12px;">{{ d.created_at|date:"d M Y" }}</td>
+            <td>
+              <button class="btn-sm-icon btn-status"
+                      onclick="openStatusModal({{ d.id }},'{{ d.status }}','{{ d.admin_remarks|escapejs }}')"
+                      title="Update Status">
+                🔄
+              </button>
+              <button class="btn-sm-icon btn-del"
+                      onclick="deleteDemand({{ d.id }})"
+                      title="Delete">
+                🗑️
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-4 text-muted">No demand entries found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     UPDATE STATUS MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;border:none;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#1565c0,#1976d2);border-radius:18px 18px 0 0;">
+        <h5 class="modal-title text-white fw-bold">🔄 Update Demand Status</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body ph-modal-body p-4">
+        <input type="hidden" id="sm_id">
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <select id="sm_status" class="form-select">
+            <option value="new">🆕 New</option>
+            <option value="reviewed">🔍 Reviewed</option>
+            <option value="in_progress">⚙️ In Progress</option>
+            <option value="fulfilled">✅ Fulfilled</option>
+            <option value="rejected">❌ Rejected</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Admin Remarks (optional)</label>
+          <textarea id="sm_remarks" class="form-control" rows="3" placeholder="Add notes for your team…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4">
+        <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn rounded-pill fw-bold px-4"
+                style="background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;"
+                onclick="submitStatusUpdate()">Update Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const CSRF = "{{ csrf_token }}";
+
+// ── Quick-add field toggle ───────────────────────────────
+function toggleQAFields() {
+  const t = document.getElementById('qa_type').value;
+  document.getElementById('qa_product_wrap').style.display  = t === 'product'  ? '' : 'none';
+  document.getElementById('qa_pincode_wrap').style.display  = t === 'pincode'  ? '' : 'none';
+  document.getElementById('qa_category_wrap').style.display = t === 'category' ? '' : 'none';
+}
+
+// ── Submit quick demand ──────────────────────────────────
+function submitQuickDemand() {
+  const type = document.getElementById('qa_type').value;
+  const data = {
+    csrfmiddlewaretoken: CSRF,
+    demand_type:    type,
+    customer_name:  document.getElementById('qa_cname').value.trim(),
+    customer_phone: document.getElementById('qa_phone').value.trim(),
+    product_name:      type === 'product'  ? document.getElementById('qa_product').value.trim()  : '',
+    requested_pincode: type === 'pincode'  ? document.getElementById('qa_pincode').value.trim()  : '',
+    category_name:     type === 'category' ? document.getElementById('qa_category').value.trim() : '',
+  };
+
+  const item = data.product_name || data.requested_pincode || data.category_name;
+  if (!item) { swal('Missing!', 'Please fill the demand item field.', 'warning'); return; }
+
+  $.post("{% url 'demand_add' %}", data, function(res) {
+    if (res.status === '1') {
+      swal('Logged!', res.msg, 'success').then(() => location.reload());
+    } else {
+      swal('Error', res.msg, 'error');
+    }
+  });
+}
+
+// ── Open status modal ────────────────────────────────────
+function openStatusModal(id, status, remarks) {
+  document.getElementById('sm_id').value      = id;
+  document.getElementById('sm_status').value  = status;
+  document.getElementById('sm_remarks').value = remarks;
+  new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+// ── Submit status update ─────────────────────────────────
+function submitStatusUpdate() {
+  const id = document.getElementById('sm_id').value;
+  $.post(`/admin/demand/status/${id}/`, {
+    csrfmiddlewaretoken: CSRF,
+    status:        document.getElementById('sm_status').value,
+    admin_remarks: document.getElementById('sm_remarks').value.trim(),
+  }, function(res) {
+    if (res.status === '1') {
+      swal('Updated!', res.msg, 'success').then(() => location.reload());
+    } else {
+      swal('Error', res.msg, 'error');
+    }
+  });
+}
+
+// ── Delete demand ────────────────────────────────────────
+function deleteDemand(id) {
+  swal({ title:'Delete this demand?', text:'This cannot be undone.', icon:'warning', dangerMode:true, buttons:['No','Yes, Delete'] })
+  .then(yes => {
+    if (!yes) return;
+    $.post(`/admin/demand/delete/${id}/`, { csrfmiddlewaretoken: CSRF }, function(res) {
+      if (res.status === '1') {
+        document.getElementById(`drow-${id}`).remove();
+        swal('Deleted!', res.msg, 'success');
+      }
+    });
+  });
+}
+</script>
+{% endblock %}

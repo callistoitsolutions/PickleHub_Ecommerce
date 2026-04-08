@@ -122,6 +122,36 @@ urlpatterns = [
     
     
 #################################### Deals & Offers URLS Section End Here ###############################################
+
+
+
+#################################### Pincode Manager  URLS Section Start Here ###############################################
+
+
+
+
+
+
+    # ── PINCODE MANAGER ─────────────────────────────────────
+    path('admin/pincodes/',                views.pincode_manager,  name='pincode_manager'),
+    path('admin/pincodes/add/',            views.pincode_add,      name='pincode_add'),
+    path('admin/pincodes/edit/<int:pk>/',  views.pincode_edit,     name='pincode_edit'),
+    path('admin/pincodes/toggle/<int:pk>/',views.pincode_toggle,   name='pincode_toggle'),
+    path('admin/pincodes/delete/<int:pk>/',views.pincode_delete,   name='pincode_delete'),
+
+    # ── DEMAND REPORT ────────────────────────────────────────
+    path('admin/demand/',                  views.demand_report,         name='demand_report'),
+    path('admin/demand/add/',              views.demand_add,            name='demand_add'),
+    path('admin/demand/status/<int:pk>/',  views.demand_update_status,  name='demand_update_status'),
+    path('admin/demand/delete/<int:pk>/',  views.demand_delete,         name='demand_delete'),
+
+
+
+
+
+
+
+#################################### Pincode Manager  URLS Section End Here ###############################################
 ]
 
 

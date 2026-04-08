@@ -185,6 +185,11 @@
         </div>
     </div>
 
+
+    <div class="nav-section">Pincode Manager</div>
+    <a class="nav-item {% block nav_rep_pincode %}{% endblock %}" href="{% url 'pincode_manager' %}"><i class="fa fa-chart-bar"></i> Pincode Manager</a>
+      <a class="nav-item {% block nav_rep_demand %}{% endblock %}" href="{% url 'demand_report' %}"><i class="fa fa-chart-bar"></i> Demand Report</a>
+
     <div class="nav-section">Reports</div>
     <a class="nav-item {% block nav_rep_sales %}{% endblock %}" href="picklehub_reports.html"><i class="fa fa-chart-bar"></i> Sales Reports</a>
     <a class="nav-item" href="picklehub_reports.html#products"><i class="fa fa-chart-pie"></i> Product Reports</a>

@@ -488,6 +488,110 @@ def cart(request):
         return render(request, 'cart/cart.html',context)
     else:
         return render(request, 'account/login.html')
+    
+
+
+
+
+
+
+
+
+# ── Wishlist page ──────────────────────────────────────────────
+def product_wishlist(request):
+    session_id = request.session.get('User_id')
+
+    # 🔐 Check login
+    if not session_id:
+        return redirect('login')
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+    if not user_obj:
+        return redirect('login')
+
+    # ✅ Clean queryset (NO invalid prefetch)
+    wish_qs = (
+        Wishlist.objects
+        .filter(user=user_obj)
+        .select_related('product', 'product__brand')
+    )
+
+    # 🔄 Build data for frontend
+    items = []
+    for w in wish_qs:
+        p = w.product
+
+        items.append({
+            'id'          : p.id,
+            'name'        : p.name,
+            'brand'       : p.brand.name if p.brand else '',
+            'size'        : p.weight or '',
+            'price'       : float(p.price),
+            'mrp'         : float(p.old_price) if p.old_price else float(p.price),
+            'badge'       : p.badge or '',
+            'img'         : p.image.url if p.image else '',
+            'emoji'       : p.emoji or '🥒',
+            'added'       : w.added_on.strftime('%d %b %Y'),
+            'inStock'     : not p.is_out_of_stock,
+            'slug'        : p.slug,
+            'discount_pct': p.discount_pct,
+        })
+
+    # 📊 Summary
+    context = {
+        'user_obj'       : user_obj,
+        'wish_items_json': json.dumps(items),
+        'total'          : len(items),
+        'in_stock_count' : sum(1 for i in items if i['inStock']),
+        'oos_count'      : sum(1 for i in items if not i['inStock']),
+    }
+
+    return render(request, 'products_panel/product_wishlist.html', context)
+
+# ── Toggle wishlist (AJAX) ─────────────────────────────────────
+@require_POST
+def toggle_wishlist(request):
+    session_id = request.session.get('User_id')
+    if not session_id:
+        return JsonResponse({'status': '0', 'msg': 'Login required'})
+
+    try:
+        data       = json.loads(request.body)
+        product_id = data.get('product_id')
+    except Exception:
+        return JsonResponse({'status': '0', 'msg': 'Invalid data'})
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+    product  = Product.objects.filter(id=product_id).first()
+
+    if not user_obj or not product:
+        return JsonResponse({'status': '0', 'msg': 'Not found'})
+
+    obj, created = Wishlist.objects.get_or_create(user=user_obj, product=product)
+    if not created:
+        obj.delete()
+        return JsonResponse({'status': '1', 'action': 'removed', 'msg': 'Removed from wishlist'})
+
+    return JsonResponse({'status': '1', 'action': 'added', 'msg': 'Added to wishlist'})
+
+
+# ── Remove single item (AJAX) ──────────────────────────────────
+@require_POST
+def remove_wishlist_item(request):
+    session_id = request.session.get('User_id')
+    if not session_id:
+        return JsonResponse({'status': '0', 'msg': 'Login required'})
+
+    try:
+        data       = json.loads(request.body)
+        product_id = data.get('product_id')
+    except Exception:
+        return JsonResponse({'status': '0', 'msg': 'Invalid data'})
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+    Wishlist.objects.filter(user=user_obj, product_id=product_id).delete()
+    return JsonResponse({'status': '1', 'msg': 'Removed'})
+
 
 
 def All_products(request):
@@ -529,20 +633,19 @@ def All_products(request):
     page_num  = request.GET.get('page', 1)
     page_obj  = paginator.get_page(page_num)
 
-    # ✅ Today's Offers
+    # ── Today's Offers ──
     todays_offers = TodaysOffer.objects.filter(
         is_visible=True, product__isnull=False
     ).select_related('product')
     offer_map = {o.product_id: o for o in todays_offers}
 
-    
+    # ── Coupons ──
     page_product_ids = [p.id for p in page_obj]
     coupon_qs = Coupon.objects.filter(
         is_active=True,
         products__id__in=page_product_ids
     ).prefetch_related('products')
 
-    # build map: product_id → list of coupons
     coupon_map = {}
     for coupon in coupon_qs:
         for pid in coupon.products.values_list('id', flat=True):
@@ -550,35 +653,41 @@ def All_products(request):
                 coupon_map.setdefault(pid, []).append(coupon)
 
     for p in page_obj:
-        p.active_offer       = offer_map.get(p.id)
-        p.assigned_coupons_list = coupon_map.get(p.id, [])   # ✅ new
+        p.active_offer          = offer_map.get(p.id)
+        p.assigned_coupons_list = coupon_map.get(p.id, [])
 
     context = {
-        'products':         page_obj,
-        'paginator':        paginator,
-        'page_obj':         page_obj,
-        'categories':       categories,
-        'brands':           brands,
-        'settings':         settings,
-        'total_count':      products_qs.count(),
-        'selected_cats':    [int(x) for x in cat_ids   if x.isdigit()],
-        'selected_brands':  [int(x) for x in brand_ids if x.isdigit()],
-        'selected_regions': regions,
-        'current_price_max':int(price_max),
-        'current_sort':     sort,
-        'current_rating':   min_rating,
-        'user_obj':None
+        'products':          page_obj,
+        'paginator':         paginator,
+        'page_obj':          page_obj,
+        'categories':        categories,
+        'brands':            brands,
+        'settings':          settings,
+        'total_count':       products_qs.count(),
+        'selected_cats':     [int(x) for x in cat_ids   if x.isdigit()],
+        'selected_brands':   [int(x) for x in brand_ids if x.isdigit()],
+        'selected_regions':  regions,
+        'current_price_max': int(price_max),
+        'current_sort':      sort,
+        'current_rating':    min_rating,
+        'user_obj':          None,
+        'user_wishlist_ids': set(),   # default — empty set for guests
     }
 
-    # 🔹 3. Handle the logged-in user logic safely
+    # ── Logged-in user ──
     session_id = request.session.get('User_id')
     if session_id:
-        
         user_obj = UserDetails.objects.filter(id=session_id).first()
         if user_obj:
             context['user_obj'] = user_obj
 
-    return render(request, 'products_panel/All_products.html',context)
+            # ✅ fetch this user's wishlisted product IDs in one DB query
+            context['user_wishlist_ids'] = set(
+                Wishlist.objects.filter(user=user_obj)
+                .values_list('product_id', flat=True)
+            )
+
+    return render(request, 'products_panel/All_products.html', context)
 
 
 
