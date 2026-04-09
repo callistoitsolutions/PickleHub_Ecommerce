@@ -365,12 +365,35 @@
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
+                                        <a class="dropdown-item py-2" href="{% url "My_Orders" %}" style="color: #1a1a2e;">
+                                            <i class="fas fa-shopping-basket me-2 text-muted"></i> My Orders
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url "My_Wallet" %}" style="color: #1a1a2e;">
+                                            <i class="fas fa-wallet me-2 text-muted"></i> My Wallet
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
                                         <button type="button" class="dropdown-item py-2 text-danger fw-bold" style="cursor: pointer;" onclick="User_Logout()">
                                         <i class="fa fa-sign-out-alt me-2"></i> Logout
                                         </button>
                                     </li>
                                 </ul>
                             </div>
+
+                            <a href="#" aria-label="Wishlist">
+                                <i class="fa fa-heart"></i>
+                                <span>Wishlist</span>
+                            </a>
+                            
+                            <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
+                                <i class="fa fa-shopping-cart"></i>
+                                <span class="cart-badge" aria-label="3 items in cart">3</span>
+                                <span>Cart</span>
+                            </a>
 
                         {% else %}
 
@@ -382,15 +405,7 @@
                         {% endif %}
 
                         
-                        <a href="/wishlist/" aria-label="Wishlist">
-                            <i class="fa fa-heart"></i>
-                            <span>Wishlist</span>
-                        </a>
-                        <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
-                            <i class="fa fa-shopping-cart"></i>
-                            <span class="cart-badge" aria-label="3 items in cart">3</span>
-                            <span>Cart</span>
-                        </a>
+                        
                     </div>
                 </div>
             </div>

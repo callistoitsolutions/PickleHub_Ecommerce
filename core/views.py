@@ -299,6 +299,34 @@ def User_Profile(request):
 ########### Views end for update user profile #############################
 
 
+########## Views start for my orders section ##########################
+
+def My_Orders(request):
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = UserDetails.objects.filter(id=session_id).first()
+        context = {'user_obj':user_obj}
+        return render(request,'home/My_Orders/my_orders.html',context)
+    else:
+        return render(request,'account/login.html')
+
+############# Views end for my orders section ###########################
+
+
+########## Views start for my wallet section ########################
+
+def My_Wallet(request):
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = UserDetails.objects.filter(id=session_id).first()
+        context = {'user_obj':user_obj}
+        return render(request,'home/My_Wallet/my_wallet.html',context)
+    else:
+        return render(request,'account/login.html')
+
+############# Views end for my wallet section ######################
+
+
 
 
 @csrf_exempt

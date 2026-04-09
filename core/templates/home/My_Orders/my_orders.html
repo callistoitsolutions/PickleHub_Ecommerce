@@ -1,0 +1,222 @@
+{% extends 'home/base.html' %}
+
+{% block title %}My Orders | PickleHub Nagpur{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #e85d04;
+        --dark: #1a1a2e;
+        --accent: #ffd60a;
+        --bg-light: #f0f2f5;
+        --success: #2d6a4f;
+    }
+
+    .orders-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .orders-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: none;
+        position: relative;
+    }
+
+    /* 🔙 BACK BUTTON */
+    .btn-back-circle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-back-circle:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateX(-3px);
+    }
+
+    .orders-header {
+        background: linear-gradient(135deg, var(--dark) 0%, #0f3460 100%);
+        padding: 60px 20px 40px;
+        text-align: center;
+        position: relative;
+    }
+
+    .orders-header h2 {
+        color: #fff;
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .orders-header p {
+        color: var(--accent);
+        font-size: 14px;
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .orders-body {
+        padding: 30px;
+    }
+
+    /* 📦 TABLE STYLES */
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .table thead {
+        background: #f8f9fa;
+    }
+
+    .table thead th {
+        border: none;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f1f1;
+        color: var(--dark);
+    }
+
+    /* 🏷️ STATUS PILLS */
+    .status-pill {
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-delivered { background: #d4edda; color: #155724; }
+    .status-shipped { background: #cce5ff; color: #004085; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+
+    .order-id {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .btn-view-order {
+        background: var(--bg-light);
+        color: var(--dark);
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: .2s;
+        text-decoration: none;
+    }
+
+    .btn-view-order:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+    }
+
+    .empty-state i {
+        font-size: 50px;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="orders-container">
+    <div class="orders-card">
+        
+        <a href="javascript:history.back()" class="btn-back-circle" title="Go Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+
+        <div class="orders-header">
+            <h2>My Order History</h2>
+            <p>Track and manage your PickleHub orders</p>
+        </div>
+
+        <div class="orders-body">
+            {% if orders %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td><span class="order-id">#{{ order.order_number }}</span></td>
+                            <td>{{ order.created_at|date:"d M, Y" }}</td>
+                            <td class="fw-bold">₹{{ order.total_price }}</td>
+                            <td>
+                                <span class="status-pill 
+                                    {% if order.status == 'Pending' %}status-pending
+                                    {% elif order.status == 'Delivered' %}status-delivered
+                                    {% elif order.status == 'Shipped' %}status-shipped
+                                    {% else %}status-cancelled{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'order_detail' order.id %}" class="btn-view-order">
+                                    <i class="fa fa-eye me-1"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa fa-box-open"></i>
+                <h5 class="text-muted">You haven't placed any orders yet.</h5>
+                <a href="{% url 'index' %}" class="btn btn-warning rounded-pill px-4 mt-3 fw-bold">Start Shopping</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

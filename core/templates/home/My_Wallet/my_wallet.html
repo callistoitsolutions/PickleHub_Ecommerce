@@ -1,0 +1,257 @@
+{% extends 'home/base.html' %}
+
+{% block title %}My Wallet | PickleHub Nagpur{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #e85d04;
+        --dark: #1a1a2e;
+        --accent: #ffd60a;
+        --bg-light: #f0f2f5;
+        --success: #2d6a4f;
+    }
+
+    .wallet-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .wallet-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: none;
+        position: relative;
+    }
+
+    /* 🔙 BACK BUTTON */
+    .btn-back-circle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-back-circle:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateX(-3px);
+    }
+
+    /* 💳 WALLET HEADER / BALANCE SECTION */
+    .wallet-header {
+        background: linear-gradient(135deg, var(--dark) 0%, #0f3460 100%);
+        padding: 60px 20px 50px;
+        text-align: center;
+        position: relative;
+        color: #fff;
+    }
+
+    .balance-display {
+        margin-top: 15px;
+    }
+
+    .balance-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 5px;
+    }
+
+    .balance-amount {
+        font-size: 48px;
+        font-weight: 800;
+        font-family: 'Poppins', sans-serif;
+        color: var(--accent);
+    }
+
+    /* 🚀 ACTION BUTTONS */
+    .wallet-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .btn-action {
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+        transition: .3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add-money {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(232, 93, 4, 0.3);
+    }
+
+    .btn-add-money:hover {
+        background: #f48c06;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .btn-withdraw {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-withdraw:hover {
+        background: #fff;
+        color: var(--dark);
+    }
+
+    /* 📜 TRANSACTION LIST */
+    .wallet-body {
+        padding: 30px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .transaction-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        margin-bottom: 12px;
+        transition: .2s;
+    }
+
+    .transaction-item:hover {
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .trans-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .trans-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .icon-in { background: #d4edda; color: #155724; }
+    .icon-out { background: #f8d7da; color: #721c24; }
+
+    .trans-details h6 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .trans-details small {
+        color: #888;
+        font-size: 12px;
+    }
+
+    .trans-amount {
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .amount-plus { color: var(--success); }
+    .amount-minus { color: #c62828; }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: #aaa;
+    }
+</style>
+
+<div class="wallet-container">
+    <div class="wallet-card">
+        
+        <a href="javascript:history.back()" class="btn-back-circle" title="Go Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+
+        <div class="wallet-header">
+            <div class="balance-display">
+                <div class="balance-label">Available Balance</div>
+                <div class="balance-amount">₹{{ wallet_balance|default:"0.00" }}</div>
+            </div>
+
+            <div class="wallet-actions">
+                <a href="#" class="btn-action btn-add-money">
+                    <i class="fa fa-plus-circle"></i> Add Money
+                </a>
+                <a href="#" class="btn-action btn-withdraw">
+                    <i class="fa fa-university"></i> Withdraw
+                </a>
+            </div>
+        </div>
+
+        <div class="wallet-body">
+            <h5 class="section-title">
+                <i class="fa fa-history text-primary"></i> Recent Transactions
+            </h5>
+
+            {% if transactions %}
+                {% for trans in transactions %}
+                <div class="transaction-item">
+                    <div class="trans-info">
+                        <div class="trans-icon {% if trans.type == 'credit' %}icon-in{% else %}icon-out{% endif %}">
+                            <i class="fa {% if trans.type == 'credit' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
+                        </div>
+                        <div class="trans-details">
+                            <h6>{{ trans.remarks }}</h6>
+                            <small>{{ trans.created_at|date:"d M Y, h:i A" }}</small>
+                        </div>
+                    </div>
+                    <div class="trans-amount {% if trans.type == 'credit' %}amount-plus{% else %}amount-minus{% endif %}">
+                        {% if trans.type == 'credit' %}+{% else %}-{% endif %} ₹{{ trans.amount }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fa fa-receipt fa-3x mb-3"></i>
+                    <p>No transactions found in your wallet history.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

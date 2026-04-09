@@ -18,6 +18,14 @@ urlpatterns = [
 
     path('User_Profile', views.User_Profile, name='User_Profile'),
 
+    ############## urls for my orders section ##########################
+
+    path('My_Orders', views.My_Orders, name='My_Orders'),
+
+    ############## urls for my wallet section ##################
+
+    path('My_Wallet', views.My_Wallet, name='My_Wallet'),
+
 
     ############# urls for user logout ###########################
 

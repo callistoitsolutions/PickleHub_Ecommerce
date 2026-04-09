@@ -753,7 +753,7 @@ img { display: block; max-width: 100%; }
                 {% if p.discount_label %}<span class="product-discount">{{ p.discount_label }}</span>{% endif %}
               </div>
               <button class="btn-add-cart mt-2">
-                <i class="fa fa-cart-plus"></i> Add to Cart
+                <i class="fa fa-cart-plus" onclick="Add_Cart({{p.id}})"></i> Add to Cart
               </button>
               <a href="https://wa.me/{{ p.whatsapp_number }}?text=I want {{ p.name }} {{ p.weight }}" class="btn-whatsapp">
                 <i class="fab fa-whatsapp"></i> Order
