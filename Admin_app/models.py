@@ -375,3 +375,94 @@ class CategorySection(models.Model):
     
     
     
+############ Pincode Manager  Modals Start Here ############################################################
+
+
+
+
+
+class DeliveryPincode(models.Model):
+    """Stores every pincode PickleHub delivers to."""
+
+    pincode      = models.CharField(max_length=10, unique=True)
+    area_name    = models.CharField(max_length=120)          # e.g. "Dharampeth"
+    city         = models.CharField(max_length=80, default="Nagpur")
+    state        = models.CharField(max_length=80, default="Maharashtra")
+
+    is_active    = models.BooleanField(default=True)         # toggle delivery on/off
+    cod_allowed  = models.BooleanField(default=True)         # Cash-on-delivery flag
+    delivery_days = models.PositiveSmallIntegerField(default=2)  # estimated days
+
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['pincode']
+        verbose_name        = "Delivery Pincode"
+        verbose_name_plural = "Delivery Pincodes"
+
+    def __str__(self):
+        return f"{self.pincode} – {self.area_name} ({self.city})"
+
+
+
+
+class DemandReport(models.Model):
+    """
+    Customers request products / pincodes not yet available.
+    Admins use this to decide what to stock or where to expand.
+    """
+
+    TYPE_CHOICES = [
+        ('product',  'Product Demand'),
+        ('pincode',  'Pincode Demand'),
+        ('category', 'Category Demand'),
+    ]
+
+    STATUS_CHOICES = [
+        ('new',         'New'),
+        ('reviewed',    'Reviewed'),
+        ('in_progress', 'In Progress'),
+        ('fulfilled',   'Fulfilled'),
+        ('rejected',    'Rejected'),
+    ]
+
+    demand_type      = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    customer_name    = models.CharField(max_length=120, blank=True)
+    customer_phone   = models.CharField(max_length=15,  blank=True)
+    customer_email   = models.EmailField(blank=True)
+
+    # What they want
+    product_name     = models.CharField(max_length=200, blank=True,
+                                        help_text="Fill if demand_type = product")
+    requested_pincode = models.CharField(max_length=10, blank=True,
+                                         help_text="Fill if demand_type = pincode")
+    category_name    = models.CharField(max_length=120, blank=True,
+                                        help_text="Fill if demand_type = category")
+    notes            = models.TextField(blank=True)
+
+    # Admin fields
+    status           = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                                        default='new')
+    admin_remarks    = models.TextField(blank=True)
+    vote_count       = models.PositiveIntegerField(default=1,
+                          help_text="How many customers want the same thing")
+
+    created_at       = models.DateTimeField(auto_now_add=True)
+    updated_at       = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-vote_count', '-created_at']
+        verbose_name        = "Demand Report"
+        verbose_name_plural = "Demand Reports"
+
+    def __str__(self):
+        label = self.product_name or self.requested_pincode or self.category_name
+        return f"[{self.get_demand_type_display()}] {label} (votes: {self.vote_count})"
+
+
+
+
+
+
+############ Pincode Manager  Modals Start Here ############################################################

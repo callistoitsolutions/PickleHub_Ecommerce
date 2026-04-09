@@ -1032,3 +1032,260 @@ def dotd_save_ajax(request):
         return JsonResponse({'success': False, 'error': 'Product not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+    
+    
+    
+
+#####################Start Pincode Manager  Views Section #######################################################
+
+
+
+
+
+
+def _get_admin(request):
+    """Return the admin object stored in session (adapt as needed)."""
+  # adjust import to your actual Admin model
+    admin_id = request.session.get('admin_id')
+    if not admin_id:
+        return None
+    try:
+        return AdminDetails.objects.get(id=admin_id)
+    except Exception:
+        return None
+
+
+
+def pincode_manager(request):
+    """
+    Main page — lists all pincodes.
+    GET  → render page
+    """
+    admin_obj = _get_admin(request)
+
+    pincodes  = DeliveryPincode.objects.all()
+
+    # live filter via query string
+    q = request.GET.get('q', '').strip()
+    if q:
+        pincodes = pincodes.filter(
+            Q(pincode__icontains=q) |
+            Q(area_name__icontains=q) |
+            Q(city__icontains=q)
+        )
+
+    status_filter = request.GET.get('status', '')   # 'active' | 'inactive'
+    if status_filter == 'active':
+        pincodes = pincodes.filter(is_active=True)
+    elif status_filter == 'inactive':
+        pincodes = pincodes.filter(is_active=False)
+
+    stats = {
+        'total':    DeliveryPincode.objects.count(),
+        'active':   DeliveryPincode.objects.filter(is_active=True).count(),
+        'inactive': DeliveryPincode.objects.filter(is_active=False).count(),
+        'cod':      DeliveryPincode.objects.filter(cod_allowed=True).count(),
+    }
+
+    ctx = {
+        'admin_obj': admin_obj,
+        'pincodes':  pincodes,
+        'stats':     stats,
+        'q':         q,
+        'status_filter': status_filter,
+    }
+    return render(request, 'Admin_Pages/Pincode/pincode_manager.html', ctx)
+
+
+def pincode_add(request):
+    """AJAX POST — add a new pincode."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    pincode      = request.POST.get('pincode', '').strip()
+    area_name    = request.POST.get('area_name', '').strip()
+    city         = request.POST.get('city', 'Nagpur').strip()
+    state        = request.POST.get('state', 'Maharashtra').strip()
+    cod_allowed  = request.POST.get('cod_allowed', 'true') == 'true'
+    delivery_days = int(request.POST.get('delivery_days', 2))
+
+    if not pincode or not area_name:
+        return JsonResponse({'status': '0', 'msg': 'Pincode and Area Name are required.'})
+
+    if DeliveryPincode.objects.filter(pincode=pincode).exists():
+        return JsonResponse({'status': '0', 'msg': f'Pincode {pincode} already exists.'})
+
+    obj = DeliveryPincode.objects.create(
+        pincode=pincode,
+        area_name=area_name,
+        city=city,
+        state=state,
+        cod_allowed=cod_allowed,
+        delivery_days=delivery_days,
+        is_active=True,
+    )
+    return JsonResponse({'status': '1', 'msg': f'Pincode {pincode} added successfully!', 'id': obj.id})
+
+
+def pincode_toggle(request, pk):
+    """AJAX POST — toggle active/inactive."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    obj = get_object_or_404(DeliveryPincode, pk=pk)
+    obj.is_active = not obj.is_active
+    obj.save()
+    state = 'Active' if obj.is_active else 'Inactive'
+    return JsonResponse({'status': '1', 'msg': f'Pincode marked as {state}.', 'is_active': obj.is_active})
+
+
+def pincode_delete(request, pk):
+    """AJAX POST — soft delete (just marks inactive) or hard delete."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    obj = get_object_or_404(DeliveryPincode, pk=pk)
+    pincode_val = obj.pincode
+    obj.delete()
+    return JsonResponse({'status': '1', 'msg': f'Pincode {pincode_val} deleted.'})
+
+
+def pincode_edit(request, pk):
+    """AJAX POST — edit an existing pincode."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    obj = get_object_or_404(DeliveryPincode, pk=pk)
+    obj.area_name     = request.POST.get('area_name',    obj.area_name).strip()
+    obj.city          = request.POST.get('city',         obj.city).strip()
+    obj.state         = request.POST.get('state',        obj.state).strip()
+    obj.cod_allowed   = request.POST.get('cod_allowed', 'true') == 'true'
+    obj.delivery_days = int(request.POST.get('delivery_days', obj.delivery_days))
+    obj.save()
+    return JsonResponse({'status': '1', 'msg': 'Pincode updated successfully!'})
+
+
+
+def demand_report(request):
+    """
+    Admin demand report page.
+    GET → render with stats + list
+    """
+    admin_obj = _get_admin(request)
+
+    demands = DemandReport.objects.all()
+
+    # Filters
+    dtype   = request.GET.get('type', '')
+    dstatus = request.GET.get('status', '')
+    q       = request.GET.get('q', '').strip()
+
+    if dtype:
+        demands = demands.filter(demand_type=dtype)
+    if dstatus:
+        demands = demands.filter(status=dstatus)
+    if q:
+        demands = demands.filter(
+            Q(product_name__icontains=q) |
+            Q(requested_pincode__icontains=q) |
+            Q(category_name__icontains=q) |
+            Q(customer_name__icontains=q)
+        )
+
+    stats = {
+        'total':       DemandReport.objects.count(),
+        'new':         DemandReport.objects.filter(status='new').count(),
+        'in_progress': DemandReport.objects.filter(status='in_progress').count(),
+        'fulfilled':   DemandReport.objects.filter(status='fulfilled').count(),
+        'product_demand':  DemandReport.objects.filter(demand_type='product').count(),
+        'pincode_demand':  DemandReport.objects.filter(demand_type='pincode').count(),
+        'category_demand': DemandReport.objects.filter(demand_type='category').count(),
+    }
+
+    ctx = {
+        'admin_obj': admin_obj,
+        'demands':   demands,
+        'stats':     stats,
+        'dtype':     dtype,
+        'dstatus':   dstatus,
+        'q':         q,
+        'type_choices':   DemandReport.TYPE_CHOICES,
+        'status_choices': DemandReport.STATUS_CHOICES,
+    }
+    return render(request, 'Admin_Pages/Pincode/demand_report.html', ctx)
+
+
+def demand_update_status(request, pk):
+    """AJAX POST — update status + admin remarks."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    obj = get_object_or_404(DemandReport, pk=pk)
+    new_status     = request.POST.get('status', obj.status)
+    admin_remarks  = request.POST.get('admin_remarks', '').strip()
+
+    obj.status        = new_status
+    obj.admin_remarks = admin_remarks
+    obj.save()
+    return JsonResponse({'status': '1', 'msg': 'Demand status updated!'})
+
+
+def demand_delete(request, pk):
+    """AJAX POST — delete a demand entry."""
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    obj = get_object_or_404(DemandReport, pk=pk)
+    obj.delete()
+    return JsonResponse({'status': '1', 'msg': 'Demand entry deleted.'})
+
+
+def demand_add(request):
+    """
+    AJAX POST — manually add a demand (admin can log offline requests).
+    Also used by the public-facing 'Request a Product' form if you add one.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': '0', 'msg': 'Invalid method'})
+
+    demand_type       = request.POST.get('demand_type', 'product')
+    customer_name     = request.POST.get('customer_name', '').strip()
+    customer_phone    = request.POST.get('customer_phone', '').strip()
+    customer_email    = request.POST.get('customer_email', '').strip()
+    product_name      = request.POST.get('product_name', '').strip()
+    requested_pincode = request.POST.get('requested_pincode', '').strip()
+    category_name     = request.POST.get('category_name', '').strip()
+    notes             = request.POST.get('notes', '').strip()
+
+    # If same item already exists, increment vote count
+    lookup = {}
+    if demand_type == 'product' and product_name:
+        lookup = {'demand_type': 'product', 'product_name__iexact': product_name}
+    elif demand_type == 'pincode' and requested_pincode:
+        lookup = {'demand_type': 'pincode', 'requested_pincode': requested_pincode}
+    elif demand_type == 'category' and category_name:
+        lookup = {'demand_type': 'category', 'category_name__iexact': category_name}
+
+    if lookup:
+        existing = DemandReport.objects.filter(**lookup).first()
+        if existing:
+            existing.vote_count += 1
+            existing.save()
+            return JsonResponse({'status': '1', 'msg': 'Vote added to existing demand!', 'id': existing.id})
+
+    obj = DemandReport.objects.create(
+        demand_type=demand_type,
+        customer_name=customer_name,
+        customer_phone=customer_phone,
+        customer_email=customer_email,
+        product_name=product_name,
+        requested_pincode=requested_pincode,
+        category_name=category_name,
+        notes=notes,
+    )
+    return JsonResponse({'status': '1', 'msg': 'Demand logged successfully!', 'id': obj.id})
+
+
+
+#####################End Pincode Manager  Views Section #######################################################
+

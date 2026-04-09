@@ -405,7 +405,15 @@
                         {% endif %}
 
                         
-                        
+                        <a href="/wishlist/" aria-label="Wishlist">
+                            <i class="fa fa-heart"></i>
+                            <span>Wishlist</span>
+                        </a>
+                        <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
+                            <i class="fa fa-shopping-cart"></i>
+                            <span class="cart-badge" aria-label="3 items in cart">3</span>
+                            <span>Cart</span>
+                        </a>
                     </div>
                 </div>
             </div>

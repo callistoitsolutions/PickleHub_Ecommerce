@@ -1,0 +1,382 @@
+{% extends "Admin_pages/admin_base.html" %}
+{% load static %}
+
+{% block title %}Pincode Manager | PickleHub Admin{% endblock %}
+{% block page_title %}📍 Pincode Manager{% endblock %}
+
+{% block nav_settings %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── page-level overrides ─────────────────────────── */
+  .pin-stat { border-radius:16px;padding:18px 22px;color:#fff;display:flex;align-items:center;gap:14px; }
+  .pin-stat .ps-icon { font-size:32px; }
+  .pin-stat .ps-val  { font-size:26px;font-weight:800;line-height:1; }
+  .pin-stat .ps-lbl  { font-size:11px;opacity:.85;margin-top:2px; }
+
+  .pin-stat.s-total   { background:linear-gradient(135deg,#1565c0,#1976d2); }
+  .pin-stat.s-active  { background:linear-gradient(135deg,#2d6a4f,#40916c); }
+  .pin-stat.s-inactive{ background:linear-gradient(135deg,#c62828,#e53935); }
+  .pin-stat.s-cod     { background:linear-gradient(135deg,#e85d04,#f48c06); }
+
+  /* table */
+  .pin-table th  { font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;background:#f8f9fa; }
+  .pin-table td  { padding:12px 14px;vertical-align:middle;font-size:13px;border-bottom:1px solid #f5f5f5; }
+  .pin-table tr:hover td { background:#fffaf7; }
+
+  .badge-active   { background:#d4edda;color:#155724;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .badge-inactive { background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700; }
+  .badge-cod-yes  { background:#fff3cd;color:#856404;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700; }
+  .badge-cod-no   { background:#e0e0e0;color:#555;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700; }
+
+  .btn-sm-icon { border:none;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s; }
+  .btn-toggle  { background:#e3f2fd;color:#1565c0; }
+  .btn-edit    { background:#fff3e0;color:#e65100; }
+  .btn-del     { background:#fce4ec;color:#c62828; }
+  .btn-toggle:hover{ background:#1565c0;color:#fff; }
+  .btn-edit:hover  { background:#e85d04;color:#fff; }
+  .btn-del:hover   { background:#c62828;color:#fff; }
+
+  /* modal */
+  .ph-modal-body .form-label { font-size:13px;font-weight:600;color:#444; }
+  .ph-modal-body .form-control,.ph-modal-body .form-select {
+    font-size:13px;border-radius:10px;border:1.5px solid #e0e0e0;padding:9px 12px;
+  }
+  .ph-modal-body .form-control:focus { border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.12); }
+
+  .search-bar { border-radius:50px;border:1.5px solid #e0e0e0;padding:8px 18px;font-size:13px;min-width:260px; }
+  .search-bar:focus { outline:none;border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.1); }
+  .filter-btn { border-radius:50px;border:1.5px solid #e0e0e0;padding:7px 16px;font-size:12px;font-weight:600;background:#fff;cursor:pointer;transition:.2s; }
+  .filter-btn.active,.filter-btn:hover { background:#e85d04;color:#fff;border-color:#e85d04; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── STAT CARDS ─────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="pin-stat s-total">
+      <div class="ps-icon">📍</div>
+      <div><div class="ps-val">{{ stats.total }}</div><div class="ps-lbl">Total Pincodes</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="pin-stat s-active">
+      <div class="ps-icon">✅</div>
+      <div><div class="ps-val">{{ stats.active }}</div><div class="ps-lbl">Active</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="pin-stat s-inactive">
+      <div class="ps-icon">🚫</div>
+      <div><div class="ps-val">{{ stats.inactive }}</div><div class="ps-lbl">Inactive</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="pin-stat s-cod">
+      <div class="ps-icon">💵</div>
+      <div><div class="ps-val">{{ stats.cod }}</div><div class="ps-lbl">COD Available</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN CARD ──────────────────────────────────── -->
+<div class="sec-card">
+  <div class="sec-head flex-wrap gap-2">
+    <h3>📋 All Delivery Pincodes</h3>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+      <!-- Search -->
+      <form method="GET" action="" class="d-flex align-items-center gap-2">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search pincode / area…" class="search-bar">
+        <button type="submit" class="filter-btn {% if not status_filter %}active{% endif %}">🔍</button>
+        <a href="{% url 'pincode_manager' %}" class="filter-btn">✖ Clear</a>
+      </form>
+
+      <!-- Filter pills -->
+      <a href="?status=active{% if q %}&q={{ q }}{% endif %}"
+         class="filter-btn {% if status_filter == 'active' %}active{% endif %}">✅ Active</a>
+      <a href="?status=inactive{% if q %}&q={{ q }}{% endif %}"
+         class="filter-btn {% if status_filter == 'inactive' %}active{% endif %}">🚫 Inactive</a>
+
+      <!-- Add button -->
+      <button class="btn btn-sm" onclick="openAddModal()"
+              style="background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;border-radius:10px;font-weight:700;font-size:13px;padding:8px 18px;">
+        ➕ Add Pincode
+      </button>
+    </div>
+  </div>
+
+  <div class="sec-body p-0">
+    <div class="table-responsive">
+      <table class="pin-table w-100">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pincode</th>
+            <th>Area</th>
+            <th>City</th>
+            <th>State</th>
+            <th>COD</th>
+            <th>Est. Days</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pincodeTableBody">
+          {% for p in pincodes %}
+          <tr id="row-{{ p.id }}">
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ p.pincode }}</strong></td>
+            <td>{{ p.area_name }}</td>
+            <td>{{ p.city }}</td>
+            <td>{{ p.state }}</td>
+            <td>
+              {% if p.cod_allowed %}
+                <span class="badge-cod-yes">💵 Yes</span>
+              {% else %}
+                <span class="badge-cod-no">❌ No</span>
+              {% endif %}
+            </td>
+            <td>{{ p.delivery_days }} day{{ p.delivery_days|pluralize }}</td>
+            <td>
+              {% if p.is_active %}
+                <span class="badge-active" id="status-{{ p.id }}">Active</span>
+              {% else %}
+                <span class="badge-inactive" id="status-{{ p.id }}">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <button class="btn-sm-icon btn-toggle"
+                      onclick="togglePincode({{ p.id }})"
+                      title="Toggle Active/Inactive">
+                🔄
+              </button>
+              <button class="btn-sm-icon btn-edit"
+                      onclick="openEditModal({{ p.id }},'{{ p.pincode }}','{{ p.area_name }}','{{ p.city }}','{{ p.state }}',{{ p.cod_allowed|lower }},{{ p.delivery_days }})"
+                      title="Edit">
+                ✏️
+              </button>
+              <button class="btn-sm-icon btn-del"
+                      onclick="deletePincode({{ p.id }}, '{{ p.pincode }}')"
+                      title="Delete">
+                🗑️
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-4 text-muted">No pincodes found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ADD PINCODE MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal fade" id="addPincodeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;border:none;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#e85d04,#f48c06);border-radius:18px 18px 0 0;">
+        <h5 class="modal-title text-white fw-bold">➕ Add New Pincode</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body ph-modal-body p-4">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Pincode *</label>
+            <input type="text" id="add_pincode" class="form-control" placeholder="e.g. 440010" maxlength="10">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Area Name *</label>
+            <input type="text" id="add_area" class="form-control" placeholder="e.g. Dharampeth">
+          </div>
+          <div class="col-6">
+            <label class="form-label">City</label>
+            <input type="text" id="add_city" class="form-control" value="Nagpur">
+          </div>
+          <div class="col-6">
+            <label class="form-label">State</label>
+            <input type="text" id="add_state" class="form-control" value="Maharashtra">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Delivery Days</label>
+            <input type="number" id="add_days" class="form-control" value="2" min="1" max="15">
+          </div>
+          <div class="col-6">
+            <label class="form-label">COD Allowed?</label>
+            <select id="add_cod" class="form-select">
+              <option value="true">✅ Yes</option>
+              <option value="false">❌ No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4">
+        <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn rounded-pill fw-bold px-4"
+                style="background:linear-gradient(135deg,#e85d04,#f48c06);color:#fff;"
+                onclick="submitAddPincode()">Add Pincode</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     EDIT PINCODE MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal fade" id="editPincodeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;border:none;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#1565c0,#1976d2);border-radius:18px 18px 0 0;">
+        <h5 class="modal-title text-white fw-bold">✏️ Edit Pincode</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body ph-modal-body p-4">
+        <input type="hidden" id="edit_id">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Pincode</label>
+            <input type="text" id="edit_pincode" class="form-control" readonly style="background:#f5f5f5;">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Area Name *</label>
+            <input type="text" id="edit_area" class="form-control">
+          </div>
+          <div class="col-6">
+            <label class="form-label">City</label>
+            <input type="text" id="edit_city" class="form-control">
+          </div>
+          <div class="col-6">
+            <label class="form-label">State</label>
+            <input type="text" id="edit_state" class="form-control">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Delivery Days</label>
+            <input type="number" id="edit_days" class="form-control" min="1" max="15">
+          </div>
+          <div class="col-6">
+            <label class="form-label">COD Allowed?</label>
+            <select id="edit_cod" class="form-select">
+              <option value="true">✅ Yes</option>
+              <option value="false">❌ No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4">
+        <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn rounded-pill fw-bold px-4"
+                style="background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;"
+                onclick="submitEditPincode()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+const CSRF = "{{ csrf_token }}";
+
+// ── Open Modals ──────────────────────────────────────────
+function openAddModal() {
+  new bootstrap.Modal(document.getElementById('addPincodeModal')).show();
+}
+
+function openEditModal(id, pincode, area, city, state, cod, days) {
+  document.getElementById('edit_id').value      = id;
+  document.getElementById('edit_pincode').value = pincode;
+  document.getElementById('edit_area').value    = area;
+  document.getElementById('edit_city').value    = city;
+  document.getElementById('edit_state').value   = state;
+  document.getElementById('edit_cod').value     = cod ? 'true' : 'false';
+  document.getElementById('edit_days').value    = days;
+  new bootstrap.Modal(document.getElementById('editPincodeModal')).show();
+}
+
+// ── ADD ──────────────────────────────────────────────────
+function submitAddPincode() {
+  const pin  = document.getElementById('add_pincode').value.trim();
+  const area = document.getElementById('add_area').value.trim();
+  if (!pin || !area) { swal('Missing!','Pincode and Area are required.','warning'); return; }
+
+  $.post("{% url 'pincode_add' %}", {
+    csrfmiddlewaretoken: CSRF,
+    pincode:      pin,
+    area_name:    area,
+    city:         document.getElementById('add_city').value.trim(),
+    state:        document.getElementById('add_state').value.trim(),
+    cod_allowed:  document.getElementById('add_cod').value,
+    delivery_days:document.getElementById('add_days').value,
+  }, function(res) {
+    if (res.status === '1') {
+      swal('Added!', res.msg, 'success').then(() => location.reload());
+    } else {
+      swal('Error', res.msg, 'error');
+    }
+  });
+}
+
+// ── EDIT ─────────────────────────────────────────────────
+function submitEditPincode() {
+  const id = document.getElementById('edit_id').value;
+  $.post(`/admin/pincodes/edit/${id}/`, {
+    csrfmiddlewaretoken: CSRF,
+    area_name:    document.getElementById('edit_area').value.trim(),
+    city:         document.getElementById('edit_city').value.trim(),
+    state:        document.getElementById('edit_state').value.trim(),
+    cod_allowed:  document.getElementById('edit_cod').value,
+    delivery_days:document.getElementById('edit_days').value,
+  }, function(res) {
+    if (res.status === '1') {
+      swal('Updated!', res.msg, 'success').then(() => location.reload());
+    } else {
+      swal('Error', res.msg, 'error');
+    }
+  });
+}
+
+// ── TOGGLE ───────────────────────────────────────────────
+function togglePincode(id) {
+  swal({ title:'Toggle Status?', text:'Switch active/inactive for this pincode?', icon:'warning', buttons:['No','Yes'] })
+  .then(yes => {
+    if (!yes) return;
+    $.post(`/admin/pincodes/toggle/${id}/`, { csrfmiddlewaretoken: CSRF }, function(res) {
+      if (res.status === '1') {
+        const badge = document.getElementById(`status-${id}`);
+        if (res.is_active) {
+          badge.className = 'badge-active';
+          badge.textContent = 'Active';
+        } else {
+          badge.className = 'badge-inactive';
+          badge.textContent = 'Inactive';
+        }
+        swal('Done!', res.msg, 'success');
+      }
+    });
+  });
+}
+
+// ── DELETE ───────────────────────────────────────────────
+function deletePincode(id, pin) {
+  swal({ title:`Delete ${pin}?`, text:'This cannot be undone.', icon:'warning', dangerMode:true, buttons:['No','Yes, Delete'] })
+  .then(yes => {
+    if (!yes) return;
+    $.post(`/admin/pincodes/delete/${id}/`, { csrfmiddlewaretoken: CSRF }, function(res) {
+      if (res.status === '1') {
+        document.getElementById(`row-${id}`).remove();
+        swal('Deleted!', res.msg, 'success');
+      }
+    });
+  });
+}
+</script>
+{% endblock %}

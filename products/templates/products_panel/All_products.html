@@ -583,10 +583,11 @@
 {% endif %}
 
 
-                        <button class="p-wish" aria-label="Add to wishlist"
-                                onclick="event.preventDefault()">
-                            <i class="fa fa-heart"></i>
-                        </button>
+                   <button class="p-wish" data-product-id="{{ product.id }}" 
+        aria-label="Add to wishlist" onclick="event.preventDefault()">
+    <i class="fa fa-heart" 
+       style="{% if product.id in user_wishlist_ids %}color:#e85d04{% endif %}"></i>
+</button>
                     </div>
 
                     <!-- body -->
@@ -851,13 +852,38 @@ document.querySelectorAll('.btn-cart').forEach(function(btn) {
     });
 });
 
-/* ── wishlist heart toggle ── */
+
+
+/* ── wishlist heart toggle (AJAX) ── */
 document.querySelectorAll('.p-wish').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var icon = this.querySelector('i');
-        icon.style.color = icon.style.color === 'rgb(232, 93, 4)' ? '#ccc' : '#e85d04';
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var productId = this.dataset.productId;
+        var icon      = this.querySelector('i');
+        fetch("{% url 'toggle_wishlist' %}", {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body   : JSON.stringify({ product_id: productId })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if (data.status === '1') {
+                icon.style.color = data.action === 'added' ? '#e85d04' : '#ccc';
+                showToast(data.action === 'added' ? '❤️ Added to wishlist!' : '💔 Removed from wishlist', data.action === 'added' ? 'ok' : 'err');
+            }
+        });
     });
 });
+
+function showToast(msg, type) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);border-left:4px solid '+(type==='ok'?'#52b788':'#e85d04')+';';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 3000);
+}
+
 </script>
 
 
