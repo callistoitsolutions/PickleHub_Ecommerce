@@ -675,7 +675,7 @@
             {% else %}
                 <button class="btn-cart"
                         data-product="{{ product.id }}"
-                        {% if product.is_low_stock %}data-max="{{ product.stock }}"{% endif %}>
+                        {% if product.is_low_stock %}data-max="{{ product.stock }}"{% endif %} onclick="Add_Cart(this, '{{product.id}}')">
                     <i class="fa fa-cart-plus"></i> Add to Cart
                 </button>
                 <a href="https://wa.me/{{ product.whatsapp_number }}?text=Hi%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}"

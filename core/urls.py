@@ -58,8 +58,20 @@ urlpatterns = [
 
     
     path('cart', views.cart, name='cart'),
+
+    ############## urls for ajax for add to cart ############################
+
+    path('Cart_Ajax', views.Cart_Ajax, name='Cart_Ajax'),
+
+    ######### urls for ajax for update quantity and price ########################
+
+    path('Update_Cart_Qty_Ajax', views.Update_Cart_Qty_Ajax, name='Update_Cart_Qty_Ajax'),
+
+    ########### urls for ajax for remove cart items ##########################
+
+    path('Remove_Cart_Item_Ajax', views.Remove_Cart_Item_Ajax, name='Remove_Cart_Item_Ajax'),
     
-      ##########################  Products Urls Section Ends Here ###############################################
+    ##########################  Products Urls Section Ends Here ###############################################
 
 ########################## Wesbite Page Sections URLS Section Starts Here ###############################################
     

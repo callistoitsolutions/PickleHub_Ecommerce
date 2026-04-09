@@ -384,14 +384,14 @@
                                 </ul>
                             </div>
 
-                            <a href="#" aria-label="Wishlist">
+                            <a href="/wishlist/" aria-label="Wishlist">
                                 <i class="fa fa-heart"></i>
                                 <span>Wishlist</span>
                             </a>
                             
                             <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
                                 <i class="fa fa-shopping-cart"></i>
-                                <span class="cart-badge" aria-label="3 items in cart">3</span>
+                                <span class="cart-badge" >{{cart_count}}</span>
                                 <span>Cart</span>
                             </a>
 
@@ -405,15 +405,7 @@
                         {% endif %}
 
                         
-                        <a href="/wishlist/" aria-label="Wishlist">
-                            <i class="fa fa-heart"></i>
-                            <span>Wishlist</span>
-                        </a>
-                        <a href="{% url "cart" %}" aria-label="Shopping Cart" style="position:relative;">
-                            <i class="fa fa-shopping-cart"></i>
-                            <span class="cart-badge" aria-label="3 items in cart">3</span>
-                            <span>Cart</span>
-                        </a>
+                        
                     </div>
                 </div>
             </div>
@@ -826,6 +818,75 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer(
             }
         });
     }
+</script>
+
+
+<script>
+
+    function Add_Cart(btn, productId) {
+    // 1. First, ask the user for confirmation
+    swal({
+        title: "Add to Basket?",
+        text: "Would you like to add this delicious pickle to your cart?",
+        icon: "info",
+        buttons: ["No, Cancel", "Yes, Add it!"],
+        dangerMode: false,
+    })
+    .then((willAdd) => {
+        if (willAdd) {
+            // 2. If user clicked "Yes", run the AJAX
+            $(btn).prop('disabled', true);
+            
+            $.ajax({
+                type: "POST",
+                url: "{% url 'Cart_Ajax' %}",
+                data: {
+                    'product_id': productId,
+                    'qty': 1,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $(btn).prop('disabled', false);
+                    
+                    if (response.status == "1") {
+                        // Update the Navbar Badge
+                        $('.cart-badge').text(response.cart_count);
+                        
+                        // Show Success Alert with choices
+                        swal({
+                            title: "Success!",
+                            text: response.msg,
+                            icon: "success",
+                            buttons: {
+                                continue: "Continue Shopping",
+                                cart: "View Basket"
+                            },
+                        }).then((value) => {
+                            if (value === "cart") {
+                                window.location.href = "{% url 'cart' %}";
+                            }
+                        });
+                    } else {
+                        // Handle Login required or other errors
+                        swal("Wait!", response.msg, "info").then(() => {
+                            if (response.msg.includes("login")) {
+                                window.location.href = "{% url 'login' %}";
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    $(btn).prop('disabled', false);
+                    swal("Error", "Server is not responding", "error");
+                }
+            });
+        } else {
+            // User clicked "No, Cancel"
+            console.log("User decided not to add the product.");
+        }
+    });
+}
+
 </script>
 
 {% block extra_js %}{% endblock %}

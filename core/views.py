@@ -16,6 +16,7 @@ from django.utils import timezone
 import traceback
 from django.db.models import Q
 from datetime import datetime
+from core.models import *
 
 
 
@@ -107,6 +108,9 @@ def index(request):
     for p in products:
         p.active_offer = offer_product_ids.get(p.id)  # None if no offer exists
 
+
+    
+
     # ────────────────────────────────────────────────────────────
 
     context = {
@@ -138,6 +142,11 @@ def index(request):
         user_obj = UserDetails.objects.filter(id=session_id).first()
         if user_obj:
             context['user_obj'] = user_obj
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+        context['cart_count'] = cart_count
 
     # 🔹 4. Return the render (Works safely for both scenarios now!)
     return render(request, 'home/index.html', context)
@@ -291,7 +300,12 @@ def User_Profile(request):
     session_id = request.session.get('User_id')
     if session_id:
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
+        context = {'user_obj':user_obj,'cart_count':cart_count}
         return render(request,'home/User_Profile/user_profile.html',context)
     else:
         return render(request,'account/login.html')
@@ -305,7 +319,12 @@ def My_Orders(request):
     session_id = request.session.get('User_id')
     if session_id:
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
+        context = {'user_obj':user_obj,'cart_count':cart_count}
         return render(request,'home/My_Orders/my_orders.html',context)
     else:
         return render(request,'account/login.html')
@@ -319,7 +338,12 @@ def My_Wallet(request):
     session_id = request.session.get('User_id')
     if session_id:
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+        
+        context = {'user_obj':user_obj,'cart_count':cart_count}
         return render(request,'home/My_Wallet/my_wallet.html',context)
     else:
         return render(request,'account/login.html')
@@ -491,6 +515,11 @@ def product_details(request, slug):
         if user_obj:
             context['user_obj'] = user_obj
 
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+        context['cart_count'] = cart_count
+
     return render(request, 'products_panel/product_details.html',context)
 
 
@@ -499,7 +528,12 @@ def checkout(request):
     if session_id:
 
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
+        context = {'user_obj':user_obj,'cart_count':cart_count}
         return render(request, 'payments/checkout.html',context)
 
     else:
@@ -512,10 +546,137 @@ def cart(request):
     session_id = request.session.get('User_id')
     if session_id:
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        # Fetch the active cart for the user
+        cart = Cart.objects.filter(user_id=user_obj.id, is_active=True).first()
+
+        # Get all items in that cart
+        cart_items = []
+        subtotal = 0
+        if cart:
+            cart_items = cart.cart_items.all()
+            subtotal = sum(item.item_total for item in cart_items)
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
+        context = {'user_obj':user_obj,'cart_items': cart_items,'subtotal': subtotal,'item_count': cart_items.count(),'cart_count':cart_count}
+
         return render(request, 'cart/cart.html',context)
     else:
         return render(request, 'account/login.html')
+    
+
+############## Views start for ajax for add to cart ##########################
+
+@csrf_exempt
+def Cart_Ajax(request):
+    if request.method == "POST":
+        try:
+            user_id = request.session.get('User_id')
+            product_id = request.POST.get('product_id')
+            
+            if not user_id:
+                return JsonResponse({"status": "0", "msg": "Please login to add items to cart"})
+
+            user_obj = UserDetails.objects.get(id=user_id)
+            product_obj = Product.objects.get(id=product_id)
+
+            cart_obj, created = Cart.objects.get_or_create(
+                user=user_obj, 
+                is_active=True
+            )
+
+            # --- MODIFIED STEP 4: CHECK FOR EXISTING ITEM ---
+            item, item_created = CartItem.objects.get_or_create(
+                cart=cart_obj,
+                product=product_obj,
+                defaults={'price_at_addition': product_obj.price, 'quantity': 1}
+            )
+
+            if not item_created:
+                # If item already existed, we DON'T update quantity.
+                # Instead, we send a "2" status to show a specific alert.
+                return JsonResponse({
+                    "status": "0", 
+                    "msg": f"{product_obj.name} is already in your basket!"
+                })
+
+            # --- END MODIFIED STEP ---
+
+            total_items = sum(i.quantity for i in cart_obj.cart_items.all())
+
+            return JsonResponse({
+                "status": "1", 
+                "msg": f"{product_obj.name} added to basket!",
+                "cart_count": total_items
+            })
+
+        except Exception:
+            print(traceback.format_exc())
+            return JsonResponse({"status": "0", "msg": "Something went wrong!"})
+
+############## Views end for ajax for add to cart ##############################
+
+
+########### Views start for ajax for update quantity and price ##################
+
+@csrf_exempt
+def Update_Cart_Qty_Ajax(request):
+    item_id = request.POST.get('item_id')
+    change = int(request.POST.get('change'))
+    
+    item = CartItem.objects.get(id=item_id)
+    if item.quantity + change >= 1:
+        item.quantity += change
+        item.save()
+
+    # Calculate all the numbers for the frontend
+    cart = item.cart
+    new_subtotal = sum(i.item_total for i in cart.cart_items.all())
+    # discount = 263 # Your static or calculated discount
+    
+    return JsonResponse({
+        "status": "1",
+        "item_qty": item.quantity,
+        "item_total": float(item.item_total),
+        "subtotal": float(new_subtotal),
+        # "final_total": float(new_subtotal - discount),
+        # "savings": float(discount)
+    })
+
+########### Views end for ajax for update quantity and price ###########################
+
+
+########### Views start for ajax for remove items ###########################
+
+@csrf_exempt
+def Remove_Cart_Item_Ajax(request):
+    if request.method == "POST":
+        item_id = request.POST.get('item_id')
+        try:
+            # Find and delete the specific item
+            item = CartItem.objects.get(id=item_id)
+            cart = item.cart
+            item.delete()
+
+            # Calculate fresh totals
+            cart_items = cart.cart_items.all()
+            new_subtotal = sum(i.item_total for i in cart_items)
+            new_count = sum(i.quantity for i in cart_items)
+
+            return JsonResponse({
+                "status": "1",
+                "msg": "Item removed successfully",
+                "subtotal": float(new_subtotal),
+                "cart_count": new_count
+            })
+        except CartItem.DoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Item not found"})
+
+############# Views end for ajax for remove items ###########################
+
     
 
 
@@ -528,6 +689,12 @@ def cart(request):
 # ── Wishlist page ──────────────────────────────────────────────
 def product_wishlist(request):
     session_id = request.session.get('User_id')
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+
+    ############## Display count in cart #############################
+
+    cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
 
     # 🔐 Check login
     if not session_id:
@@ -572,6 +739,7 @@ def product_wishlist(request):
         'total'          : len(items),
         'in_stock_count' : sum(1 for i in items if i['inStock']),
         'oos_count'      : sum(1 for i in items if not i['inStock']),
+        'cart_count':cart_count
     }
 
     return render(request, 'products_panel/product_wishlist.html', context)
@@ -580,6 +748,13 @@ def product_wishlist(request):
 @require_POST
 def toggle_wishlist(request):
     session_id = request.session.get('User_id')
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+
+    ############## Display count in cart #############################
+
+    cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
     if not session_id:
         return JsonResponse({'status': '0', 'msg': 'Login required'})
 
@@ -607,6 +782,13 @@ def toggle_wishlist(request):
 @require_POST
 def remove_wishlist_item(request):
     session_id = request.session.get('User_id')
+
+    user_obj = UserDetails.objects.filter(id=session_id).first()
+
+    ############## Display count in cart #############################
+
+    cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
     if not session_id:
         return JsonResponse({'status': '0', 'msg': 'Login required'})
 
@@ -709,6 +891,12 @@ def All_products(request):
         if user_obj:
             context['user_obj'] = user_obj
 
+            ############## Display count in cart #############################
+
+            cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+
+            context['cart_count'] = cart_count
+
             # ✅ fetch this user's wishlisted product IDs in one DB query
             context['user_wishlist_ids'] = set(
                 Wishlist.objects.filter(user=user_obj)
@@ -727,7 +915,12 @@ def contact(request):
     session_id = request.session.get('User_id')
     if session_id:
         user_obj = UserDetails.objects.filter(id=session_id).first()
-        context = {'user_obj':user_obj}
+
+        ############## Display count in cart #############################
+
+        cart_count = CartItem.objects.filter(cart__user=user_obj.id).count()
+        
+        context = {'user_obj':user_obj,'cart_count':cart_count}
         return render(request, 'home/contact.html',context)
     else:
         return render(request, 'home/contact.html')

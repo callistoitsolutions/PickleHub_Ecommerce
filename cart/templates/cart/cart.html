@@ -190,60 +190,50 @@
             <div class="white-card">
                 <div class="card-head">
                     <span><i class="fa fa-shopping-basket me-2"></i>Your Cart Items</span>
-                    <span style="background:rgba(255,255,255,0.15); padding:3px 12px; border-radius:50px; font-size:12px;">3 items</span>
+                    <span style="background:rgba(255,255,255,0.15); padding:3px 12px; border-radius:50px; font-size:12px;">{{item_count}} items</span>
                 </div>
                 <div role="list" aria-label="Cart items">
-                    <div class="cart-item" role="listitem">
-                        <div class="item-img" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);" aria-hidden="true">🥭</div>
-                        <div class="item-details">
-                            <div class="item-brand">Rajasthani Pickles</div>
-                            <div class="item-name">Rajasthani Mango Pickle</div>
-                            <div class="item-meta">500g | Mustard Oil</div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                            <div class="qty-ctrl" aria-label="Quantity">
-                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
-                                <input class="qty-inp" type="number" value="1" min="1" max="10" aria-label="Qty">
-                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+                    {% if cart_items %}
+                        {% for item in cart_items %}
+                        <div class="cart-item" role="listitem" id="item-row-{{ item.id }}">
+                            <div class="item-img" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+                                {% else %}
+                                    🏺
+                                {% endif %}
                             </div>
-                            <div><span class="item-price">₹320</span>&nbsp;<span class="item-old">₹450</span></div>
-                        </div>
-                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
-                    </div>
-                    <div class="cart-item" role="listitem">
-                        <div class="item-img" style="background:linear-gradient(135deg,#fce4ec,#f8bbd9);" aria-hidden="true">🧄</div>
-                        <div class="item-details">
-                            <div class="item-brand">Andhra Heritage</div>
-                            <div class="item-name">Andhra Spicy Garlic Pickle</div>
-                            <div class="item-meta">250g | Sesame Oil</div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                            <div class="qty-ctrl" aria-label="Quantity">
-                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
-                                <input class="qty-inp" type="number" value="2" min="1" max="10" aria-label="Qty">
-                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+
+                            <div class="item-details">
+                                <div class="item-brand">{{ item.product.brand_name }}</div>
+                                <div class="item-name">{{ item.product.name }}</div>
+                                <div class="item-meta" style="font-weight:bold;color:black;">{{ item.product.weight }} | Authentic Taste</div>
                             </div>
-                            <div><span class="item-price">₹398</span>&nbsp;<span class="item-old">₹560</span></div>
-                        </div>
-                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
-                    </div>
-                    <div class="cart-item" role="listitem">
-                        <div class="item-img" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);" aria-hidden="true">🌶️</div>
-                        <div class="item-details">
-                            <div class="item-brand">Gujarat Flavours</div>
-                            <div class="item-name">Gujarati Mixed Achaar</div>
-                            <div class="item-meta">400g | Sesame Oil</div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                            <div class="qty-ctrl" aria-label="Quantity">
-                                <button class="qty-btn" onclick="chQty(this,-1)" aria-label="Decrease">−</button>
-                                <input class="qty-inp" type="number" value="1" min="1" max="10" aria-label="Qty">
-                                <button class="qty-btn" onclick="chQty(this,1)" aria-label="Increase">+</button>
+
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                                <div class="qty-ctrl">
+                                    <button class="qty-btn" onclick="chQty(this, -1, '{{ item.id }}')">−</button>
+                                    <input class="qty-inp" type="number" value="{{ item.quantity }}" readonly>
+                                    <button class="qty-btn" onclick="chQty(this, 1, '{{ item.id }}')">+</button>
+                                </div>
+    
+                                <div>
+                                    <span class="item-price" id="item-total-{{ item.id }}">₹{{ item.item_total }}</span>
+                                </div>
                             </div>
-                            <div><span class="item-price">₹249</span>&nbsp;<span class="item-old">₹320</span></div>
+
+                            <button class="remove-btn" onclick="removeItem(this, '{{ item.id }}')" aria-label="Remove item">
+                                <i class="fa fa-times"></i>
+                            </button>
+
                         </div>
-                        <button class="remove-btn" onclick="removeItem(this)" aria-label="Remove item"><i class="fa fa-times"></i></button>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h3>Your basket is empty!</h3>
+                            <a href="{% url 'index' %}" class="btn-continue-shop">Go Shopping</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -273,25 +263,33 @@
         <div class="col-lg-4">
             <div class="summary-sticky">
                 <div class="white-card" style="overflow:visible;">
-                    <div class="card-head"><span>📦 Order Summary</span></div>
+                    <div class="card-head"><span>Order Summary</span></div>
                     <div class="summary-body">
-                        <div class="sum-row"><span>Subtotal (3 items)</span><span>₹1,230</span></div>
-                        <div class="sum-row green"><span>🎉 Product Discount</span><span>− ₹263</span></div>
-                        <div class="sum-row green" id="couponRow" style="display:none;"><span>🏷️ Coupon (PICKLE20)</span><span>− ₹193</span></div>
-                        <div class="sum-row green"><span>🚚 Delivery</span><span>FREE</span></div>
-                        <hr class="sum-divider">
-                        <div class="sum-total"><span>Total</span><span id="totalAmt">₹967</span></div>
-                        <div class="savings-pill" role="status" aria-live="polite">🎉 You save <strong id="saveAmt">₹263</strong> on this order!</div>
-                        <button class="btn-proceed" onclick="goToCheckout()" aria-label="Proceed to checkout">
-                            <i class="fa fa-arrow-right"></i> Proceed to Checkout
-                        </button>
-                        <button class="btn-continue-shop" onclick="window.location='/products/'" aria-label="Continue shopping">← Continue Shopping</button>
-                        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px;" aria-label="Accepted payment methods">
-                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">📱 UPI</span>
-                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">🏦 Bank Transfer</span>
-                            <span style="background:#f8f9fa; border:1px solid #e0e0e0; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:600; color:#555;">💵 COD</span>
+                        <div class="sum-row">
+                            <span style="font-weight:bold;color:black;">Subtotal (<span id="itemCountDisplay">{{ item_count }}</span> items)</span>
+                            <span id="subtotalAmt" style="font-weight:bold;color:black;">₹{{ subtotal }}</span>
                         </div>
-                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:8px;"><i class="fa fa-lock"></i> Secure & Trusted Checkout</p>
+
+                        <hr class="sum-divider">
+
+                        <div class="sum-total">
+                            <span>Total</span>
+                            <span id="totalAmt">₹{{ subtotal }}</span>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn-proceed" onclick="goToCheckout()" aria-label="Proceed to checkout">
+                                <i class="fa fa-lock me-2"></i> Checkout Now
+                            </button>
+                            
+                            <button class="btn-continue-shop" onclick="window.location='{% url 'All_products' %}'" aria-label="Continue shopping">
+                                ← Continue Shopping
+                            </button>
+                        </div>
+
+                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:15px;">
+                            <i class="fa fa-shield-alt"></i> Secure & Encrypted Checkout
+                        </p>
                     </div>
                 </div>
             </div>
@@ -579,6 +577,8 @@
 
 {% block extra_js %}
 <script>
+
+
     var currentPay = 'upi';
 
     // ---- Cart Functions ----
@@ -773,5 +773,90 @@
     }
     setStep(0);
     document.getElementById('step1').className = 'step active';
+</script>
+
+<script>
+
+    {% comment %} Javascript to update quantity and price also {% endcomment %}
+
+    function chQty(btn, change, itemId) {
+    $.ajax({
+        url: "{% url 'Update_Cart_Qty_Ajax' %}",
+        method: "POST",
+        data: {
+            'item_id': itemId,
+            'change': change,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+        if (response.status == "1") {
+            // 1. Update the input field in the row
+            $(btn).siblings('.qty-inp').val(response.item_qty);
+
+            // 2. Update the individual item total (e.g., 2 jars x 200)
+            $('#item-total-' + itemId).text('₹' + response.item_total);
+
+            // 3. Update the Summary Sidebar (The part you were missing!)
+            // This targets the IDs we just looked at
+            $('#subtotalAmt').text('₹' + response.subtotal);
+            $('#totalAmt').text('₹' + response.subtotal); // Since you removed discount for now
+            
+            // Optional: Update the item count if you changed quantity
+            // Note: You'll need to send 'total_item_count' from your view
+            if(response.total_item_count) {
+                $('#itemCountDisplay').text(response.total_item_count);
+            }
+        }
+}
+    });
+}
+</script>
+
+<script>
+
+    {% comment %} Javascript to remove the product from the cart {% endcomment %}
+
+    function removeItem(btn, itemId) {
+    swal({
+        title: "Remove from Cart?",
+        text: "Are you sure you want to remove this pickle from your basket?",
+        icon: "warning",
+        buttons: ["No, Keep it", "Yes, Remove"],
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            $.ajax({
+                url: "{% url 'Remove_Cart_Item_Ajax' %}",
+                method: "POST",
+                data: {
+                    'item_id': itemId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status == "1") {
+                        // 1. Smoothly remove the item from the UI
+                        $(btn).closest('.cart-item').fadeOut(400, function() {
+                            $(this).remove();
+                            
+                            // 2. If cart is empty, reload to show empty state
+                            if (response.cart_count == 0) {
+                                location.reload();
+                            }
+                        });
+
+                        // 3. Update the Summary Sidebar instantly
+                        $('#subtotalAmt').text('₹' + response.subtotal);
+                        $('#totalAmt').text('₹' + response.subtotal);
+                        $('#itemCountDisplay').text(response.cart_count);
+                        $('.cart-badge').text(response.cart_count);
+                        
+                        swal("Removed!", response.msg, "success");
+                    }
+                }
+            });
+        }
+    });
+}
+
 </script>
 {% endblock %}
