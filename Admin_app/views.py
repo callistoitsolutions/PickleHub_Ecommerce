@@ -26,6 +26,9 @@ from products.product_utils  import _product_page_data
 
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
+from django.template.loader import render_to_string
+from core.models import *
+from datetime import datetime
 
 
 
@@ -79,6 +82,45 @@ def dashboard(request):
 # 2. ADMIN HOME PAGE
 # ──────────────────────────────────────────────
 
+
+########### Views start for all cart items ###########################
+
+def All_Cart_Items(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = AdminDetails.objects.get(id=session_id)
+
+        cart_obj = CartItem.objects.all().order_by('-id')
+        cart_obj_count = CartItem.objects.all().count()
+
+        rendered = render_to_string("Admin_pages/render_to_string/R_Cart/r_t_s_cart.html",{'cart_obj':cart_obj,'cart_obj_count':cart_obj_count})
+
+        context = {'admin_obj':admin_obj,'carts_list':rendered}
+        return render(request,'Admin_pages/Cart/all_carts.html',context)
+    else:
+        return render(request,'Admin_pages/admin_login.html')
+
+############ Views end for all cart items #############################
+
+
+############ Views start for today's cart items ####################
+
+def Today_Cart_Items(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = AdminDetails.objects.get(id=session_id)
+
+        cart_obj = CartItem.objects.filter(cart_date=datetime.today()).order_by('-id')
+        cart_obj_count = CartItem.objects.filter(cart_date=datetime.today()).count()
+
+        rendered = render_to_string("Admin_pages/render_to_string/R_Cart/r_t_s_cart.html",{'cart_obj':cart_obj,'cart_obj_count':cart_obj_count})
+
+        context = {'admin_obj':admin_obj,'carts_list':rendered}
+        return render(request,'Admin_pages/Cart/today_carts.html',context)
+    else:
+        return render(request,'Admin_pages/admin_login.html')
+
+######### Views end for today's cart items ########################
 
 ############## Views start for admin login #####################
 

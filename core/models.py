@@ -41,6 +41,9 @@ class CartItem(models.Model):
     # (In case the product price changes later)
     price_at_addition = models.DecimalField(max_digits=10, decimal_places=2)
 
+    cart_date = models.DateField(blank=True,null=True)
+    cart_time = models.TimeField(blank=True,null=True)
+
     @property
     def item_total(self):
         return self.price_at_addition * self.quantity

@@ -139,6 +139,19 @@
     <div class="nav-section">Main</div>
     <a class="nav-item {% block nav_dash %}{% endblock %}" href="{% url 'dashboard' %}"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
 
+    <div class="nav-section" style="color:white;">Notifications</div>
+
+    <a class="nav-item {% block nav_carts %}{% endblock %}" data-bs-toggle="collapse" href="#cartsDropdown" role="button" aria-expanded="false" aria-controls="cartsDropdown">
+        <i class="fa fa-shopping-cart"></i> Carts <span class="nav-badge">{{cart_obj_count_today}}</span>
+    </a>
+    <div class="collapse" id="cartsDropdown">
+        <div class="nav-submenu">
+            <a class="nav-item" href="{% url "All_Cart_Items" %}"><i class="fa fa-circle"></i>All Carts Items</a>
+            <a class="nav-item " href="{% url "Today_Cart_Items" %}"><i class="fa fa-circle"></i> Today's Carts Items <span class="nav-badge">{{cart_obj_count_today}}</span> </a>
+        </div>
+    </div>
+
+
     <div class="nav-section">Orders</div>
     <a class="nav-item {% block nav_orders %}{% endblock %}" href="picklehub_orders_report.html"><i class="fa fa-shopping-bag"></i> All Orders <span class="nav-badge">12</span></a>
     <a class="nav-item" href="#" onclick="showSection('paymentReview')"><i class="fa fa-clock"></i> Payment Review <span class="nav-badge" style="background:#1565c0;">5</span></a>

@@ -592,7 +592,9 @@ def Cart_Ajax(request):
             item, item_created = CartItem.objects.get_or_create(
                 cart=cart_obj,
                 product=product_obj,
-                defaults={'price_at_addition': product_obj.price, 'quantity': 1}
+                defaults={'price_at_addition': product_obj.price, 'quantity': 1},
+                cart_date = datetime.today(),
+                cart_time = datetime.now()
             )
 
             if not item_created:
@@ -678,10 +680,12 @@ def Remove_Cart_Item_Ajax(request):
 ############# Views end for ajax for remove items ###########################
 
     
+############ Views start for checkout page #############################
 
+def Checkout(request):
+    return HttpResponse("Checkout Page")
 
-
-
+############## Views end for checkout page ###########################
 
 
 

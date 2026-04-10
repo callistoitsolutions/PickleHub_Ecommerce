@@ -7,6 +7,14 @@ urlpatterns = [
     path('feature_section', views.feature_section, name='feature_section'),
     path('dashboard', views.dashboard, name='dashboard'),
 
+    ############# urls for all cart items #########################
+
+    path('All_Cart_Items', views.All_Cart_Items, name='All_Cart_Items'),
+
+    ########## urls for today's cart items #######################
+
+    path('Today_Cart_Items', views.Today_Cart_Items, name='Today_Cart_Items'),
+
     ############ urls for admin login #############################
 
     path('', views.Admin_Login, name='Admin_Login'),

@@ -155,94 +155,241 @@
 {% endblock %}
 
 {% block content %}
-<br>
+<div class="steps-bar" aria-label="Checkout steps">
+    <div class="container">
+        <div class="steps">
+            <div class="step active" id="step1"><div class="num">1</div><span>Cart</span></div>
+            <div class="step-line" id="line1"></div>
+            <div class="step" id="step2"><div class="num">2</div><span>Address</span></div>
+            <div class="step-line" id="line2"></div>
+            <div class="step" id="step3"><div class="num">3</div><span>Payment</span></div>
+            <div class="step-line" id="line3"></div>
+            <div class="step" id="step4"><div class="num">4</div><span>Confirmed</span></div>
+        </div>
+    </div>
+</div>
 
 <div class="page-header" aria-label="Page Header">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-2" style="font-size:12px;">
                 <li class="breadcrumb-item"><a href="/" style="color:#f48c06; text-decoration:none;">Home</a></li>
-                <li class="breadcrumb-item active" id="pageHeaderLabel" style="color:rgba(255,255,255,0.6);">Shopping Cart</li>
+                <li class="breadcrumb-item active" id="pageHeaderLabel" style="color:rgba(255,255,255,0.6);">Checkout</li>
             </ol>
         </nav>
-        <h2 id="pageTitle">🛒 Shopping Cart</h2>
+        <h2 id="pageTitle">Checkout</h2>
     </div>
 </div>
 
 <div class="container py-4">
 
-<div id="cartSection">
+<div id="checkoutSection" class="checkout-section">
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="white-card">
-                <div class="card-head">
-                    <span><i class="fa fa-shopping-basket me-2"></i>Your Cart Items</span>
-                    <span style="background:rgba(255,255,255,0.15); padding:3px 12px; border-radius:50px; font-size:12px;">{{item_count}} items</span>
+
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon-circle" aria-hidden="true">📍</div>
+                    Delivery Address
                 </div>
-                <div role="list" aria-label="Cart items">
-                    {% if cart_items %}
-                        {% for item in cart_items %}
-                        <div class="cart-item" role="listitem" id="item-row-{{ item.id }}">
-                            <div class="item-img" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);">
-                                {% if item.product.image %}
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                                {% else %}
-                                    🏺
-                                {% endif %}
-                            </div>
-
-                            <div class="item-details">
-                                <div class="item-brand">{{ item.product.brand_name }}</div>
-                                <div class="item-name">{{ item.product.name }}</div>
-                                <div class="item-meta" style="font-weight:bold;color:black;">{{ item.product.weight }} | Authentic Taste</div>
-                            </div>
-
-                            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                                <div class="qty-ctrl">
-                                    <button class="qty-btn" onclick="chQty(this, -1, '{{ item.id }}')">−</button>
-                                    <input class="qty-inp" type="number" value="{{ item.quantity }}" readonly>
-                                    <button class="qty-btn" onclick="chQty(this, 1, '{{ item.id }}')">+</button>
-                                </div>
-    
-                                <div>
-                                    <span class="item-price" id="item-total-{{ item.id }}">₹{{ item.item_total }}</span>
-                                </div>
-                            </div>
-
-                            <button class="remove-btn" onclick="removeItem(this, '{{ item.id }}')" aria-label="Remove item">
-                                <i class="fa fa-times"></i>
-                            </button>
-
+                <form id="checkoutForm" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="fullName">Full Name *</label>
+                            <input type="text" class="form-control" id="fullName" placeholder="e.g. Rahul Ramteke" required>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-5">
-                            <h3>Your basket is empty!</h3>
-                            <a href="{% url 'index' %}" class="btn-continue-shop">Go Shopping</a>
+                        <div class="col-md-6">
+                            <label class="form-label" for="phone">Mobile Number *</label>
+                            <input type="tel" class="form-control" id="phone" placeholder="10-digit mobile number" required maxlength="10">
                         </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="white-card" style="padding:18px 20px;">
-                <div style="font-size:14px; font-weight:700; color:#1a1a2e; margin-bottom:12px;"><i class="fa fa-tag me-2" style="color:#e85d04;"></i>Apply Coupon Code</div>
-                <div class="coupon-row">
-                    <input type="text" class="coupon-inp" id="couponInput" placeholder="Try: PICKLE20 or FIRSTORDER" aria-label="Coupon code">
-                    <button class="coupon-btn" onclick="applyCoupon()" aria-label="Apply coupon">Apply</button>
-                </div>
-                <p id="couponMsg" style="font-size:12px; margin-top:8px; display:none;"></p>
-            </div>
-
-            <div style="background:linear-gradient(135deg,#e8f5e9,#f0fff4); border-radius:16px; padding:18px; border:2px solid #a8e6cf;">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <span style="font-size:36px;" aria-hidden="true">💬</span>
-                    <div style="flex:1;">
-                        <div style="font-weight:700; color:#2d6a4f; font-size:14px;">Prefer WhatsApp Ordering?</div>
-                        <div style="font-size:12px; color:#555; margin-top:3px;">Send your cart directly — we'll confirm &amp; deliver!</div>
+                        <div class="col-12">
+                            <label class="form-label" for="address">Full Address *</label>
+                            <textarea class="form-control" id="address" rows="2" placeholder="House No., Street, Area, Locality, Landmark" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="city">City *</label>
+                            <input type="text" class="form-control" id="city" value="Nagpur" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="state">State</label>
+                            <select class="form-select" id="state">
+                                <option>Maharashtra</option>
+                                <option>Madhya Pradesh</option>
+                                <option>Chhattisgarh</option>
+                                <option>Gujarat</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="pincode">PIN Code *</label>
+                            <input type="text" class="form-control" id="pincode" placeholder="440001" maxlength="6" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email (for receipt)</label>
+                            <input type="email" class="form-control" id="email" placeholder="yourname@email.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="notes">Delivery Notes (optional)</label>
+                            <input type="text" class="form-control" id="notes" placeholder="e.g. Call before delivery">
+                        </div>
                     </div>
-                    <a href="https://wa.me/919876543210?text=Hi PickleHub! I want to order:%0A1x Rajasthani Mango Pickle 500g - ₹320%0A2x Andhra Garlic Pickle 250g - ₹398%0A1x Gujarati Mixed Achaar 400g - ₹249%0ATotal: ₹967%0APlease confirm my order." style="background:#25D366; color:#fff; padding:12px 20px; border-radius:50px; font-weight:700; font-size:13px; text-decoration:none; display:flex; align-items:center; gap:7px; white-space:nowrap;" aria-label="Order via WhatsApp">
-                        <i class="fab fa-whatsapp"></i> WhatsApp Order
-                    </a>
+                </form>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon-circle" aria-hidden="true">💳</div>
+                    Select Payment Method
+                </div>
+
+                <div class="pay-option selected" id="payUPI" onclick="selectPay('upi')" role="radio" aria-checked="true" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="upi" id="radioUPI" checked aria-label="Pay via UPI / QR Code">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);" aria-hidden="true">📱</div>
+                        <div>
+                            <div class="pay-title">UPI / QR Code Payment</div>
+                            <div class="pay-desc">Scan QR &amp; pay via GPay, PhonePe, Paytm, BHIM</div>
+                        </div>
+                        <div class="pay-badge orange ms-auto">Recommended</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div style="background:#fffaf7; border-radius:12px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:13px; font-weight:700; color:#1a1a2e; margin-bottom:12px;">
+                                📲 Scan & Pay — UPI QR Code
+                            </div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-5">
+                                    <div class="qr-upload-area" onclick="document.getElementById('qrFileInput').click()" id="qrUploadArea" role="button" aria-label="Upload QR code image">
+                                        <img id="qrPreview" class="qr-preview" src="" alt="Uploaded QR Code">
+                                        <div id="qrPlaceholder">
+                                            <span class="qr-placeholder" aria-hidden="true">📷</span>
+                                            <div class="qr-upload-label">Upload Your UPI QR Code</div>
+                                            <div class="qr-hint">(Admin: Upload your payment QR here)</div>
+                                            <div class="qr-hint mt-1">JPG, PNG — Max 2MB</div>
+                                        </div>
+                                        <input type="file" id="qrFileInput" accept="image/*" onchange="previewQR(event)" aria-label="QR code file upload">
+                                    </div>
+                                    <div style="margin-top:8px; text-align:center;">
+                                        <button onclick="document.getElementById('qrFileInput').click()" style="background:transparent; border:1.5px solid #e85d04; color:#e85d04; border-radius:50px; padding:6px 16px; font-size:12px; font-weight:600; cursor:pointer; transition:.3s;" aria-label="Change QR code">
+                                            <i class="fa fa-upload me-1"></i> Change QR
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="upi-detail-box">
+                                        <div style="font-size:12px; font-weight:700; color:#555; margin-bottom:6px;">📋 UPI Payment Details</div>
+                                        <div style="font-size:12px; color:#888; margin-bottom:4px;">UPI ID (tap to copy):</div>
+                                        <div class="upi-id-row">
+                                            <span class="upi-id-text" id="upiIdText">picklehub@upi</span>
+                                            <button class="copy-btn" id="copyUpiBtn" onclick="copyUPI()" aria-label="Copy UPI ID">
+                                                <i class="fa fa-copy me-1"></i> Copy
+                                            </button>
+                                        </div>
+                                        <div style="font-size:12px; color:#888; margin:8px 0 4px;">Pay Amount:</div>
+                                        <div style="font-size:22px; font-weight:800; color:#e85d04;" aria-label="Payment amount: 967 rupees">₹967</div>
+                                        <div style="font-size:11px; color:#aaa; margin-top:4px;">Add your name &amp; Order ID in UPI note</div>
+                                    </div>
+                                    <div style="background:#e3f2fd; border-radius:10px; padding:10px; font-size:12px; color:#1565c0;">
+                                        <i class="fa fa-info-circle me-1"></i>
+                                        After paying, <strong>upload your payment screenshot</strong> below so we can confirm your order instantly.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:8px;">
+                                📸 Upload Payment Screenshot <span style="color:#e85d04;">*</span>
+                                <span style="font-weight:400; color:#aaa;">(After paying, upload screenshot for fast confirmation)</span>
+                            </label>
+                            <div class="screenshot-upload" onclick="document.getElementById('screenshotInput').click()" role="button" aria-label="Upload payment screenshot">
+                                <input type="file" id="screenshotInput" accept="image/*" onchange="previewScreenshot(event)" aria-label="Payment screenshot">
+                                <img id="screenshotPreview" class="screenshot-preview" src="" alt="Payment screenshot preview">
+                                <div id="screenshotPlaceholder">
+                                    <span style="font-size:32px; display:block; margin-bottom:6px;" aria-hidden="true">📤</span>
+                                    <div style="font-weight:600; color:#888; font-size:13px;">Click to upload payment screenshot</div>
+                                    <div style="font-size:11px; color:#aaa; margin-top:4px;">PNG, JPG, JPEG — Max 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-option" id="payBank" onclick="selectPay('bank')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="bank" id="radioBank" aria-label="Pay via Bank Transfer / NEFT">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb);" aria-hidden="true">🏦</div>
+                        <div>
+                            <div class="pay-title">Bank Transfer / NEFT / IMPS</div>
+                            <div class="pay-desc">Direct bank transfer — NEFT, IMPS, RTGS</div>
+                        </div>
+                        <div class="pay-badge ms-auto" style="background:linear-gradient(135deg,#1565c0,#1976d2);">Secure</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div style="background:#f8fbff; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #e3f2fd;">
+                            <div style="font-size:13px; font-weight:700; color:#1a1a2e; margin-bottom:12px;"><i class="fa fa-university me-2" style="color:#1565c0;"></i>Bank Account Details</div>
+                            <table class="bank-detail-table" aria-label="Bank account details">
+                                <tbody>
+                                    <tr><td>Account Name</td><td>PickleHub Nagpur</td></tr>
+                                    <tr><td>Account No.</td>
+                                        <td>
+                                            <span id="accNoText">1234 5678 9012 3456</span>
+                                            <button onclick="copyText('accNoText','copyAccBtn')" id="copyAccBtn" class="copy-btn ms-2" style="font-size:11px; padding:3px 9px;" aria-label="Copy account number"><i class="fa fa-copy"></i> Copy</button>
+                                        </td>
+                                    </tr>
+                                    <tr><td>IFSC Code</td>
+                                        <td>
+                                            <span id="ifscText">HDFC0001234</span>
+                                            <button onclick="copyText('ifscText','copyIfscBtn')" id="copyIfscBtn" class="copy-btn ms-2" style="font-size:11px; padding:3px 9px;" aria-label="Copy IFSC code"><i class="fa fa-copy"></i> Copy</button>
+                                        </td>
+                                    </tr>
+                                    <tr><td>Bank Name</td><td>HDFC Bank</td></tr>
+                                    <tr><td>Branch</td><td>Nagpur Main Branch</td></tr>
+                                    <tr><td>Account Type</td><td>Current Account</td></tr>
+                                    <tr><td><strong>Amount to Pay</strong></td><td><strong style="color:#e85d04; font-size:16px;">₹967</strong></td></tr>
+                                </tbody>
+                            </table>
+                            <div style="background:#fff3cd; border-radius:10px; padding:10px; font-size:12px; color:#856404; margin-top:12px; border:1px solid #ffc107;">
+                                <i class="fa fa-exclamation-triangle me-1"></i>
+                                <strong>Important:</strong> Please add your <strong>Name + Phone Number</strong> in the bank transfer remarks/description for quick order confirmation.
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:8px;">
+                                📸 Upload Transfer Confirmation Screenshot <span style="color:#e85d04;">*</span>
+                            </label>
+                            <div class="screenshot-upload" onclick="document.getElementById('bankScreenshotInput').click()" role="button" aria-label="Upload bank transfer screenshot">
+                                <input type="file" id="bankScreenshotInput" accept="image/*" onchange="previewBankScreenshot(event)" aria-label="Bank transfer screenshot">
+                                <img id="bankScreenshotPreview" class="screenshot-preview" src="" alt="Bank transfer screenshot">
+                                <div id="bankScreenshotPlaceholder">
+                                    <span style="font-size:32px; display:block; margin-bottom:6px;" aria-hidden="true">📤</span>
+                                    <div style="font-weight:600; color:#888; font-size:13px;">Upload bank transfer screenshot</div>
+                                    <div style="font-size:11px; color:#aaa; margin-top:4px;">PNG, JPG — Max 5MB</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-option" id="payCOD" onclick="selectPay('cod')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="pay-option-header">
+                        <input type="radio" name="payment" value="cod" id="radioCOD" aria-label="Cash on Delivery">
+                        <div class="pay-icon-box" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);" aria-hidden="true">💵</div>
+                        <div>
+                            <div class="pay-title">Cash on Delivery (COD)</div>
+                            <div class="pay-desc">Pay cash when your order is delivered at your doorstep</div>
+                        </div>
+                        <div class="pay-badge ms-auto" style="background:linear-gradient(135deg,#2d6a4f,#52b788);">Most Popular</div>
+                    </div>
+                    <div class="pay-detail-panel">
+                        <div class="cod-info-box">
+                            <div class="cod-row"><span class="ico">✅</span><span>Pay in cash when our delivery person arrives at your door — no advance payment needed.</span></div>
+                            <div class="cod-row"><span class="ico">💰</span><span>Keep exact change of <strong>₹967</strong> ready for smooth delivery.</span></div>
+                            <div class="cod-row"><span class="ico">📦</span><span>Please inspect the package before paying. Damaged packaging? Refuse and WhatsApp us immediately.</span></div>
+                            <div class="cod-row"><span class="ico">🕐</span><span>Order will be delivered <strong>within 24 hours</strong> across Nagpur. Our delivery person will call before arriving.</span></div>
+                            <div class="cod-row"><span class="ico">📱</span><span>You will receive a <strong>WhatsApp confirmation</strong> once your order is dispatched.</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,32 +397,27 @@
         <div class="col-lg-4">
             <div class="summary-sticky">
                 <div class="white-card" style="overflow:visible;">
-                    <div class="card-head"><span>Order Summary</span></div>
+                    <div class="card-head"><span>🧾 Final Bill</span></div>
                     <div class="summary-body">
-                        <div class="sum-row">
-                            <span style="font-weight:bold;color:black;">Subtotal (<span id="itemCountDisplay">{{ item_count }}</span> items)</span>
-                            <span id="subtotalAmt" style="font-weight:bold;color:black;">₹{{ subtotal }}</span>
-                        </div>
-
+                        <div class="sum-row"><span>🥭 Rajasthani Mango × 1</span><span>₹320</span></div>
+                        <div class="sum-row"><span>🧄 Andhra Garlic × 2</span><span>₹398</span></div>
+                        <div class="sum-row"><span>🌶️ Gujarati Mixed × 1</span><span>₹249</span></div>
                         <hr class="sum-divider">
-
-                        <div class="sum-total">
-                            <span>Total</span>
-                            <span id="totalAmt">₹{{ subtotal }}</span>
+                        <div class="sum-row"><span>Subtotal</span><span>₹1,230</span></div>
+                        <div class="sum-row green"><span>Discount</span><span>−₹263</span></div>
+                        <div class="sum-row green"><span>Delivery</span><span>FREE 🎉</span></div>
+                        <hr class="sum-divider">
+                        <div class="sum-total"><span>Total</span><span>₹967</span></div>
+                        <div class="savings-pill">You save ₹263 on this order! 🎉</div>
+                        <div style="background:#fff3e0; border-radius:10px; padding:10px; margin:10px 0; font-size:12px; color:#e85d04;" id="selectedPayDisplay">
+                            <i class="fa fa-check-circle me-1"></i> Payment: <strong>UPI / QR Code</strong>
                         </div>
-
-                        <div class="mt-4">
-                            <a href="{% url "Checkout" %}" class="btn-proceed" aria-label="Proceed to checkout">
-                                <i class="fa fa-lock me-2"></i> Checkout Now
-                            </a>
-                            
-                            <button class="btn-continue-shop" onclick="window.location='{% url 'All_products' %}'" aria-label="Continue shopping">
-                                ← Continue Shopping
-                            </button>
-                        </div>
-
-                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:15px;">
-                            <i class="fa fa-shield-alt"></i> Secure & Encrypted Checkout
+                        <button class="btn-place-order" onclick="placeOrder()" aria-label="Place order">
+                            <i class="fa fa-check-circle"></i> Place Order — ₹967
+                        </button>
+                        <button class="btn-back" onclick="goBackToCart()" aria-label="Go back to cart">← Back to Cart</button>
+                        <p style="font-size:11px; color:#aaa; text-align:center; margin-top:10px;">
+                            <i class="fa fa-lock"></i> Your data is safe &amp; secure
                         </p>
                     </div>
                 </div>
@@ -284,7 +426,37 @@
     </div>
 </div>
 
-
+<div id="successSection" class="success-section">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="success-card">
+                <span class="success-icon" aria-hidden="true">🎉</span>
+                <h2 style="font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:#2d6a4f; margin:12px 0 6px;">Order Placed Successfully!</h2>
+                <p style="font-size:13px; color:#777; margin-bottom:14px;">Thank you for ordering from PickleHub Nagpur. Your pickles will be delivered within 24 hours.</p>
+                <div class="order-id-pill" role="status" aria-live="polite">Order ID: #PH-2026-00847</div>
+                <div class="detail-box" aria-label="Order details">
+                    <div class="detail-row"><span>Customer Name</span><strong id="successName">—</strong></div>
+                    <div class="detail-row"><span>Mobile</span><strong id="successPhone">—</strong></div>
+                    <div class="detail-row"><span>Total Amount</span><strong>₹967</strong></div>
+                    <div class="detail-row"><span>Payment Method</span><strong id="successPayment">COD</strong></div>
+                    <div class="detail-row"><span>Estimated Delivery</span><strong style="color:#2d6a4f;">Tomorrow by 6 PM</strong></div>
+                    <div class="detail-row" id="screenshotRow" style="display:none;"><span>Payment Proof</span><strong style="color:#2d6a4f;">✅ Uploaded</strong></div>
+                </div>
+                <div style="background:#fff3e0; border-radius:12px; padding:12px; margin:12px 0; font-size:13px; color:#e85d04;">
+                    <i class="fa fa-whatsapp me-1" style="color:#25D366;"></i>
+                    We'll send a <strong>WhatsApp confirmation</strong> to your mobile number shortly!
+                </div>
+                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:14px;">
+                    <button class="btn-success-action btn-track-order" aria-label="Track order">📦 Track Order</button>
+                    <button class="btn-success-action btn-shop-more" onclick="window.location='/'" aria-label="Continue shopping">🛒 Shop More Pickles</button>
+                </div>
+                <a id="waConfirmLink" href="https://wa.me/919876543210?text=Hi! My Order ID is PH-2026-00847. Please confirm my order." class="btn-wa-confirm" aria-label="Confirm order on WhatsApp">
+                    <i class="fab fa-whatsapp"></i> Confirm Order on WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 {% endblock %}

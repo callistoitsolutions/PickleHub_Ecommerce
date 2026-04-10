@@ -70,6 +70,10 @@ urlpatterns = [
     ########### urls for ajax for remove cart items ##########################
 
     path('Remove_Cart_Item_Ajax', views.Remove_Cart_Item_Ajax, name='Remove_Cart_Item_Ajax'),
+
+    ############ urls for checkout page #########################
+
+    path('Checkout', views.Checkout, name='Checkout'),
     
     ##########################  Products Urls Section Ends Here ###############################################
 
